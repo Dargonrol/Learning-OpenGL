@@ -13,29 +13,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(GLFW)
 
-FetchContent_Declare(
-        glad
-        GIT_REPOSITORY https://github.com/Dav1dde/glad
-        GIT_TAG v2.0.8
-)
-FetchContent_GetProperties(glad)
-if(NOT glad_POPULATED)
-    FetchContent_MakeAvailable(glad)
-    add_subdirectory(${glad_SOURCE_DIR}/cmake ${glad_BINARY_DIR})
-endif()
-
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/linmath.h
 )
 
 target_link_libraries(
-        ${PROJECT_NAME} PRIVATE glfw glad
+        ${PROJECT_NAME} PRIVATE glfw
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-        ${glad_SOURCE_DIR}/include
-        ${glad_BINARY_DIR}/include
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
 )
 
 target_compile_definitions(
