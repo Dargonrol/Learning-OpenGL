@@ -15,7 +15,6 @@ FetchContent_MakeAvailable(GLFW)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/linmath.h
 )
 
 target_link_libraries(
@@ -28,7 +27,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_compile_definitions(
-        ${PROJECT_NAME} PRIVATE WORKDIR_PATH="${CMAKE_CURRENT_SOURCE_DIR}"
+        ${PROJECT_NAME} PRIVATE SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
         ${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}"
 )
 
