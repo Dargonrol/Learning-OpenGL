@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.0...${CMAKE_VERSION})
-project(OpenGLAPP VERSION 0.1 LANGUAGES CXX)
+project(OpenGLAPP VERSION 0.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
 
@@ -13,7 +14,27 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(GLFW)
 
+FetchContent_Declare(
+        GLM
+        GIT_REPOSITORY https://github.com/g-truc/glm
+        GIT_TAG 1.0.2
+)
+FetchContent_MakeAvailable(GLM)
+
 add_executable(${PROJECT_NAME}
+        include/imgui/imgui.h
+        include/imgui/imgui.cpp
+        include/imgui/imconfig.h
+        include/imgui/imgui_demo.cpp
+        include/imgui/imgui_draw.cpp
+        include/imgui/imgui_internal.h
+        include/imgui/imgui_tables.cpp
+        include/imgui/imgui_widgets.cpp
+        include/imgui/backends/imgui_impl_glfw.h
+        include/imgui/backends/imgui_impl_glfw.cpp
+        include/imgui/backends/imgui_impl_opengl3.h
+        include/imgui/backends/imgui_impl_opengl3.cpp
+
         src/main.cpp
         src/Renderer.h
         src/Renderer.cpp
@@ -34,11 +55,13 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(
-        ${PROJECT_NAME} PRIVATE glfw
+        ${PROJECT_NAME} PRIVATE glfw glm
 )
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
+        ${PROJECT_SOURCE_DIR}/include/imgui
+        ${PROJECT_SOURCE_DIR}/include/imgui/backends
         ${PROJECT_SOURCE_DIR}/include
 )
 

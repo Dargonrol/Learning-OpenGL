@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -33,6 +36,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+Renderer::Renderer() = default;
+
+Renderer::Renderer(int width, int height) : m_Window_Height(height), m_Window_Width(width) {}
+
 void Renderer::Init()
 {
     glfwSetErrorCallback(error_callback);
@@ -44,7 +51,7 @@ void Renderer::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, "OpenGL Triangle", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -61,8 +68,20 @@ void Renderer::Init()
 
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendEquation(GL_FUNC_ADD));
 
     m_window = window;
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplOpenGL3_Init("#version 330"); // <- hier fehlt es bei dir
+    ImGui::StyleColorsDark();
 }
 
 void Renderer::Update()
@@ -75,6 +94,9 @@ void Renderer::Update()
 
 void Renderer::Shutdown()
 {
+    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(m_window);
     glfwTerminate();
 }
@@ -90,4 +112,20 @@ void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &
 void Renderer::Clear() const
 {
     GLCall(glClear(GL_COLOR_BUFFER_BIT));
+}
+
+void Renderer::ImGui_BeginFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Renderer::ImGui_EndFrame()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(m_window);
+    glfwPollEvents();
 }

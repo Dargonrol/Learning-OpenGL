@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
 
@@ -29,6 +30,11 @@ void Shader::Unbind() const
 void Shader::SetUniform1i(const std::string &name, int v0)
 {
     GLCall(glUniform1i(GetUniformLocation(name), v0));
+}
+
+void Shader::SetUniformMat4f(const std::string &name, glm::mat4 matrix)
+{
+    GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]))
 }
 
 void Shader::SetUniform4f(const std::string &name, float v0, float v1, float v2, float v3)
