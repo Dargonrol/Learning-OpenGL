@@ -2,7 +2,6 @@
 #include <glad/gl.h>
 #undef GLAD_GL_IMPLEMENTATION
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <filesystem>
 
 #include <iostream>
@@ -13,6 +12,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 
@@ -21,49 +21,13 @@
 #endif
 #define BASE_PATH std::filesystem::path(SOURCE_DIR)
 
-
-static void error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
 int main()
 {
-    glfwSetErrorCallback(error_callback);
-
-    if (!glfwInit())
-        exit(EXIT_FAILURE);
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-
-    glfwSetKeyCallback(window, key_callback);
-
-    glfwMakeContextCurrent(window);
-    gladLoadGL(glfwGetProcAddress);
-    glfwSwapInterval(1);
-
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-
     float positions[] = {
-        -0.5f, -0.5f,
-         0.5f,  -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
+        -0.5f, -0.5f, 0.0f, 0.0f,
+         0.5f,  -0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f
     };
 
     GLuint indices[] = {
@@ -71,12 +35,16 @@ int main()
         2, 3, 0
     };
 
+    Renderer renderer;
+    renderer.Init();
+
     VertexArray va;
 
-    VertexBuffer vb(positions, 8 * sizeof(float));
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     vb.Bind();
 
     VertexBufferLayout layout;
+    layout.Push<float>(2);
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
 
@@ -92,11 +60,13 @@ int main()
     shader.Bind();
     shader.SetUniform4f("u_Color", 1.0f, 0.5f, 0.5f, 1.0f);
 
-    Renderer renderer;
+    Texture texture(BASE_PATH / "resources/textures/Nian.png");
+    texture.Bind(0);
+    shader.SetUniform1i("u_Texture", 0);
 
     float r = 0.0f;
     float inc = 0.05f;
-    while (!glfwWindowShouldClose(window))
+    while (!renderer.GetWindowShouldClose())
     {
         renderer.Clear();
         shader.Bind();
@@ -110,12 +80,9 @@ int main()
 
         r += inc;
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        renderer.Update();
     }
 
-    glfwDestroyWindow(window);
-
-    glfwTerminate();
+    renderer.Shutdown();
     exit(EXIT_SUCCESS);
 }

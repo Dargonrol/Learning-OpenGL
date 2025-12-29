@@ -27,6 +27,10 @@ add_executable(${PROJECT_NAME}
         src/VertexBufferLayout.h
         src/Shader.cpp
         src/Shader.h
+        include/stb_image/stb_image.h
+        src/Texture.cpp
+        src/Texture.h
+        src/stb_image.cpp
 )
 
 target_link_libraries(
