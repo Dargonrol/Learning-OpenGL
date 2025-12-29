@@ -15,6 +15,18 @@ FetchContent_MakeAvailable(GLFW)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
+        src/Renderer.h
+        src/Renderer.cpp
+        src/Util.h
+        src/VertexBuffer.cpp
+        src/VertexBuffer.h
+        src/IndexBuffer.cpp
+        src/IndexBuffer.h
+        src/VertexArray.cpp
+        src/VertexArray.h
+        src/VertexBufferLayout.h
+        src/Shader.cpp
+        src/Shader.h
 )
 
 target_link_libraries(

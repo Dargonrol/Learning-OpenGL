@@ -1,0 +1,41 @@
+#pragma once
+#include <filesystem>
+#include <unordered_map>
+
+#include "glad/gl.h"
+
+struct ShaderSourceCode
+{
+    std::string vertexShader;
+    std::string fragmentShader;
+};
+
+struct ShaderFilePath
+{
+    std::filesystem::path vertexShader;
+    std::filesystem::path fragmentShader;
+};
+
+class Shader
+{
+public:
+    Shader(const ShaderFilePath& filepaths);
+    ~Shader();
+
+    void Bind() const;
+    void Unbind() const;
+
+    // Set uniforms
+    void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+
+private:
+    int GetUniformLocation(const std::string& name);
+
+    [[nodiscard]] ShaderSourceCode parseShader(const ShaderFilePath& filepaths);
+    [[nodiscard]] GLuint CompileShader(const std::string& source, GLuint type);
+    [[nodiscard]] GLuint CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
+
+private:
+    unsigned int m_RendererID;
+    std::unordered_map<std::string, int> m_UniformLocationCache;
+};
