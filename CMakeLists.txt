@@ -52,6 +52,15 @@ add_executable(${PROJECT_NAME}
         src/Texture.cpp
         src/Texture.h
         src/stb_image.cpp
+        src/Scene/Scene.h
+        src/Scene/Scenes/Scene_ClearColor.cpp
+        src/Scene/Scenes/Scene_ClearColor.h
+        src/Scene/Scenes/Scene_Menu.cpp
+        src/Scene/Scenes/Scene_Menu.h
+        src/Scene/SceneManager.cpp
+        src/Scene/SceneManager.h
+        src/Scene/Scenes/Scene_Texture2D.cpp
+        src/Scene/Scenes/Scene_Texture2D.h
 )
 
 target_link_libraries(

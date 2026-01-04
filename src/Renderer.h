@@ -5,7 +5,6 @@
 #include "Util.h"
 #include "VertexArray.h"
 #include "GLFW/glfw3.h"
-#include <imgui/imgui.h>
 
 #ifdef RELEASE
     #define ASSERT(x)
@@ -31,16 +30,19 @@ public:
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
     void Clear() const;
 
-    void ImGui_BeginFrame();
-    void ImGui_EndFrame();
-
     [[nodiscard]] bool GetWindowShouldClose() const { return m_WindowShouldClose; }
     [[nodiscard]] int GetWindowWidth() const { return m_Window_Width; }
     [[nodiscard]] int GetWindowHeight() const { return m_Window_Height; }
+
+    void SetTitle(std::string_view title);
+
+    void ImGui_BeginFrame() const;
+    void ImGui_EndFrame() const;
 
 private:
     bool m_WindowShouldClose = false;
     GLFWwindow* m_window = nullptr;
     int m_Window_Height = 500;
     int m_Window_Width = 650;
+    std::string m_title = "Window Title";
 };

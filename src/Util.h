@@ -8,3 +8,8 @@
     #include <signal.h>
     #define DEBUG_BREAK() raise(SIGTRAP)
 #endif
+
+#ifndef SOURCE_DIR
+    #define SOURCE_DIR ""
+#endif
+#define BASE_PATH std::filesystem::path(SOURCE_DIR)

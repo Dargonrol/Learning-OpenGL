@@ -6,7 +6,9 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
-#include "glad/gl.h"
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+#undef GLAD_GL_IMPLEMENTATION
 #include "GLFW/glfw3.h"
 #include "Util.h"
 
@@ -36,7 +38,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-Renderer::Renderer() = default;
+Renderer::Renderer() {};
 
 Renderer::Renderer(int width, int height) : m_Window_Height(height), m_Window_Width(width) {}
 
@@ -51,7 +53,7 @@ void Renderer::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, "OpenGL Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, m_title.c_str(), NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -111,17 +113,23 @@ void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &
 
 void Renderer::Clear() const
 {
+    GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
     GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::ImGui_BeginFrame()
+void Renderer::SetTitle(std::string_view title)
+{
+    m_title = std::string(title);
+}
+
+void Renderer::ImGui_BeginFrame() const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
-void Renderer::ImGui_EndFrame()
+void Renderer::ImGui_EndFrame() const
 {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

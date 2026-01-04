@@ -1,0 +1,20 @@
+#pragma once
+#include "../Scene.h"
+
+namespace Scene
+{
+    class Scene_ClearColor : public Scene::Scene
+    {
+    public:
+        Scene_ClearColor();
+        ~Scene_ClearColor() override = default;
+
+        void Init() override {}
+        void Update(float deltaTime) override;
+        void Render() override;
+        void ImGuiRender() override;
+
+    private:
+        float m_ClearColor[4];
+    };
+}
