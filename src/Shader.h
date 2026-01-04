@@ -42,3 +42,5 @@ private:
     unsigned int m_RendererID;
     std::unordered_map<std::string, int> m_UniformLocationCache;
 };
+
+static unsigned int lastBoundShader = 0;

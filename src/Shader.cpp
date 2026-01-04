@@ -19,7 +19,10 @@ Shader::~Shader()
 
 void Shader::Bind() const
 {
+    if (lastBoundShader == m_RendererID)
+        return;
     GLCall(glUseProgram(m_RendererID));
+    lastBoundShader = m_RendererID;
 }
 
 void Shader::Unbind() const
