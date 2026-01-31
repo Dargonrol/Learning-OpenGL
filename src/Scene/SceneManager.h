@@ -26,7 +26,7 @@ namespace Scene
             }
             auto scene = std::make_unique<T>();
             scene->p_SceneManager_Ref = this;
-            scene->Init();
+            scene->name = std::string(name);
             m_Scenes_Vector.push_back(std::move(scene));
             m_NameToHash_Map.emplace(SceneName, typeid(T).hash_code());
         }
@@ -69,6 +69,15 @@ namespace Scene
             {
                 if (typeid(*scene) == typeid(T))
                 {
+                    if (!scene->initialized)
+                    {
+                        if (scene->Init() != 0)
+                        {
+                            scene->initialized = false;
+                            return;
+                        }
+                        scene->initialized = true;
+                    }
                     if (m_CurrentScene)
                         m_CurrentScene->OnLeave();
                     m_CurrentScene = scene.get();
@@ -83,6 +92,7 @@ namespace Scene
 
         [[nodiscard]] std::vector<std::string> GetSceneNames() const;
         [[nodiscard]] Scene& GetCurrentScene() const { return *m_CurrentScene; }
+        [[nodiscard]] const std::vector<std::unique_ptr<Scene>>& GetScenesVector() const { return m_Scenes_Vector; }
         [[nodiscard]] Renderer& GetRenderer() const { return m_renderer; }
 
     private:

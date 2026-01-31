@@ -9,7 +9,7 @@ namespace Scene
         Scene_ClearColor();
         ~Scene_ClearColor() override = default;
 
-        void Init() override {}
+        int Init() override { return 0; }
         void Update(float deltaTime) override;
         void Render() override;
         void ImGuiRender() override;

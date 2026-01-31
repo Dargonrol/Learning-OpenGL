@@ -13,7 +13,7 @@ namespace Scene
         Scene_Menu() = default;
         ~Scene_Menu() override = default;
 
-        void Init() override {}
+        int Init() override { return 0; }
         void Render() override;
         void Update(float deltaTime) override;
         void ImGuiRender() override;

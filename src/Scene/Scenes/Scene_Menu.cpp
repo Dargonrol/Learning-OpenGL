@@ -44,6 +44,17 @@ namespace Scene
                 p_SceneManager_Ref->SetScene(scene);
             }
         }
+        ImGui::Separator();
+        if (ImGui::Button("Reset Scenes"))
+        {
+            std::cout << "Resetting all scenes\n";
+            for (auto& scene: p_SceneManager_Ref->GetScenesVector())
+            {
+                if (scene->name == this->name)
+                    continue;
+                scene->initialized = false;
+            }
+        }
         ImGui::End();
     }
 }

@@ -24,7 +24,7 @@ namespace Scene
     {
     }
 
-    void Scene_Texture2D::Init()
+    int Scene_Texture2D::Init()
     {
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
 
@@ -60,13 +60,18 @@ namespace Scene
             BASE_PATH / "resources/shaders/basic.fragGL"
         };
 
-        shader = new Shader(paths);
+        int error = 0;
+        shader = new Shader(paths, error);
+        if (error)
+            return error;
         shader->Bind();
         shader->SetUniform4f("u_Color", 1.0f, 0.5f, 0.5f, 1.0f);
 
         texture = new Texture(BASE_PATH / "resources/textures/Nian.png");
         texture->Bind(0);
         shader->SetUniform1i("u_Texture", 0);
+
+        return error;
     }
 
     Scene_Texture2D::~Scene_Texture2D()

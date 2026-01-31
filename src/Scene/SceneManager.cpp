@@ -43,6 +43,15 @@ namespace Scene
         {
             if (typeid(**it).hash_code() == hash)
             {
+                if (!it->get()->initialized)
+                {
+                    if (it->get()->Init() != 0)
+                    {
+                        it->get()->initialized = false;
+                        return;
+                    }
+                    it->get()->initialized = true;
+                }
                 if (m_CurrentScene)
                     m_CurrentScene->OnLeave();
                 m_CurrentScene = it->get();

@@ -4,6 +4,7 @@
 #include "Scene/SceneManager.h"
 #include "Scene/Scenes/Scene_ClearColor.h"
 #include "Scene/Scenes/Scene_Menu.h"
+#include "Scene/Scenes/Scene_Simple3D.h"
 #include "Scene/Scenes/Scene_Texture2D.h"
 
 int main()
@@ -17,6 +18,7 @@ int main()
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);
     sceneManager.RegisterScene<Scene::Scene_ClearColor>("Clear Color"sv);
     sceneManager.RegisterScene<Scene::Scene_Texture2D>("Texture2D"sv);
+    sceneManager.RegisterScene<Scene::Scene_Simple3D>("Simple3D"sv);
     sceneManager.SetScene<Scene::Scene_Menu>();
 
     while (!renderer.GetWindowShouldClose())

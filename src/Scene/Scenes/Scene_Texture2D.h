@@ -14,7 +14,7 @@ namespace Scene
         Scene_Texture2D();
         ~Scene_Texture2D() override;
 
-        void Init() override;
+        int Init() override;
         void Update(float deltaTime) override;
         void Render() override;
         void ImGuiRender() override;

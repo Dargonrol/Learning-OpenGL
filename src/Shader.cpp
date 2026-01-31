@@ -6,10 +6,12 @@
 
 #include "Renderer.h"
 
-Shader::Shader(const ShaderFilePath &filepaths)
+Shader::Shader(const ShaderFilePath &filepaths, int& error)
 {
-    ShaderSourceCode shaderSource = parseShader(filepaths);
-    m_RendererID = CreateShader(shaderSource.vertexShader, shaderSource.fragmentShader);
+    ShaderSourceCode shaderSource = parseShader(filepaths, error);
+    if (shaderSource.fragmentShader.empty() || shaderSource.vertexShader.empty())
+        return;
+    m_RendererID = CreateShader(shaderSource.vertexShader, shaderSource.fragmentShader, error);
 }
 
 Shader::~Shader()
@@ -59,14 +61,20 @@ int Shader::GetUniformLocation(const std::string &name)
     return location;
 }
 
-ShaderSourceCode Shader::parseShader(const ShaderFilePath& filepaths)
+ShaderSourceCode Shader::parseShader(const ShaderFilePath& filepaths, int& error)
 {
     std::string line;
     std::stringstream ss[2];
 
     std::ifstream stream(filepaths.vertexShader);
     if (!stream.is_open())
+    {
         std::cerr << "Failed to open vertex shader: " << std::filesystem::absolute(filepaths.vertexShader) << std::endl;
+        if (error == 0)
+            error = -1;
+        return {};
+    }
+
     while (getline(stream, line))
     {
         if (line.find("#shader") == std::string::npos)
@@ -77,7 +85,13 @@ ShaderSourceCode Shader::parseShader(const ShaderFilePath& filepaths)
 
     std::ifstream stream2(filepaths.fragmentShader);
     if (!stream2.is_open())
+    {
         std::cerr << "Failed to open fragment shader: " << std::filesystem::absolute(filepaths.fragmentShader) << std::endl;
+        if (error == 0)
+            error = -1;
+        return {};
+    }
+
     while (getline(stream2, line))
         if (line.find("#shader") == std::string::npos)
         {
@@ -87,7 +101,7 @@ ShaderSourceCode Shader::parseShader(const ShaderFilePath& filepaths)
     return {ss[0].str(), ss[1].str() };
 }
 
-GLuint Shader::CompileShader(const std::string& source, GLuint type)
+GLuint Shader::CompileShader(const std::string& source, GLuint type, int& error)
 {
     std::string typeString;
     switch (type)
@@ -123,6 +137,8 @@ GLuint Shader::CompileShader(const std::string& source, GLuint type)
 
         std::cout << "failed to compile " << typeString.c_str() << " shader!" << std::endl;
         std::cout << message << std::endl;
+        if (error == 0)
+            error = -1;
         glDeleteShader(id);
         return 0;
     }
@@ -132,11 +148,11 @@ GLuint Shader::CompileShader(const std::string& source, GLuint type)
     return id;
 }
 
-GLuint Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
+GLuint Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader, int& error)
 {
     GLuint program = glCreateProgram();
-    GLuint vs = CompileShader(vertexShader, GL_VERTEX_SHADER);
-    GLuint fs = CompileShader(fragmentShader, GL_FRAGMENT_SHADER);
+    GLuint vs = CompileShader(vertexShader, GL_VERTEX_SHADER, error);
+    GLuint fs = CompileShader(fragmentShader, GL_FRAGMENT_SHADER, error);
 
     glAttachShader(program, vs);
     glAttachShader(program, fs);

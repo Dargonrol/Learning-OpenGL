@@ -65,6 +65,8 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_BatchRendering.cpp
         src/Scene/Scenes/Scene_BatchRendering.h
         src/Scene/Scene.cpp
+        src/Scene/Scenes/Scene_Simple3D.cpp
+        src/Scene/Scenes/Scene_Simple3D.h
 )
 
 target_link_libraries(

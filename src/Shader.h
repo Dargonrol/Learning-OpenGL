@@ -20,7 +20,7 @@ struct ShaderFilePath
 class Shader
 {
 public:
-    Shader(const ShaderFilePath& filepaths);
+    Shader(const ShaderFilePath& filepaths, int& error);
     ~Shader();
 
     void Bind() const;
@@ -34,9 +34,9 @@ public:
 private:
     int GetUniformLocation(const std::string& name);
 
-    [[nodiscard]] ShaderSourceCode parseShader(const ShaderFilePath& filepaths);
-    [[nodiscard]] GLuint CompileShader(const std::string& source, GLuint type);
-    [[nodiscard]] GLuint CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
+    [[nodiscard]] ShaderSourceCode parseShader(const ShaderFilePath& filepaths, int& error);
+    [[nodiscard]] GLuint CompileShader(const std::string& source, GLuint type, int& error);
+    [[nodiscard]] GLuint CreateShader(const std::string& vertexShader, const std::string& fragmentShader, int& error);
 
 private:
     unsigned int m_RendererID;
