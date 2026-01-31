@@ -91,7 +91,6 @@ void Renderer::Update()
 {
     if (glfwWindowShouldClose(m_window))
         m_WindowShouldClose = true;
-    glfwSwapBuffers(m_window);
     glfwPollEvents();
 }
 
@@ -148,5 +147,4 @@ void Renderer::ImGui_EndFrame() const
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);
-    glfwPollEvents();
 }

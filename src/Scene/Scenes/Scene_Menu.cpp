@@ -44,7 +44,15 @@ namespace Scene
                 p_SceneManager_Ref->SetScene(scene);
             }
         }
+
+        float buttonHeight = ImGui::GetFrameHeight();
+        float avail = ImGui::GetContentRegionAvail().y;
+
+        if (avail > buttonHeight)
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + avail - buttonHeight - 5);
+
         ImGui::Separator();
+
         if (ImGui::Button("Reset Scenes"))
         {
             std::cout << "Resetting all scenes\n";
