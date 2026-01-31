@@ -17,5 +17,8 @@ namespace Scene
         void Render() override;
         void Update(float deltaTime) override;
         void ImGuiRender() override;
+        void OnEnter() override;
+
+        static int s_prevEscapeState; // keep previous state
     };
 }

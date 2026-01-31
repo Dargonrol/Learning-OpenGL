@@ -1,5 +1,7 @@
 #include "SceneManager.h"
 
+#include <iostream>
+
 namespace Scene
 {
     void SceneManager::UnRegisterScene(const std::string_view name)
@@ -31,12 +33,21 @@ namespace Scene
         if(iterName == m_NameToHash_Map.end()) {
             return;
         }
-        size_t hash = iterName -> second;
+
+        const size_t hash = iterName -> second;
+        // if scene is already set
+        if (m_CurrentScene && typeid(*m_CurrentScene).hash_code() == hash)
+            return;
+
         for (auto it = m_Scenes_Vector.begin(); it != m_Scenes_Vector.end(); ++it)
         {
             if (typeid(**it).hash_code() == hash)
             {
+                if (m_CurrentScene)
+                    m_CurrentScene->OnLeave();
                 m_CurrentScene = it->get();
+                if (m_CurrentScene)
+                    m_CurrentScene->OnEnter();
                 return;
             }
         }
@@ -58,7 +69,9 @@ namespace Scene
     {
         m_renderer.Update();
         if (m_CurrentScene)
+        {
             m_CurrentScene->Update(deltaTime);
+        }
     }
 
     std::vector<std::string> SceneManager::GetSceneNames() const

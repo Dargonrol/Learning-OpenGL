@@ -33,8 +33,12 @@ public:
     [[nodiscard]] bool GetWindowShouldClose() const { return m_WindowShouldClose; }
     [[nodiscard]] int GetWindowWidth() const { return m_Window_Width; }
     [[nodiscard]] int GetWindowHeight() const { return m_Window_Height; }
+    [[nodiscard]] GLFWwindow& GetWindow() const { return *m_window; }
+    [[nodiscard]] std::string_view GetDefaultTitle() const;
 
     void SetTitle(std::string_view title);
+    void SetDefaultTitle(std::string_view title);
+    void SetWindowShouldClose() { m_WindowShouldClose = true; }
 
     void ImGui_BeginFrame() const;
     void ImGui_EndFrame() const;
@@ -44,5 +48,6 @@ private:
     GLFWwindow* m_window = nullptr;
     int m_Window_Height = 500;
     int m_Window_Width = 650;
-    std::string m_title = "Window Title";
+    std::string m_Title = "Window Title";
+    std::string m_DefaultTitle;
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -64,12 +65,14 @@ namespace Scene
         template<typename T> requires (std::is_base_of_v<Scene, T>)
         void SetScene()
         {
-            size_t hash = typeid(T).hash_code();
-            for (auto& item : m_Scenes_Vector)
+            for (auto& scene : m_Scenes_Vector)
             {
-                if (typeid(*item).hash_code() == hash)
+                if (typeid(*scene) == typeid(T))
                 {
-                    m_CurrentScene = item.get();
+                    if (m_CurrentScene)
+                        m_CurrentScene->OnLeave();
+                    m_CurrentScene = scene.get();
+                    m_CurrentScene->OnEnter();
                     return;
                 }
             }
@@ -80,7 +83,7 @@ namespace Scene
 
         [[nodiscard]] std::vector<std::string> GetSceneNames() const;
         [[nodiscard]] Scene& GetCurrentScene() const { return *m_CurrentScene; }
-        [[nodiscard]] const Renderer& GetRenderer() const { return m_renderer; }
+        [[nodiscard]] Renderer& GetRenderer() const { return m_renderer; }
 
     private:
         std::unordered_map<std::string, size_t> m_NameToHash_Map;

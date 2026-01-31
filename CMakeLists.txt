@@ -61,6 +61,10 @@ add_executable(${PROJECT_NAME}
         src/Scene/SceneManager.h
         src/Scene/Scenes/Scene_Texture2D.cpp
         src/Scene/Scenes/Scene_Texture2D.h
+        src/Vertex.h
+        src/Scene/Scenes/Scene_BatchRendering.cpp
+        src/Scene/Scenes/Scene_BatchRendering.h
+        src/Scene/Scene.cpp
 )
 
 target_link_libraries(

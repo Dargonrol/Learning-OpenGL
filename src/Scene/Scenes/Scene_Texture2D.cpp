@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "imgui.h"
+#include "Scene_Menu.h"
 #include "../../Util.h"
 #include "../../Renderer.h"
 #include "../../VertexArray.h"
@@ -16,7 +17,10 @@
 
 namespace Scene
 {
-    Scene_Texture2D::Scene_Texture2D() : r(0.0f), inc(0.05f), va(nullptr), ib(nullptr), vb(nullptr), shader(nullptr)
+    using std::literals::operator ""sv;
+
+    Scene_Texture2D::Scene_Texture2D() : va(nullptr), ib(nullptr), vb(nullptr), texture(nullptr),
+                                         shader(nullptr)
     {
     }
 
@@ -77,6 +81,14 @@ namespace Scene
         if (r > 1.0f) inc = -0.05f;
         else if (r < 0.0f) inc = 0.05f;
         r += inc;
+
+        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+
+        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
+
+        if (keyState == GLFW_PRESS) {
+            p_SceneManager_Ref->SetScene<Scene_Menu>();
+        }
     }
 
     void Scene_Texture2D::Render()
@@ -109,5 +121,10 @@ namespace Scene
         ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 960.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
+    }
+
+    void Scene_Texture2D::OnEnter()
+    {
+        p_SceneManager_Ref->GetRenderer().SetTitle("Texture 2D test"sv);
     }
 }

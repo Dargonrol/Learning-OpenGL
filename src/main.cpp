@@ -10,7 +10,7 @@ int main()
 {
     using namespace std::literals;
     Renderer renderer(650, 500);
-    renderer.SetTitle("OpenGL Test"sv);
+    renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
 
     Scene::SceneManager sceneManager{renderer};
@@ -21,8 +21,6 @@ int main()
 
     while (!renderer.GetWindowShouldClose())
     {
-        // set up some kind of cache to see if shader is already bound. if so, don't run openGL call
-
         sceneManager.Update(0.0f);
         sceneManager.Render();
     }

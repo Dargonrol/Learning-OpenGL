@@ -18,6 +18,7 @@ namespace Scene
         void Update(float deltaTime) override;
         void Render() override;
         void ImGuiRender() override;
+        void OnEnter() override;
 
     private:
         float r = 0.0f;
@@ -26,11 +27,11 @@ namespace Scene
         VertexArray* va;
         IndexBuffer* ib;
         VertexBuffer* vb;
-        Texture* texture;
+        Texture* texture{};
         Shader* shader;
         glm::vec3 translationA{200, 200, 0};
         glm::vec3 translationB{400, 200, 0};
-        glm::mat4 proj;
-        glm::mat4 view;
+        glm::mat4 proj{};
+        glm::mat4 view{};
     };
 }

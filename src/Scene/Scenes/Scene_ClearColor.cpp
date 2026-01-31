@@ -12,7 +12,13 @@ namespace Scene
 
     void Scene_ClearColor::Update(float deltaTime)
     {
-        //Scene::Update(deltaTime);
+        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+
+        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
+
+        if (keyState == GLFW_PRESS) {
+            p_SceneManager_Ref->SetScene("Menu");
+        }
     }
 
     void Scene_ClearColor::Render()

@@ -32,10 +32,9 @@ static void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+
 }
 
 Renderer::Renderer() {};
@@ -53,7 +52,7 @@ void Renderer::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, m_title.c_str(), NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, m_Title.c_str(), NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -84,6 +83,8 @@ void Renderer::Init()
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init("#version 330"); // <- hier fehlt es bei dir
     ImGui::StyleColorsDark();
+
+    glfwSetWindowTitle(m_window, m_Title.c_str());
 }
 
 void Renderer::Update()
@@ -117,9 +118,21 @@ void Renderer::Clear() const
     GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
+std::string_view Renderer::GetDefaultTitle() const
+{
+    return m_DefaultTitle;
+}
+
 void Renderer::SetTitle(std::string_view title)
 {
-    m_title = std::string(title);
+    m_Title = std::string(title);
+    if (m_window)
+        glfwSetWindowTitle(m_window, m_Title.c_str());
+}
+
+void Renderer::SetDefaultTitle(std::string_view title)
+{
+    m_DefaultTitle = std::string(title);
 }
 
 void Renderer::ImGui_BeginFrame() const
