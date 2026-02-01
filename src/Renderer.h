@@ -28,6 +28,7 @@ public:
     void Update();
 
     void Draw(const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;
+    void Draw(const VertexArray& va, Shader& shader, unsigned int count) const;
     void Clear() const;
 
     [[nodiscard]] bool GetWindowShouldClose() const { return m_WindowShouldClose; }

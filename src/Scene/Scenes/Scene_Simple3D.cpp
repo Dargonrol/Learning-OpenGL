@@ -20,23 +20,59 @@ namespace Scene
         if (error)
             return error;
         m_shader->Bind();
-        m_shader->SetUniformMat4f("u_model", m_model);
-        m_shader->SetUniformMat4f("u_view", m_view);
-        m_shader->SetUniformMat4f("u_proj", m_proj);
+        //m_shader->SetUniformMat4f("u_model", m_model);
+        //m_shader->SetUniformMat4f("u_view", m_view);
+        //m_shader->SetUniformMat4f("u_proj", m_proj);
 
         float vertices[] = {
-            // positions         // texture coords
-            0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
-           -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
-           -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
         };
         unsigned int indices[] = {
             0, 1, 3, // first triangle
             1, 2, 3  // second triangle
         };
 
-        m_vb = std::make_unique<VertexBuffer>(vertices, 4 * 5 * sizeof(float));
+        m_vb = std::make_unique<VertexBuffer>(vertices, 6 * 6 * 5 * sizeof(float));
         m_vb->Bind();
 
         VertexBufferLayout layout;
@@ -60,10 +96,16 @@ namespace Scene
 
         int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
         int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
-        std::cout << "u_Texture1 location: " << loc1 << ", u_Texture2 location: " << loc2 << "\n";
 
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            m_model[i] = {1.0f};
+        }
 
-        m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        m_view = {1.0f};
+        m_proj = {};
+
+        //m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
         m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
@@ -80,17 +122,27 @@ namespace Scene
             return;
         }
 
-        m_shader->Bind();
-        m_shader->SetUniformMat4f("u_model", m_model);
-        m_shader->SetUniformMat4f("u_view", m_view);
-        m_shader->SetUniformMat4f("u_proj", m_proj);
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            m_model[i] = glm::mat4(1.0f);
+            m_model[i] = glm::translate(m_model[i], cubePositions[i]);
+            rotationAngles[i] += 20.0f * (i + 0.5) * deltaTime;
+            m_model[i] = glm::rotate(m_model[i], glm::radians(rotationAngles[i]), glm::vec3(1.0f, 0.3f, 0.5f));
+        }
     }
 
     void Scene_Simple3D::Render()
     {
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
         m_shader->Bind();
-        renderer.Draw(*m_va, *m_ib, *m_shader); // will eventually be va, ib, material
+        m_shader->SetUniformMat4f("u_view", m_view);
+        m_shader->SetUniformMat4f("u_proj", m_proj);
+
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            m_shader->SetUniformMat4f("u_model", m_model[i]);
+            renderer.Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+        }
     }
 
     void Scene_Simple3D::ImGuiRender()
@@ -103,6 +155,7 @@ namespace Scene
         m_shader->Bind();
         m_tex1->Bind(0);
         m_tex2->Bind(1);
+        GLCall(glEnable(GL_DEPTH_TEST));
     }
 
     void Scene_Simple3D::OnLeave()
@@ -110,5 +163,6 @@ namespace Scene
         m_tex1->Unbind();
         m_tex2->Unbind();
         m_shader->Unbind();
+        GLCall(glDisable(GL_DEPTH_TEST));
     }
 }

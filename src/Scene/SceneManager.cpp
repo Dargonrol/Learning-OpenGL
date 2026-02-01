@@ -74,8 +74,12 @@ namespace Scene
         }
     }
 
-    void SceneManager::Update(float deltaTime) const
+    void SceneManager::Update(float deltaTime)
     {
+        m_currentTime = static_cast<float>(glfwGetTime());
+        m_deltaTime = m_currentTime - m_lastFrameTime;
+        m_lastFrameTime = m_currentTime;
+
         m_renderer.Update();
         if (m_CurrentScene)
         {

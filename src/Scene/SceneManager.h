@@ -88,12 +88,13 @@ namespace Scene
         }
 
         void Render() const;
-        void Update(float deltaTime) const;
+        void Update(float deltaTime);
 
         [[nodiscard]] std::vector<std::string> GetSceneNames() const;
         [[nodiscard]] Scene& GetCurrentScene() const { return *m_CurrentScene; }
         [[nodiscard]] const std::vector<std::unique_ptr<Scene>>& GetScenesVector() const { return m_Scenes_Vector; }
         [[nodiscard]] Renderer& GetRenderer() const { return m_renderer; }
+        [[nodiscard]] float GetDeltaTime() const { return m_deltaTime; }
 
     private:
         std::unordered_map<std::string, size_t> m_NameToHash_Map;
@@ -101,5 +102,8 @@ namespace Scene
 
         Scene* m_CurrentScene = nullptr;
         Renderer& m_renderer;
+        float m_deltaTime = 0.0f;
+        float m_lastFrameTime = 0.0f;
+        float m_currentTime = 0.0f;
     };
 }

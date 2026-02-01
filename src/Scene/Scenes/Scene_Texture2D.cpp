@@ -67,7 +67,7 @@ namespace Scene
         shader->Bind();
         shader->SetUniform4f("u_Color", 1.0f, 0.5f, 0.5f, 1.0f);
 
-        texture = std::make_unique<Texture>(BASE_PATH / "resources/textures/base.png");
+        texture = std::make_unique<Texture>(BASE_PATH / "resources/textures/Nian.png");
         texture->Bind(0);
         shader->SetUniform1i("u_Texture", 0);
 

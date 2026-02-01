@@ -23,7 +23,7 @@ int main()
 
     while (!renderer.GetWindowShouldClose())
     {
-        sceneManager.Update(0.0f);
+        sceneManager.Update(sceneManager.GetDeltaTime());
         sceneManager.Render();
     }
 
