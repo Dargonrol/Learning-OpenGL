@@ -40,16 +40,16 @@ namespace Scene
             2, 3, 0
         };
 
-        vb = new VertexBuffer(vertices, 4 * 4 * sizeof(float));
+        vb = std::make_unique<VertexBuffer>(vertices, 4 * 4 * sizeof(float));
         vb->Bind();
 
         VertexBufferLayout layout;
         layout.Push<float>(2);
         layout.Push<float>(2);
-        va = new VertexArray();
+        va = std::make_unique<VertexArray>();
         va->AddBuffer(*vb, layout);
 
-        ib = new IndexBuffer(indices, 6);
+        ib = std::make_unique<IndexBuffer>(indices, 6);
         ib->Bind();
 
         proj = glm::ortho(0.0f, (float)renderer.GetWindowWidth(), 0.0f, (float)renderer.GetWindowHeight(), -1.0f, 1.0f);
@@ -61,24 +61,17 @@ namespace Scene
         };
 
         int error = 0;
-        shader = new Shader(paths, error);
+        shader = std::make_unique<Shader>(paths, error);
         if (error)
             return error;
         shader->Bind();
         shader->SetUniform4f("u_Color", 1.0f, 0.5f, 0.5f, 1.0f);
 
-        texture = new Texture(BASE_PATH / "resources/textures/Nian.png");
+        texture = std::make_unique<Texture>(BASE_PATH / "resources/textures/base.png");
         texture->Bind(0);
         shader->SetUniform1i("u_Texture", 0);
 
         return error;
-    }
-
-    Scene_Texture2D::~Scene_Texture2D()
-    {
-        delete shader;
-        delete ib;
-        delete va;
     }
 
     void Scene_Texture2D::Update(float deltaTime)
@@ -131,5 +124,13 @@ namespace Scene
     void Scene_Texture2D::OnEnter()
     {
         p_SceneManager_Ref->GetRenderer().SetTitle("Texture 2D test"sv);
+        shader->Bind();
+        texture->Bind(0);
+    }
+
+    void Scene_Texture2D::OnLeave()
+    {
+        texture->Unbind();
+        shader->Unbind();
     }
 }

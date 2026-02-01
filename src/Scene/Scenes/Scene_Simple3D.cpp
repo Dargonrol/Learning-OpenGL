@@ -49,35 +49,41 @@ namespace Scene
         m_ib = std::make_unique<IndexBuffer>(indices, 6);
         m_ib->Bind();
 
-        m_tex1 = std::make_unique<Texture>(BASE_PATH / "resources/textures/base.jpg");
+        m_shader->Bind();
+        m_tex1 = std::make_unique<Texture>(BASE_PATH / "resources/textures/base.png");
         m_tex1->Bind(0);
         m_shader->SetUniform1i("u_Texture1", 0);
 
-        m_tex1 = std::make_unique<Texture>(BASE_PATH / "resources/textures/Nian.png");
-        m_tex1->Bind(0);
+        m_tex2 = std::make_unique<Texture>(BASE_PATH / "resources/textures/Nian.png");
+        m_tex2->Bind(1);
         m_shader->SetUniform1i("u_Texture2", 1);
+
+        int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
+        int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
+        std::cout << "u_Texture1 location: " << loc1 << ", u_Texture2 location: " << loc2 << "\n";
+
+
+        m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
+        m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
         return error;
     }
 
     void Scene_Simple3D::Update(float deltaTime)
     {
-        m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
-        m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
+
+        if (keyState == GLFW_PRESS) {
+            p_SceneManager_Ref->SetScene<Scene_Menu>();
+            return;
+        }
 
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_model", m_model);
         m_shader->SetUniformMat4f("u_view", m_view);
         m_shader->SetUniformMat4f("u_proj", m_proj);
-
-        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
-
-        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
-
-        if (keyState == GLFW_PRESS) {
-            p_SceneManager_Ref->SetScene<Scene_Menu>();
-        }
     }
 
     void Scene_Simple3D::Render()
@@ -90,5 +96,19 @@ namespace Scene
     void Scene_Simple3D::ImGuiRender()
     {
 
+    }
+
+    void Scene_Simple3D::OnEnter()
+    {
+        m_shader->Bind();
+        m_tex1->Bind(0);
+        m_tex2->Bind(1);
+    }
+
+    void Scene_Simple3D::OnLeave()
+    {
+        m_tex1->Unbind();
+        m_tex2->Unbind();
+        m_shader->Unbind();
     }
 }

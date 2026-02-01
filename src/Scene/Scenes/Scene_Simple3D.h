@@ -18,6 +18,8 @@ namespace Scene
         void Update(float deltaTime) override;
         void Render() override;
         void ImGuiRender() override;
+        void OnEnter() override;
+        void OnLeave() override;
 
     private:
         glm::mat4 m_model{1.0f};

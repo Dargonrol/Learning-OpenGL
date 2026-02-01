@@ -11,6 +11,7 @@
 #undef GLAD_GL_IMPLEMENTATION
 #include "GLFW/glfw3.h"
 #include "Util.h"
+#include "stb_image/stb_image.h"
 
 void GLClearError()
 {
@@ -85,6 +86,8 @@ void Renderer::Init()
     ImGui::StyleColorsDark();
 
     glfwSetWindowTitle(m_window, m_Title.c_str());
+
+    stbi_set_flip_vertically_on_load(true);
 }
 
 void Renderer::Update()

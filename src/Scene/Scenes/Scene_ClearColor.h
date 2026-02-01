@@ -14,6 +14,8 @@ namespace Scene
         void Render() override;
         void ImGuiRender() override;
 
+        void OnEnter() override {};
+
     private:
         float m_ClearColor[4];
     };

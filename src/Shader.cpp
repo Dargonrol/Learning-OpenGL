@@ -21,15 +21,16 @@ Shader::~Shader()
 
 void Shader::Bind() const
 {
-    if (lastBoundShader == m_RendererID)
+    if (!m_GotUnbound && lastBoundShader == m_RendererID)
         return;
     GLCall(glUseProgram(m_RendererID));
     lastBoundShader = m_RendererID;
 }
 
-void Shader::Unbind() const
+void Shader::Unbind()
 {
     GLCall(glUseProgram(0));
+    m_GotUnbound = true;
 }
 
 void Shader::SetUniform1i(const std::string &name, int v0)
@@ -39,7 +40,7 @@ void Shader::SetUniform1i(const std::string &name, int v0)
 
 void Shader::SetUniformMat4f(const std::string &name, glm::mat4 matrix)
 {
-    GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]))
+    GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
 }
 
 void Shader::SetUniform4f(const std::string &name, float v0, float v1, float v2, float v3)

@@ -42,6 +42,8 @@ namespace Scene
             if (scene != "Menu" && ImGui::Button(scene.c_str()))
             {
                 p_SceneManager_Ref->SetScene(scene);
+                ImGui::End();
+                return;
             }
         }
 
