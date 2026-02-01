@@ -23,7 +23,7 @@ public:
     Shader(const ShaderFilePath& filepaths, int& error);
     ~Shader();
 
-    void Bind() const;
+    void Bind();
     void Unbind();
 
     [[nodiscard]] unsigned int GetRendererID() const { return m_RendererID; }

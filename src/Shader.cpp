@@ -19,12 +19,13 @@ Shader::~Shader()
     GLCall(glDeleteProgram(m_RendererID));
 }
 
-void Shader::Bind() const
+void Shader::Bind()
 {
     if (!m_GotUnbound && lastBoundShader == m_RendererID)
         return;
     GLCall(glUseProgram(m_RendererID));
     lastBoundShader = m_RendererID;
+    m_GotUnbound = false;
 }
 
 void Shader::Unbind()
