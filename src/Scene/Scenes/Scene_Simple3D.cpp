@@ -1,5 +1,6 @@
 #include "Scene_Simple3D.h"
 
+#include "imgui.h"
 #include "../../OpenGL.h"
 
 #include "Scene_Menu.h"
@@ -12,6 +13,7 @@
 #include "../../Core/VertexBuffer.h"
 #include "../SceneManager.h"
 #include "../../Core/Renderer.h"
+#include "../../Extra/Camera.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Scene
@@ -113,12 +115,21 @@ namespace Scene
             m_model[i] = {1.0f};
         }
 
-        m_view = {1.0f};
+        m_camera = std::make_unique<Camera>();
         m_proj = {};
 
         //m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
+        //m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
         m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        m_radius = 10.0f;
+        m_speed = 0.5f;
+        m_time = 0.0f;
+        m_camX = 0.0f;
+        m_camZ = 0.0f;
+        m_angle = 0.0f;
+
+        m_camera->SetMode(CameraMode::ORBIT);
 
         return error;
     }
@@ -140,13 +151,21 @@ namespace Scene
             rotationAngles[i] += 20.0f * (i + 0.5) * deltaTime;
             m_model[i] = glm::rotate(m_model[i], glm::radians(rotationAngles[i]), glm::vec3(1.0f, 0.3f, 0.5f));
         }
+
+        m_angle = m_time * m_speed;
+        m_camX = std::sin(m_angle) * m_radius;
+        m_camZ = std::cos(m_angle) * m_radius;
+
+        m_camera->SetPosition({m_camX, 0.0, m_camZ});
+        m_camera->Update();
+        m_time += deltaTime;
     }
 
     void Scene_Simple3D::Render()
     {
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
         m_shader->Bind();
-        m_shader->SetUniformMat4f("u_view", m_view);
+        m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
         m_shader->SetUniformMat4f("u_proj", m_proj);
 
         for(unsigned int i = 0; i < 10; i++)
@@ -158,7 +177,13 @@ namespace Scene
 
     void Scene_Simple3D::ImGuiRender()
     {
-
+        ImGui::Begin("Camera Control");
+        if (ImGui::Button("back"))
+            p_SceneManager_Ref->SetScene("Menu");
+        ImGui::SliderFloat("Speed", &m_speed, -10.0f, 10.0f);
+        ImGui::SliderFloat("Radius", &m_radius, -20.0f, 20.0f);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
     }
 
     void Scene_Simple3D::OnEnter()

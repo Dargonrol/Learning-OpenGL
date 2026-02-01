@@ -8,6 +8,7 @@ class IndexBuffer;
 class VertexBuffer;
 class VertexArray;
 class Shader;
+class Camera;
 
 namespace Scene
 {
@@ -25,8 +26,11 @@ namespace Scene
         void OnLeave() override;
 
     private:
+        void ResetCamera();
+        void HandleInput(float deltaTime);
+
+    private:
         glm::mat4 m_model[10]{1.0f};
-        glm::mat4 m_view{1.0f};
         glm::mat4 m_proj{1.0f};
 
         glm::vec3 cubePositions[10]{
@@ -44,6 +48,7 @@ namespace Scene
 
         float rotationAngles[10] = {0.0f};
 
+        std::unique_ptr<Camera> m_camera;
         std::unique_ptr<Shader> m_shader;
         std::unique_ptr<VertexArray> m_va;
         std::unique_ptr<VertexBuffer> m_vb;
@@ -51,5 +56,17 @@ namespace Scene
 
         std::unique_ptr<Texture> m_tex1;
         std::unique_ptr<Texture> m_tex2;
+
+        float m_camSpeed;
+        float m_camSensitivity;
+        float m_mouseSensitivity;
+
+        // ImGui
+        int m_cameraModeIndex = 0;
+        int m_prevTabState;
+
+        // mouse
+        double m_mouseX, m_mouseY;
+        double m_mouseLastX, m_mouseLastY;
     };
 }

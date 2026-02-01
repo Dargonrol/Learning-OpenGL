@@ -8,6 +8,7 @@ class IndexBuffer;
 class VertexBuffer;
 class VertexArray;
 class Shader;
+class Camera;
 
 namespace Scene
 {
@@ -26,7 +27,6 @@ namespace Scene
 
     private:
         glm::mat4 m_model[10]{1.0f};
-        glm::mat4 m_view{1.0f};
         glm::mat4 m_proj{1.0f};
 
         glm::vec3 cubePositions[10]{
@@ -44,6 +44,7 @@ namespace Scene
 
         float rotationAngles[10] = {0};
 
+        std::unique_ptr<Camera> m_camera;
         std::unique_ptr<Shader> m_shader;
         std::unique_ptr<VertexArray> m_va;
         std::unique_ptr<VertexBuffer> m_vb;
@@ -51,5 +52,12 @@ namespace Scene
 
         std::unique_ptr<Texture> m_tex1;
         std::unique_ptr<Texture> m_tex2;
+
+        float m_radius;
+        float m_time;
+        float m_angle;
+        float m_speed;
+        float m_camX;
+        float m_camZ;
     };
 }
