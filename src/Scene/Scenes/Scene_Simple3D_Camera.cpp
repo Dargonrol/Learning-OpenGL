@@ -1,4 +1,4 @@
-#include "Scene_Simple3D.h"
+#include "Scene_Simple3D_Camera.h"
 
 #include "Scene_Menu.h"
 #include "../../Core/Util.h"
@@ -8,7 +8,7 @@
 
 namespace Scene
 {
-    int Scene_Simple3D::Init()
+    int Scene_Simple3D_Camera::Init()
     {
         int error = 0;
         ShaderFilePath paths = {
@@ -112,7 +112,7 @@ namespace Scene
         return error;
     }
 
-    void Scene_Simple3D::Update(float deltaTime)
+    void Scene_Simple3D_Camera::Update(float deltaTime)
     {
         GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
@@ -131,7 +131,7 @@ namespace Scene
         }
     }
 
-    void Scene_Simple3D::Render()
+    void Scene_Simple3D_Camera::Render()
     {
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
         m_shader->Bind();
@@ -145,12 +145,12 @@ namespace Scene
         }
     }
 
-    void Scene_Simple3D::ImGuiRender()
+    void Scene_Simple3D_Camera::ImGuiRender()
     {
 
     }
 
-    void Scene_Simple3D::OnEnter()
+    void Scene_Simple3D_Camera::OnEnter()
     {
         m_shader->Bind();
         m_tex1->Bind(0);
@@ -158,7 +158,7 @@ namespace Scene
         GLCall(glEnable(GL_DEPTH_TEST));
     }
 
-    void Scene_Simple3D::OnLeave()
+    void Scene_Simple3D_Camera::OnLeave()
     {
         m_tex1->Unbind();
         m_tex2->Unbind();

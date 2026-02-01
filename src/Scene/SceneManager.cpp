@@ -95,6 +95,7 @@ namespace Scene
         {
             names.push_back(key);
         }
+        std::sort(names.begin(), names.end());
         return names;
     }
 

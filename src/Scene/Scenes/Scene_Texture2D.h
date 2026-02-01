@@ -4,7 +4,7 @@
 
 #include "../Scene.h"
 #include "../SceneManager.h"
-#include "../../Texture.h"
+#include "../../Core/Texture.h"
 
 namespace Scene
 {

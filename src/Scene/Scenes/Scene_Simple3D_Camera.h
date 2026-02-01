@@ -9,10 +9,10 @@
 
 namespace Scene
 {
-    class Scene_Simple3D : public Scene::Scene
+    class Scene_Simple3D_Camera : public Scene::Scene
     {
     public:
-        Scene_Simple3D() = default;
+        Scene_Simple3D_Camera() = default;
 
         int Init() override;
         void Update(float deltaTime) override;

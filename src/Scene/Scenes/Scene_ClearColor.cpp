@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 #include "../SceneManager.h"
-#include "../../Renderer.h"
+#include "../../Core/Renderer.h"
 
 namespace Scene
 {

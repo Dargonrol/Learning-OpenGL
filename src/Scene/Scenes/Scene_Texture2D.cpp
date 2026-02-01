@@ -5,14 +5,14 @@
 
 #include "imgui.h"
 #include "Scene_Menu.h"
-#include "../../Util.h"
-#include "../../Renderer.h"
-#include "../../VertexArray.h"
-#include "../../VertexBufferLayout.h"
-#include "../../VertexBuffer.h"
-#include "../../IndexBuffer.h"
-#include "../../Shader.h"
-#include "../../Texture.h"
+#include "../../Core/Util.h"
+#include "../../Core/Renderer.h"
+#include "../../Core/VertexArray.h"
+#include "../../Core/VertexBufferLayout.h"
+#include "../../Core/VertexBuffer.h"
+#include "../../Core/IndexBuffer.h"
+#include "../../Core/Shader.h"
+#include "../../Core/Texture.h"
 
 
 namespace Scene

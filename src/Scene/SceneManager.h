@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Scene.h"
-#include "../Renderer.h"
+#include "../Core/Renderer.h"
 
 namespace Scene
 {
