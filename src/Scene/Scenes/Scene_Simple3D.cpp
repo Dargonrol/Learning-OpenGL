@@ -1,13 +1,24 @@
 #include "Scene_Simple3D.h"
 
+#include "../../OpenGL.h"
+
 #include "Scene_Menu.h"
 #include "../../Core/Util.h"
+#include "../../Core/Shader.h"
 #include "../../Core/VertexBufferLayout.h"
+#include "../../Core/IndexBuffer.h"
+#include "../../Core/Texture.h"
+#include "../../Core/VertexArray.h"
+#include "../../Core/VertexBuffer.h"
 #include "../SceneManager.h"
+#include "../../Core/Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Scene
 {
+    Scene_Simple3D::Scene_Simple3D() = default;
+    Scene_Simple3D::~Scene_Simple3D() = default;
+
     int Scene_Simple3D::Init()
     {
         int error = 0;

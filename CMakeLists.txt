@@ -71,6 +71,8 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_Simple3D_Camera.cpp
         src/Extra/Camera.cpp
         src/Extra/Camera.h
+        src/OpenGL.h
+        src/Core/VertexBufferLayout.cpp
 )
 
 target_link_libraries(

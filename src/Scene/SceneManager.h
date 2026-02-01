@@ -1,20 +1,19 @@
 #pragma once
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "Scene.h"
-#include "../Core/Renderer.h"
+class Renderer;
 
 namespace Scene
 {
     class SceneManager
     {
     public:
-        SceneManager(Renderer& renderer) : m_renderer(renderer) {};
-        ~SceneManager() = default;
+        SceneManager(Renderer& renderer);
+        ~SceneManager();
 
         template<typename T> requires (std::is_base_of_v<Scene, T>)
         void RegisterScene(const std::string_view name)

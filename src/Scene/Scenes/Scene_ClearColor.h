@@ -7,7 +7,7 @@ namespace Scene
     {
     public:
         Scene_ClearColor();
-        ~Scene_ClearColor() override = default;
+        ~Scene_ClearColor() override;
 
         int Init() override { return 0; }
         void Update(float deltaTime) override;

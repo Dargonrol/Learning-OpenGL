@@ -1,18 +1,12 @@
 #pragma once
 
-#include "IndexBuffer.h"
-#include "Shader.h"
+#include <string>
 #include "Util.h"
-#include "VertexArray.h"
-#include "GLFW/glfw3.h"
 
-#ifdef RELEASE
-    #define ASSERT(x)
-    #define GLCall(x) x;
-#else
-    #define ASSERT(x) if (!(x)) DEBUG_BREAK();
-    #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-#endif
+class VertexArray;
+class IndexBuffer;
+class Shader;
+class GLFWwindow;
 
 void GLClearError();
 bool GLLogCall(const char* function, const char* file, int line);
@@ -22,9 +16,10 @@ class Renderer
 public:
     Renderer();
     Renderer(int width, int height);
+    ~Renderer();
 
     void Init();
-    void Shutdown();
+    void Shutdown() const;
     void Update();
 
     void Draw(const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;

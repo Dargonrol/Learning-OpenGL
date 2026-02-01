@@ -4,11 +4,16 @@
 
 #include "imgui.h"
 #include "../SceneManager.h"
+#include "../../Core/Renderer.h"
+#include "GLFW/glfw3.h"
 
 namespace Scene
 {
     using namespace std::literals;
     int Scene_Menu::s_prevEscapeState;
+
+    Scene_Menu::Scene_Menu() = default;
+    Scene_Menu::~Scene_Menu() = default;
 
     void Scene_Menu::OnEnter()
     {

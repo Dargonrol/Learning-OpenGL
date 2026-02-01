@@ -1,7 +1,20 @@
 #include "VertexArray.h"
+#include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Renderer.h"
+#include "../OpenGL.h"
 
+static GLenum ShaderDataTypeToOpenGL(const ShaderDataType type)
+{
+    switch (type)
+    {
+        case ShaderDataType::Float: return GL_FLOAT;
+        case ShaderDataType::uInt:  return GL_UNSIGNED_INT;
+        case ShaderDataType::uByte: return GL_UNSIGNED_BYTE;
+    }
+    ASSERT(false);
+    return 0;
+}
 
 VertexArray::VertexArray()
 {
@@ -23,7 +36,7 @@ void VertexArray::Unbind() const
     GLCall(glBindVertexArray(0));
 }
 
-void VertexArray::AddBuffer(const VertexBuffer &vb, const VertexBufferLayout &layout)
+void VertexArray::AddBuffer(const VertexBuffer &vb, const VertexBufferLayout &layout) const
 {
     Bind();
     vb.Bind();
@@ -36,11 +49,12 @@ void VertexArray::AddBuffer(const VertexBuffer &vb, const VertexBufferLayout &la
         GLCall(glVertexAttribPointer(
             i,
             element.count,
-            element.type,
+            ShaderDataTypeToOpenGL(element.type),
             element.normalized,
             layout.GetStride(),
-            (const void*)offset
+            reinterpret_cast<const void*>(offset)
             ))
         offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
     }
 }
+

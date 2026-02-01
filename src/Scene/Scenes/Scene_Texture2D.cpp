@@ -2,9 +2,11 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <GLFW/glfw3.h>
 
 #include "imgui.h"
 #include "Scene_Menu.h"
+#include "../SceneManager.h"
 #include "../../Core/Util.h"
 #include "../../Core/Renderer.h"
 #include "../../Core/VertexArray.h"
@@ -20,9 +22,9 @@ namespace Scene
     using std::literals::operator ""sv;
 
     Scene_Texture2D::Scene_Texture2D() : va(nullptr), ib(nullptr), vb(nullptr), texture(nullptr),
-                                         shader(nullptr)
-    {
-    }
+                                         shader(nullptr) {}
+
+    Scene_Texture2D::~Scene_Texture2D() = default;
 
     int Scene_Texture2D::Init()
     {

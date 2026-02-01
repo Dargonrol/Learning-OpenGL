@@ -1,9 +1,17 @@
 #include "SceneManager.h"
 
-#include <iostream>
+#include <algorithm>
+
+#include "../Core/Renderer.h"
+#include "GLFW/glfw3.h"
+//#include "../Core/Shader.h"
 
 namespace Scene
 {
+    SceneManager::SceneManager(Renderer &renderer) : m_renderer(renderer) {}
+
+    SceneManager::~SceneManager() = default;
+
     void SceneManager::UnRegisterScene(const std::string_view name)
     {
         const std::string SceneName = std::string(name);

@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
+#include "Util.h"
+#include "../OpenGL.h"
 
 Shader::Shader(const ShaderFilePath &filepaths, int& error)
 {

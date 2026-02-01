@@ -1,17 +1,18 @@
 #include "Renderer.h"
 
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+#undef GLAD_GL_IMPLEMENTATION
+#include <GLFW/glfw3.h>
 #include <fstream>
 #include <iostream>
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
-
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#undef GLAD_GL_IMPLEMENTATION
-#include "GLFW/glfw3.h"
-#include "Util.h"
 #include "stb_image/stb_image.h"
+#include "Shader.h"
+#include "VertexArray.h"
+#include "IndexBuffer.h"
 
 void GLClearError()
 {
@@ -53,7 +54,7 @@ void Renderer::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, m_Title.c_str(), NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(m_Window_Width, m_Window_Height, m_Title.c_str(), nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
@@ -97,7 +98,7 @@ void Renderer::Update()
     glfwPollEvents();
 }
 
-void Renderer::Shutdown()
+void Renderer::Shutdown() const
 {
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
@@ -158,3 +159,5 @@ void Renderer::ImGui_EndFrame() const
 
     glfwSwapBuffers(m_window);
 }
+
+Renderer::~Renderer() = default;

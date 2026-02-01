@@ -3,12 +3,16 @@
 #include "imgui.h"
 #include "../SceneManager.h"
 #include "../../Core/Renderer.h"
+#include "../../Core/Util.h"
+#include "../../OpenGL.h"
 
 namespace Scene
 {
     Scene_ClearColor::Scene_ClearColor() : m_ClearColor{1.0f, 0.75f, 0.5f, 1.0f}
     {
     }
+
+    Scene_ClearColor::~Scene_ClearColor() = default;
 
     void Scene_ClearColor::Update(float deltaTime)
     {

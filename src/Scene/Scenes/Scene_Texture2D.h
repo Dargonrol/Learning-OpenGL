@@ -1,10 +1,16 @@
 #pragma once
 
+#include <memory>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Scene.h"
-#include "../SceneManager.h"
-#include "../../Core/Texture.h"
+
+class Shader;
+class Texture;
+class VertexBuffer;
+class IndexBuffer;
+class VertexArray;
+
 
 namespace Scene
 {
@@ -12,7 +18,7 @@ namespace Scene
     {
     public:
         Scene_Texture2D();
-        ~Scene_Texture2D() override = default;
+        ~Scene_Texture2D() override;
 
         int Init() override;
         void Update(float deltaTime) override;

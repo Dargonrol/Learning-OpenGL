@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <unordered_map>
 
-#include "glad/gl.h"
 #include "glm/fwd.hpp"
 
 struct ShaderSourceCode
@@ -37,8 +36,8 @@ private:
     int GetUniformLocation(const std::string& name);
 
     [[nodiscard]] ShaderSourceCode parseShader(const ShaderFilePath& filepaths, int& error);
-    [[nodiscard]] GLuint CompileShader(const std::string& source, GLuint type, int& error);
-    [[nodiscard]] GLuint CreateShader(const std::string& vertexShader, const std::string& fragmentShader, int& error);
+    [[nodiscard]] unsigned int CompileShader(const std::string& source, unsigned int type, int& error);
+    [[nodiscard]] unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader, int& error);
 
 private:
     unsigned int m_RendererID;

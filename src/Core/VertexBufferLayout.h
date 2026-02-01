@@ -1,22 +1,29 @@
 #pragma once
+#include <cstdint>
 #include <vector>
 
-#include "Renderer.h"
-#include "glad/gl.h"
+#include "Util.h"
+
+enum class ShaderDataType
+{
+    Float,
+    uInt,
+    uByte
+};
 
 struct VertexBufferElement
 {
-    GLenum type;
+    ShaderDataType type;
     unsigned int count;
     bool normalized;
 
-    static unsigned int GetSizeOfType(GLenum type)
+    static unsigned int GetSizeOfType(ShaderDataType type)
     {
         switch (type)
         {
-            case GL_FLOAT:          return sizeof(GLfloat);
-            case GL_UNSIGNED_INT:   return sizeof(GLuint);
-            case GL_UNSIGNED_BYTE:  return sizeof(GLbyte);
+            case ShaderDataType::Float:          return sizeof(float);
+            case ShaderDataType::uInt:   return sizeof(std::uint32_t);
+            case ShaderDataType::uByte:  return sizeof(std::uint8_t);
         }
         ASSERT(false);
         return 0;
@@ -32,7 +39,7 @@ public:
     template<typename T>
     void Push(unsigned int count);
 
-    const std::vector<VertexBufferElement> GetElements() const { return m_Elements; }
+    [[nodiscard]] std::vector<VertexBufferElement> GetElements() const { return m_Elements; }
     [[nodiscard]] unsigned int GetStride() const { return m_Stride; }
 
 private:
@@ -49,20 +56,20 @@ template<typename T>
 template<>
 inline void VertexBufferLayout::Push<float>(unsigned int count)
 {
-    m_Elements.push_back({ GL_FLOAT, count, false });
-    m_Stride += VertexBufferElement::GetSizeOfType(GL_FLOAT) * count;
+    m_Elements.push_back({ ShaderDataType::Float, count, false });
+    m_Stride += VertexBufferElement::GetSizeOfType(ShaderDataType::Float) * count;
 }
 
 template<>
 inline void VertexBufferLayout::Push<unsigned int>(unsigned int count)
 {
-    m_Elements.push_back({ GL_UNSIGNED_INT, count, false });
-    m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT) * count;
+    m_Elements.push_back({ ShaderDataType::uInt, count, false });
+    m_Stride += VertexBufferElement::GetSizeOfType(ShaderDataType::uInt) * count;
 }
 
 template<>
 inline void VertexBufferLayout::Push<unsigned char>(unsigned int count)
 {
-    m_Elements.push_back({ GL_UNSIGNED_BYTE, count, true });
-    m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE) * count;
+    m_Elements.push_back({ ShaderDataType::uByte, count, true });
+    m_Stride += VertexBufferElement::GetSizeOfType(ShaderDataType::uByte) * count;
 }

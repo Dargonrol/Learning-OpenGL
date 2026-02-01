@@ -13,3 +13,11 @@
     #define SOURCE_DIR ""
 #endif
 #define BASE_PATH std::filesystem::path(SOURCE_DIR)
+
+#ifdef RELEASE
+    #define ASSERT(x)
+    #define GLCall(x) x;
+#else
+    #define ASSERT(x) if (!(x)) DEBUG_BREAK();
+    #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#endif

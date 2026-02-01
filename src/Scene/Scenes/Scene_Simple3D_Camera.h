@@ -1,18 +1,21 @@
 #pragma once
 #include "../Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
-#include "../../Core/IndexBuffer.h"
-#include "../../Core/Shader.h"
-#include "../../Core/Texture.h"
-#include "../../Core/VertexArray.h"
+class Texture;
+class IndexBuffer;
+class VertexBuffer;
+class VertexArray;
+class Shader;
 
 namespace Scene
 {
     class Scene_Simple3D_Camera : public Scene::Scene
     {
     public:
-        Scene_Simple3D_Camera() = default;
+        Scene_Simple3D_Camera();
+        ~Scene_Simple3D_Camera() override;
 
         int Init() override;
         void Update(float deltaTime) override;
@@ -22,9 +25,9 @@ namespace Scene
         void OnLeave() override;
 
     private:
-        glm::mat4 m_model[10];
-        glm::mat4 m_view;
-        glm::mat4 m_proj;
+        glm::mat4 m_model[10]{1.0f};
+        glm::mat4 m_view{1.0f};
+        glm::mat4 m_proj{1.0f};
 
         glm::vec3 cubePositions[10]{
             glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -39,7 +42,7 @@ namespace Scene
             glm::vec3(-1.3f,  1.0f, -1.5f)
         };
 
-        float rotationAngles[10] = {0};
+        float rotationAngles[10] = {0.0f};
 
         std::unique_ptr<Shader> m_shader;
         std::unique_ptr<VertexArray> m_va;

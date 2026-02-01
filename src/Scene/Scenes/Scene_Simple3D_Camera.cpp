@@ -1,13 +1,23 @@
 #include "Scene_Simple3D_Camera.h"
 
+#include "../../OpenGL.h"
 #include "Scene_Menu.h"
 #include "../../Core/Util.h"
+#include "../../Core/Shader.h"
 #include "../../Core/VertexBufferLayout.h"
+#include "../../Core/IndexBuffer.h"
+#include "../../Core/Texture.h"
+#include "../../Core/VertexArray.h"
+#include "../../Core/VertexBuffer.h"
 #include "../SceneManager.h"
+#include "../../Core/Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Scene
 {
+    Scene_Simple3D_Camera::Scene_Simple3D_Camera() = default;
+    Scene_Simple3D_Camera::~Scene_Simple3D_Camera() = default;
+
     int Scene_Simple3D_Camera::Init()
     {
         int error = 0;
@@ -19,10 +29,6 @@ namespace Scene
         m_shader = std::make_unique<Shader>(paths, error);
         if (error)
             return error;
-        m_shader->Bind();
-        //m_shader->SetUniformMat4f("u_model", m_model);
-        //m_shader->SetUniformMat4f("u_view", m_view);
-        //m_shader->SetUniformMat4f("u_proj", m_proj);
 
         float vertices[] = {
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -97,9 +103,9 @@ namespace Scene
         int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
         int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
 
-        for(unsigned int i = 0; i < 10; i++)
+        for(auto & i : m_model)
         {
-            m_model[i] = {1.0f};
+            i = {1.0f};
         }
 
         m_view = {1.0f};
