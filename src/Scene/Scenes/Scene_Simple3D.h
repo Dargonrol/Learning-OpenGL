@@ -24,6 +24,7 @@ namespace Scene
         void ImGuiRender() override;
         void OnEnter() override;
         void OnLeave() override;
+        void OnResize(int width, int height) override;
 
     private:
         glm::mat4 m_model[10]{1.0f};

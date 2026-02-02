@@ -6,6 +6,7 @@
 
 #include "Scene.h"
 class Renderer;
+class GLFWwindow;
 
 namespace Scene
 {
@@ -14,6 +15,9 @@ namespace Scene
     public:
         SceneManager(Renderer& renderer);
         ~SceneManager();
+
+        static void FrameBufferCallback(GLFWwindow* window, int width, int height);
+        void OnResize(int width, int height) const;
 
         template<typename T> requires (std::is_base_of_v<Scene, T>)
         void RegisterScene(const std::string_view name)

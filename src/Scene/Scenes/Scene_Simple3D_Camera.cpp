@@ -27,8 +27,8 @@ namespace Scene
     {
         int error = 0;
         ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/Simple3D.vertGL",
-            BASE_PATH / "resources/shaders/Simple3D.fragGL"
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader"
         };
 
         m_shader = std::make_unique<Shader>(paths, error);
@@ -140,7 +140,6 @@ namespace Scene
     void Scene_Simple3D_Camera::ResetCamera()
     {
         m_camSpeed = 10.0f;
-        m_camera->SetPosition({0.0f, 0.0f, 3.0f});
         m_camera->Reset();
     }
 
@@ -247,28 +246,7 @@ namespace Scene
                 m_camera->SetMode(CameraMode::ORBIT);
         }
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            m_camera->AddPosition(dir * m_camSpeed * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            m_camera->AddPosition(-right * m_camSpeed * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            m_camera->AddPosition(-dir * m_camSpeed * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            m_camera->AddPosition(right * m_camSpeed * deltaTime);
-
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            m_camera->AddPosition(up * m_camSpeed * deltaTime);
-        if ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) | glfwGetKey(window, GLFW_KEY_C) | glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) == GLFW_PRESS)
-            m_camera->AddPosition(-up * m_camSpeed * deltaTime);
-
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            m_camera->AddPitch(m_camSensitivity * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            m_camera->AddPitch(-m_camSensitivity * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            m_camera->AddYaw(-m_camSensitivity * deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            m_camera->AddYaw(m_camSensitivity * deltaTime);
+        m_camera->HandleGenericCameraControls(window, deltaTime, m_camSpeed, m_camSensitivity);
 
         if ((glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4) | glfwGetKey(window, GLFW_KEY_E)) == GLFW_PRESS)
             m_camera->AddRoll(m_camSensitivity * 0.5f * deltaTime);
@@ -285,5 +263,11 @@ namespace Scene
         }
 
         m_prevTabState = glfwGetKey(window, GLFW_KEY_TAB);
+    }
+
+    void Scene_Simple3D_Camera::OnResize(int width, int height)
+    {
+        m_proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+        m_shader->SetUniformMat4f("u_proj", m_proj);
     }
 }

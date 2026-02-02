@@ -18,9 +18,7 @@ namespace Scene
     {
         GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
 
-        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
-
-        if (keyState == GLFW_PRESS) {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             p_SceneManager_Ref->SetScene("Menu");
         }
     }

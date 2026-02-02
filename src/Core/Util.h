@@ -21,3 +21,8 @@
     #define ASSERT(x) if (!(x)) DEBUG_BREAK();
     #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 #endif
+
+#define FWD_DECLARE_ALL class IndexBuffer;\
+    class VertexBuffer;\
+    class VertexArray;\
+    class Shader

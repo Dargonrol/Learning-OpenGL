@@ -3,14 +3,30 @@
 #include <algorithm>
 
 #include "../Core/Renderer.h"
-#include "GLFW/glfw3.h"
-//#include "../Core/Shader.h"
+#include "../OpenGL.h"
 
 namespace Scene
 {
-    SceneManager::SceneManager(Renderer &renderer) : m_renderer(renderer) {}
+    SceneManager::SceneManager(Renderer &renderer) : m_renderer(renderer)
+    {
+        glfwSetWindowUserPointer(&m_renderer.GetWindow(), this);
+        glfwSetFramebufferSizeCallback(&m_renderer.GetWindow(), FrameBufferCallback);
+    }
 
     SceneManager::~SceneManager() = default;
+
+    void SceneManager::FrameBufferCallback(GLFWwindow *window, int width, int height)
+    {
+        glViewport(0, 0, width, height);
+        SceneManager* sm = static_cast<SceneManager*>(glfwGetWindowUserPointer(window));
+        if (sm)
+            sm->OnResize(width, height);
+    }
+
+    void SceneManager::OnResize(int width, int height) const
+    {
+        m_CurrentScene->OnResize(width, height);
+    }
 
     void SceneManager::UnRegisterScene(const std::string_view name)
     {

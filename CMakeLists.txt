@@ -73,6 +73,11 @@ add_executable(${PROJECT_NAME}
         src/Extra/Camera.h
         src/OpenGL.h
         src/Core/VertexBufferLayout.cpp
+        src/Scene/Scenes/Scene_Lighting.cpp
+        src/Scene/Scenes/Scene_Lighting.h
+        src/Core/IncludeAll.h
+        src/Scene/Scenes/Scene_BasicPlane.cpp
+        src/Scene/Scenes/Scene_BasicPlane.h
 )
 
 target_link_libraries(

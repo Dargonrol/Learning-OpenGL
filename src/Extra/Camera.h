@@ -3,6 +3,8 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
+class GLFWwindow;
+
 enum class CameraMode
 {
     FPS = 0,
@@ -57,6 +59,8 @@ public:
         }
         return "INVALID";
     }
+
+    void HandleGenericCameraControls(GLFWwindow* window, float deltaTime, float camSpeed = 10.0f, float camSensitivity = 4.0f);
 
 private:
     void UpdateVectors();

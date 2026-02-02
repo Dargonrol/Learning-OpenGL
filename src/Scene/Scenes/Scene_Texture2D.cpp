@@ -58,8 +58,8 @@ namespace Scene
         view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/basic.vertGL",
-            BASE_PATH / "resources/shaders/basic.fragGL"
+            BASE_PATH / "resources/shaders/Basic/basic_VERT.shader",
+            BASE_PATH / "resources/shaders/Basic/basic_FRAG.shader"
         };
 
         int error = 0;

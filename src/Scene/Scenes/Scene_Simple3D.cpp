@@ -25,17 +25,14 @@ namespace Scene
     {
         int error = 0;
         ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/Simple3D.vertGL",
-            BASE_PATH / "resources/shaders/Simple3D.fragGL"
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader"
         };
 
         m_shader = std::make_unique<Shader>(paths, error);
         if (error)
             return error;
         m_shader->Bind();
-        //m_shader->SetUniformMat4f("u_model", m_model);
-        //m_shader->SetUniformMat4f("u_view", m_view);
-        //m_shader->SetUniformMat4f("u_proj", m_proj);
 
         float vertices[] = {
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -107,20 +104,14 @@ namespace Scene
         m_tex2->Bind(1);
         m_shader->SetUniform1i("u_Texture2", 1);
 
-        int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
-        int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
-
         for(unsigned int i = 0; i < 10; i++)
         {
             m_model[i] = {1.0f};
         }
 
+        Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
         m_camera = std::make_unique<Camera>();
-        m_proj = {};
-
-        //m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        //m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
-        m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        m_proj = glm::perspective(glm::radians(45.0f), (float)renderer->GetWindowWidth() / (float)renderer->GetWindowHeight(), 0.1f, 100.0f);
 
         m_radius = 10.0f;
         m_speed = 0.5f;
@@ -200,5 +191,11 @@ namespace Scene
         m_tex2->Unbind();
         m_shader->Unbind();
         GLCall(glDisable(GL_DEPTH_TEST));
+    }
+
+    void Scene_Simple3D::OnResize(int width, int height)
+    {
+        m_proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+        m_shader->SetUniformMat4f("u_proj", m_proj);
     }
 }

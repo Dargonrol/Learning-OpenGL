@@ -3,11 +3,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
+#include "../../Core/Util.h"
+
+FWD_DECLARE_ALL;
 class Texture;
-class IndexBuffer;
-class VertexBuffer;
-class VertexArray;
-class Shader;
 class Camera;
 
 namespace Scene
@@ -24,6 +23,7 @@ namespace Scene
         void ImGuiRender() override;
         void OnEnter() override;
         void OnLeave() override;
+        void OnResize(int width, int height) override;
 
     private:
         void ResetCamera();

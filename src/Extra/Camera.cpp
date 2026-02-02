@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include "GLFW/glfw3.h" 
+
 Camera::Camera()
 {
     Init();
@@ -98,4 +100,48 @@ void Camera::SetMode(const CameraMode mode)
         case CameraMode::ORBIT:
             break;
     }
+}
+
+/**
+ * Handles generic camera movement and rotation based on keyboard input.\n
+ *
+ * Controls:\n
+ *   Movement:\n
+ *     W       - Move forward\n
+ *     S       - Move backward\n
+ *     A       - Move left\n
+ *     D       - Move right\n
+ *     SPACE   - Move upward\n
+ *     LEFT_SHIFT, C, or LEFT_CONTROL - Move downward\n
+ *
+ *   Rotation:\n
+ *     UP_ARROW    - Pitch up\n
+ *     DOWN_ARROW  - Pitch down\n
+ *     LEFT_ARROW  - Yaw left\n
+ *     RIGHT_ARROW - Yaw right\n
+ */
+void Camera::HandleGenericCameraControls(GLFWwindow *window, float deltaTime, float camSpeed, float camSensitivity)
+{
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        AddPosition(m_direction * camSpeed * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        AddPosition(-m_right * camSpeed * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        AddPosition(-m_direction * camSpeed * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        AddPosition(m_right * camSpeed * deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        AddPosition(m_up * camSpeed * deltaTime);
+    if ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) | glfwGetKey(window, GLFW_KEY_C) | glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) == GLFW_PRESS)
+        AddPosition(-m_up * camSpeed * deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        AddPitch(camSensitivity * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        AddPitch(-camSensitivity * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        AddYaw(-camSensitivity * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        AddYaw(camSensitivity * deltaTime);
 }

@@ -18,6 +18,7 @@ namespace Scene
         virtual void ImGuiRender() = 0;
         virtual void OnEnter() {};
         virtual void OnLeave();
+        virtual void OnResize(int width, int height) {};
 
         bool initialized = false;
         std::string name;
