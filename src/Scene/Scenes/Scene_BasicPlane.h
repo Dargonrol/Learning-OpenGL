@@ -6,6 +6,7 @@
 #include <memory>
 
 FWD_DECLARE_ALL;
+class Camera;
 
 namespace Scene
 {
@@ -28,9 +29,10 @@ namespace Scene
         std::unique_ptr<VertexArray> m_va;
         std::unique_ptr<VertexBuffer> m_vb;
         std::unique_ptr<IndexBuffer> m_ib;
+        std::unique_ptr<Camera> m_camera;
 
         glm::mat4 m_model{};
-        glm::mat4 m_proj{};
-        glm::mat4 m_view{};
+        //glm::mat4 m_proj{};
+        //glm::mat4 m_view{};
     };
 }

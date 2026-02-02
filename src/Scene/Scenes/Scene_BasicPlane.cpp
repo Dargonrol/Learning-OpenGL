@@ -1,6 +1,7 @@
 #include "Scene_BasicPlane.h"
 
 #include "../../Core/IncludeAll.h"
+#include "../../Extra/Camera.h"
 
 namespace Scene
 {
@@ -48,13 +49,18 @@ namespace Scene
 
         Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
 
+        m_camera = std::make_unique<Camera>(CameraMode::ORTHO);
+
         m_model = glm::translate(glm::mat4(1.0f), {200, 200, 0});
-        m_proj = glm::ortho(0.0f, (float)renderer->GetWindowWidth(), 0.0f, (float)renderer->GetWindowHeight(), -1.0f, 1.0f);
-        m_view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+        //m_proj = glm::ortho(0.0f, (float)renderer->GetWindowWidth(), 0.0f, (float)renderer->GetWindowHeight(), -1.0f, 1.0f);
+        //m_view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
+        //m_view = m_camera->GetViewMatrix();
+        m_camera->SetOrthoData({{0.0f, (float)renderer->GetWindowWidth(), 0.0f, (float)renderer->GetWindowHeight()}, -1.0f, 1.0f});
 
         m_shader->SetUniformMat4f("u_model", m_model);
-        m_shader->SetUniformMat4f("u_proj", m_proj);
-        m_shader->SetUniformMat4f("u_view", m_view);
+        m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
+        m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
 
         return error;
     }
@@ -63,11 +69,13 @@ namespace Scene
     {
         GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
 
+        m_camera->Update();
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {
             p_SceneManager_Ref->SetScene<Scene_Menu>();
         }
+        m_camera->HandleGenericCameraControls(window, deltaTime, 200.0f);
     }
 
     void Scene_BasicPlane::Render()
@@ -75,10 +83,12 @@ namespace Scene
         if (!p_SceneManager_Ref) return;
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
 
+        //m_view = m_camera->GetViewMatrix();
+
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_model", m_model);
-        m_shader->SetUniformMat4f("u_view", m_view);
-        m_shader->SetUniformMat4f("u_proj", m_proj);
+        m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
+        m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
 
         renderer.Draw(*m_va, *m_ib, *m_shader); // will eventually be va, ib, material
     }
@@ -99,6 +109,6 @@ namespace Scene
 
     void Scene_BasicPlane::OnResize(int width, int height)
     {
-        m_proj = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
+        m_camera->SetOrthoBounds({0.0f, (float)width, 0.0f, (float)height});
     }
 }

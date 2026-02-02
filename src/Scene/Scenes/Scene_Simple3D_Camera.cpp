@@ -114,16 +114,12 @@ namespace Scene
         }
 
         m_camera = std::make_unique<Camera>();
-        m_proj = {};
 
-        //m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        //m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
-        m_proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
+        const Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
+        m_camera->SetPerspectiveData({glm::radians(45.0f), (float)renderer->GetWindowWidth() / (float)renderer->GetWindowHeight(), 0.1f, 100.0f});
         m_camSpeed = 10.0f;
         m_camSensitivity = 4.0f;
         m_mouseSensitivity = 0.002f;
-        m_camera->SetMode(CameraMode::ORBIT);
 
         m_mouseLastX = 0;
         m_mouseLastY = 0;
@@ -164,7 +160,7 @@ namespace Scene
         const auto& renderer = p_SceneManager_Ref->GetRenderer();
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
-        m_shader->SetUniformMat4f("u_proj", m_proj);
+        m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
 
         for (unsigned int i = 0; i < 10; i++)
         {
@@ -267,7 +263,6 @@ namespace Scene
 
     void Scene_Simple3D_Camera::OnResize(int width, int height)
     {
-        m_proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-        m_shader->SetUniformMat4f("u_proj", m_proj);
+        m_camera->SetAspectRatio((float)width / (float)height);
     }
 }
