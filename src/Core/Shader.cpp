@@ -122,7 +122,7 @@ GLuint Shader::CompileShader(const std::string& source, GLuint type, int& error)
             typeString = "unknown";
     }
 
-    std::cout << "Compiling " << typeString << " shader" << std::endl;
+    // std::cout << "Compiling " << typeString << " shader" << std::endl;
 
     GLuint id = glCreateShader(type);
     const char* src = source.c_str();
@@ -154,6 +154,7 @@ GLuint Shader::CompileShader(const std::string& source, GLuint type, int& error)
 
 GLuint Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader, int& error)
 {
+    std::cout << "Compiling Shaders...\n";
     GLuint program = glCreateProgram();
     GLuint vs = CompileShader(vertexShader, GL_VERTEX_SHADER, error);
     GLuint fs = CompileShader(fragmentShader, GL_FRAGMENT_SHADER, error);

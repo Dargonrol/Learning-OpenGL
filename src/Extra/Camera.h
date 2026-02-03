@@ -8,7 +8,8 @@ enum class CameraMode
 {
     FPS = 0,
     ORBIT = 1,
-    ORTHO = 2
+    ORTHO = 2,
+    THIRD
 };
 
 struct OrthoData
@@ -90,9 +91,9 @@ public:
     [[nodiscard]] float GetTargetDistance() const;
     [[nodiscard]] CameraMode GetMode() const;
 
-    static const std::array<const char*, 3>& GetCameraModes()
+    static const std::array<const char*, 4>& GetCameraModes()
     {
-        static std::array<const char*, 3> names = {"FPS", "ORBIT", "ORTHO"};
+        static std::array<const char*, 4> names = {"FPS", "ORBIT", "ORTHO", "THIRD" };
         return names;
     }
 
@@ -103,6 +104,7 @@ public:
             case CameraMode::FPS: return "FPS";
             case CameraMode::ORBIT: return "Orbit";
             case CameraMode::ORTHO: return "Ortho";
+            case CameraMode::THIRD: return "Third";
         }
         return "INVALID";
     }
