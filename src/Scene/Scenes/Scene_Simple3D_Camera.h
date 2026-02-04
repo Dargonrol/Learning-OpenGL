@@ -31,7 +31,6 @@ namespace Scene
 
     private:
         glm::mat4 m_model[10]{1.0f};
-        //glm::mat4 m_proj{1.0f};
 
         glm::vec3 cubePositions[10]{
             glm::vec3( 0.0f,  0.0f,  0.0f),

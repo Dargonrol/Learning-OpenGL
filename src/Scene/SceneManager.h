@@ -13,7 +13,7 @@ namespace Scene
     class SceneManager
     {
     public:
-        SceneManager(Renderer& renderer);
+        explicit SceneManager(Renderer& renderer);
         ~SceneManager();
 
         static void FrameBufferCallback(GLFWwindow* window, int width, int height);
@@ -28,7 +28,8 @@ namespace Scene
                 return;
             }
             auto scene = std::make_unique<T>();
-            scene->p_SceneManager_Ref = this;
+            scene->sceneManager_ = this;
+            scene->renderer_ = &m_renderer;
             scene->name = std::string(name);
             m_Scenes_Vector.push_back(std::move(scene));
             m_NameToHash_Map.emplace(SceneName, typeid(T).hash_code());

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "../Core/Renderer.h"
 #include "../OpenGL.h"
+#include "../Core/Renderer.h"
 
 namespace Scene
 {

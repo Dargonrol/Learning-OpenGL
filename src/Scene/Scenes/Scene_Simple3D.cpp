@@ -109,7 +109,7 @@ namespace Scene
             m_model[i] = {1.0f};
         }
 
-        Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
+        Renderer* renderer = &sceneManager_->GetRenderer();
         m_camera = std::make_unique<Camera>();
         m_proj = glm::perspective(glm::radians(45.0f), (float)renderer->GetWindowWidth() / (float)renderer->GetWindowHeight(), 0.1f, 100.0f);
 
@@ -127,11 +127,11 @@ namespace Scene
 
     void Scene_Simple3D::Update(float deltaTime)
     {
-        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {
-            p_SceneManager_Ref->SetScene<Scene_Menu>();
+            sceneManager_->SetScene<Scene_Menu>();
             return;
         }
 
@@ -154,7 +154,7 @@ namespace Scene
 
     void Scene_Simple3D::Render()
     {
-        const auto& renderer = p_SceneManager_Ref->GetRenderer();
+        const auto& renderer = sceneManager_->GetRenderer();
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
         m_shader->SetUniformMat4f("u_proj", m_proj);
@@ -170,7 +170,7 @@ namespace Scene
     {
         ImGui::Begin("Camera Control");
         if (ImGui::Button("back"))
-            p_SceneManager_Ref->SetScene("Menu");
+            sceneManager_->SetScene("Menu");
         ImGui::SliderFloat("Speed", &m_speed, -10.0f, 10.0f);
         ImGui::SliderFloat("Radius", &m_radius, -20.0f, 20.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

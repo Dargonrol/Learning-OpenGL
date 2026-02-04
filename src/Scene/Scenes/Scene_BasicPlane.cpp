@@ -47,15 +47,11 @@ namespace Scene
         m_va->Bind();
         m_va->AddBuffer(*m_vb, layout);
 
-        Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
+        Renderer* renderer = &sceneManager_->GetRenderer();
 
         m_camera = std::make_unique<Camera>(CameraMode::ORTHO);
 
         m_model = glm::translate(glm::mat4(1.0f), {200, 200, 0});
-        //m_proj = glm::ortho(0.0f, (float)renderer->GetWindowWidth(), 0.0f, (float)renderer->GetWindowHeight(), -1.0f, 1.0f);
-        //m_view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-
-        //m_view = m_camera->GetViewMatrix();
         m_camera->SetOrthoData({{0.0f, (float)renderer->GetWindowWidth(), 0.0f, (float)renderer->GetWindowHeight()}, -1.0f, 1.0f});
 
         m_shader->SetUniformMat4f("u_model", m_model);
@@ -67,21 +63,21 @@ namespace Scene
 
     void Scene_BasicPlane::Update(float deltaTime)
     {
-        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
 
         m_camera->Update();
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {
-            p_SceneManager_Ref->SetScene<Scene_Menu>();
+            sceneManager_->SetScene<Scene_Menu>();
         }
         m_camera->HandleGenericCameraControls(window, deltaTime, 200.0f);
     }
 
     void Scene_BasicPlane::Render()
     {
-        if (!p_SceneManager_Ref) return;
-        const auto& renderer = p_SceneManager_Ref->GetRenderer();
+        if (!sceneManager_) return;
+        const auto& renderer = sceneManager_->GetRenderer();
 
         //m_view = m_camera->GetViewMatrix();
 

@@ -6,6 +6,6 @@ namespace Scene
 {
     void Scene::OnLeave()
     {
-        p_SceneManager_Ref->GetRenderer().SetTitle(p_SceneManager_Ref->GetRenderer().GetDefaultTitle());
+        sceneManager_->GetRenderer().SetTitle(sceneManager_->GetRenderer().GetDefaultTitle());
     }
 }

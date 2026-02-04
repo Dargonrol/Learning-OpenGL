@@ -1,8 +1,5 @@
 #include "Scene_Simple3D_Camera.h"
 
-#include <cmath>
-#include <iostream>
-
 #include "imgui.h"
 #include "../../OpenGL.h"
 #include "Scene_Menu.h"
@@ -108,18 +105,22 @@ namespace Scene
         int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
         int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
 
-        for(auto & i : m_model)
+        for(int i = 0; i < 10; ++i)
         {
-            i = {1.0f};
+            m_model[i] = glm::mat4(1.0f);
+            m_model[i] = glm::translate(m_model[i], cubePositions[i]);
         }
 
         m_camera = std::make_unique<Camera>();
 
-        const Renderer* renderer = &p_SceneManager_Ref->GetRenderer();
-        m_camera->SetPerspectiveData({glm::radians(45.0f), (float)renderer->GetWindowWidth() / (float)renderer->GetWindowHeight(), 0.1f, 100.0f});
+        m_camera->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        m_camera->enableMouseControl = true;
+
         m_camSpeed = 10.0f;
         m_camSensitivity = 4.0f;
         m_mouseSensitivity = 0.002f;
+
+        m_camera->SetMouseSensitivity(m_mouseSensitivity);
 
         m_mouseLastX = 0;
         m_mouseLastY = 0;
@@ -157,15 +158,14 @@ namespace Scene
 
     void Scene_Simple3D_Camera::Render()
     {
-        const auto& renderer = p_SceneManager_Ref->GetRenderer();
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
         m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
 
-        for (unsigned int i = 0; i < 10; i++)
+        for (const auto & i : m_model)
         {
-            m_shader->SetUniformMat4f("u_model", m_model[i]);
-            renderer.Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            m_shader->SetUniformMat4f("u_model", i);
+            renderer_->Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
         }
     }
 
@@ -176,7 +176,7 @@ namespace Scene
         ImGui::Begin("Camera Control");
 
         if (ImGui::Button("back"))
-            p_SceneManager_Ref->SetScene("Menu");
+            sceneManager_->SetScene("Menu");
 
         ImGui::SameLine(0.0f, 5.0f);
         if (ImGui::Button("reset Camera"))
@@ -188,6 +188,7 @@ namespace Scene
         ImGui::SliderFloat("Flying Speed", &m_camSpeed, 0.1f, 100.0f);
         ImGui::SliderFloat("Mouse Sensitivity", &m_mouseSensitivity, 0.0005f, 0.009f);
 
+        ImGui::Text("Direction Vector: X: %.3f Y: %.3f Z: %.3f", m_camera->GetDirectionVector().x, m_camera->GetDirectionVector().y, m_camera->GetDirectionVector().z);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();
@@ -199,7 +200,9 @@ namespace Scene
         m_tex1->Bind(0);
         m_tex2->Bind(1);
         GLCall(glEnable(GL_DEPTH_TEST));
-        ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+        double x, y;
+        glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
+        m_camera->SyncMouse(x, y);
     }
 
     void Scene_Simple3D_Camera::OnLeave()
@@ -208,29 +211,19 @@ namespace Scene
         m_tex2->Unbind();
         m_shader->Unbind();
         GLCall(glDisable(GL_DEPTH_TEST));
-        glfwSetInputMode(&p_SceneManager_Ref->GetRenderer().GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        renderer_->ReleaseMouse();
     }
 
     void Scene_Simple3D_Camera::HandleInput(const float deltaTime)
     {
-        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+        GLFWwindow* window = &renderer_->GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            p_SceneManager_Ref->SetScene<Scene_Menu>();
+            sceneManager_->SetScene<Scene_Menu>();
             return;
         }
 
-        m_mouseLastX = m_mouseX;
-        m_mouseLastY = m_mouseY;
-        glfwGetCursorPos(window, &m_mouseX, &m_mouseY);
-
-        double deltaX = m_mouseX - m_mouseLastX;
-        double deltaY = m_mouseLastY - m_mouseY;
-
-        glm::vec3 dir = m_camera->GetDirectionVector();
-        glm::vec3 up = m_camera->GetUpVector();
-        glm::vec3 right = glm::normalize(glm::cross(dir, up));
+        m_camera->SetMouseSensitivity(m_mouseSensitivity);
 
         if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
             m_camera->Reset();
@@ -249,13 +242,15 @@ namespace Scene
         if ((glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_5) | glfwGetKey(window, GLFW_KEY_Q)) == GLFW_PRESS)
             m_camera->AddRoll(-m_camSensitivity * 0.5f * deltaTime);
 
-        if (m_camera->GetMode() == CameraMode::ORBIT || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        if (m_camera->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+        {
+            renderer_->ReleaseMouse();
+            m_camera->enableMouseControl = false;
+        }
         else
         {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            m_camera->AddYaw(static_cast<float>(deltaX) * m_mouseSensitivity);
-            m_camera->AddPitch(static_cast<float>(deltaY) * m_mouseSensitivity);
+            renderer_->CaptureMouse();
+            m_camera->enableMouseControl = true;
         }
 
         m_prevTabState = glfwGetKey(window, GLFW_KEY_TAB);
@@ -263,6 +258,6 @@ namespace Scene
 
     void Scene_Simple3D_Camera::OnResize(int width, int height)
     {
-        m_camera->SetAspectRatio((float)width / (float)height);
+        m_camera->SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
     }
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+class Renderer;
+
 namespace Scene
 {
     class SceneManager;
@@ -24,6 +26,7 @@ namespace Scene
         std::string name;
 
     protected:
-        SceneManager* p_SceneManager_Ref;
+        SceneManager* sceneManager_;
+        Renderer* renderer_;
     };
 }

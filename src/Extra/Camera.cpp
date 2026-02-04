@@ -5,9 +5,11 @@
 Camera::Camera(const CameraMode mode)
 {
     m_mode = mode;
+    m_perspectiveData.aspect = 16.0f/9.0f;
     Init();
-    SetMode(mode); // to initialize
 }
+
+Camera::~Camera() = default;
 
 void Camera::Init()
 {
@@ -21,60 +23,28 @@ void Camera::Init()
     m_pitch = 0.0f;
     m_roll = 0.0f;
 
-    m_view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 3.0f),    // pos vector
-        glm::vec3(0.0f, 0.0f, 0.0f),    // target vector
-        glm::vec3(0.0f, 1.0f, 0.0f)     // world up vector
+    m_view = glm::lookAt(m_pos, m_target, m_up);
+    m_orthoData = {
+        {0.0f, 100.0f, 0.0f, 100.0f},
+        1.0f,
+        -1.0f,
+        1.0f
+    };
+    m_perspectiveData = {
+        glm::radians(45.0f),
+        m_perspectiveData.aspect,
+        0.1f,
+        100.0f
+    };
+    m_proj = glm::perspective(
+        m_perspectiveData.fov,
+        m_perspectiveData.aspect,
+        m_perspectiveData.near,
+        m_perspectiveData.far
         );
 }
 
-Camera::~Camera() = default;
-
 void Camera::Update()
-{
-    UpdateVectors();
-}
-
-void Camera::SetPosition(const glm::vec3 &pos) { m_pos = pos; }
-void Camera::AddPosition(const glm::vec3 &pos) { m_pos += pos; }
-void Camera::SetYaw(float yaw) { m_yaw = yaw; }
-void Camera::SetPitch(float pitch) { m_pitch = pitch; }
-void Camera::SetRoll(float roll) { m_roll = roll; }
-void Camera::AddYaw(float yaw) { m_yaw += yaw; }
-void Camera::AddPitch(float pitch) { m_pitch += pitch; }
-void Camera::AddRoll(float roll) { m_roll += roll; }
-
-void Camera::SetFOV(const float fov) { m_perspectiveData.fov = fov; }
-void Camera::SetNear(const float near) { m_perspectiveData.near = near; m_orthoData.near = near; }
-void Camera::SetFar(const float far) { m_perspectiveData.far = far; m_orthoData.far = far; }
-void Camera::SetAspectRatio(const float ratio) { m_perspectiveData.aspect = ratio; }
-void Camera::SetOrthoZoom(const float zoom) { m_orthoData.zoom = zoom; }
-void Camera::SetOrthoBounds(const OrthoData::OrthoBounds bounds) { m_orthoData.bounds = bounds; }
-void Camera::SetOrthoBounds(const float left, const float right, const float bottom, const float top) { m_orthoData.bounds.left = left; m_orthoData.bounds.right = right; m_orthoData.bounds.top = top; m_orthoData.bounds.bottom = bottom; }
-void Camera::SetOrthoData(const OrthoData &ortho_data) { m_orthoData = ortho_data; }
-void Camera::SetPerspectiveData(const PerspectiveData& perspective_data) { m_perspectiveData = perspective_data; m_orthoData.near = perspective_data.near; m_orthoData.far = perspective_data.far; }
-void Camera::SetProjectionMatrix(const glm::mat4 &proj) { m_proj = proj; }
-
-float Camera::GetFOV() const { return m_perspectiveData.fov; }
-float Camera::GetNear() const { return m_perspectiveData.near; }
-float Camera::GetFar() const { return m_perspectiveData.far; }
-float Camera::GetAspectRatio() const { return m_perspectiveData.aspect; }
-float Camera::GetOrthoZoom() const { return m_orthoData.zoom; }
-OrthoData::OrthoBounds & Camera::GetOrthoBounds() { return m_orthoData.bounds; }
-OrthoData & Camera::GetOrthoData() { return m_orthoData; }
-PerspectiveData & Camera::GetPerspectiveData() { return m_perspectiveData; }
-glm::mat4 & Camera::GetProjectionMatrix() { return m_proj; }
-
-const glm::vec3 & Camera::GetTargetPos() const { return m_target; }
-float Camera::GetTargetDistance() const { return glm::length(m_pos - m_target); }
-CameraMode Camera::GetMode() const { return m_mode; }
-const glm::mat4& Camera::GetViewMatrix() const { return m_view; }
-const glm::vec3 &Camera::GetDirectionVector() const { return m_direction; }
-const glm::vec3 & Camera::GetUpVector() const { return m_up; }
-
-void Camera::SetTarget(const glm::vec3 &target) { m_target = target; }
-
-void Camera::UpdateVectors()
 {
     switch (m_mode)
     {
@@ -140,12 +110,6 @@ void Camera::UpdateVectors()
     }
 }
 
-void Camera::Reset()
-{
-    Init();
-    m_orthoData.zoom = 1.0f;
-}
-
 void Camera::SetMode(const CameraMode mode)
 {
     m_mode = mode;
@@ -162,34 +126,12 @@ void Camera::SetMode(const CameraMode mode)
                 m_perspectiveData.far
                 );
             break;
-        case CameraMode::ORBIT:
-            m_proj = glm::perspective(
-                m_perspectiveData.fov,
-                m_perspectiveData.aspect,
-                m_perspectiveData.near,
-                m_perspectiveData.far
-                );
-            break;
 
         case CameraMode::ORTHO:
             m_direction= {0.0f, 0.0f, -1.0f};
             m_up= {0.0f, 1.0f,  0.0f};
             m_right= {1.0f, 0.0f,  0.0f};
             m_pos = {0.0f, 0.0f, 0.0f};
-
-            float cx = (m_orthoData.bounds.left + m_orthoData.bounds.right) / 2.0f;
-            float cy = (m_orthoData.bounds.bottom + m_orthoData.bounds.top) / 2.0f;
-
-            float halfWidth  = (m_orthoData.bounds.right - m_orthoData.bounds.left) / 2.0f * m_orthoData.zoom;
-            float halfHeight = (m_orthoData.bounds.top   - m_orthoData.bounds.bottom) / 2.0f * m_orthoData.zoom;
-
-            m_proj = glm::ortho(
-                cx - halfWidth,
-                cx + halfWidth,
-                cy - halfHeight,
-                cy + halfHeight,
-                m_orthoData.near, m_orthoData.far
-                );
             break;
     }
 }
@@ -257,6 +199,25 @@ void Camera::HandleGenericCameraControlsFPS(GLFWwindow *window, float deltaTime,
         AddYaw(-camSensitivity * deltaTime);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         AddYaw(camSensitivity * deltaTime);
+
+    m_mouseLastX = m_mouseX;
+    m_mouseLastY = m_mouseY;
+    glfwGetCursorPos(window, &m_mouseX, &m_mouseY);
+
+    double deltaX = m_mouseX - m_mouseLastX;
+    double deltaY = m_mouseLastY - m_mouseY;
+
+    if (enableMouseControl)
+    {
+        AddYaw(static_cast<float>(deltaX) * m_mouseSensitivity);
+        AddPitch(static_cast<float>(deltaY) * m_mouseSensitivity);
+    }
+}
+
+void Camera::SyncMouse(double x, double y)
+{
+    m_mouseX = x;
+    m_mouseY = y;
 }
 
 void Camera::HandleGenericCameraControlsOrtho(GLFWwindow *window, float deltaTime, float camSpeed)
@@ -275,3 +236,46 @@ void Camera::HandleGenericCameraControlsOrtho(GLFWwindow *window, float deltaTim
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         m_orthoData.zoom -= 0.5f * deltaTime;
 }
+
+void Camera::Reset() { Init(); }
+
+void Camera::SetMouseSensitivity(float value) { m_mouseSensitivity = value; }
+void Camera::SetPosition(const glm::vec3 &pos) { m_pos = pos; }
+void Camera::AddPosition(const glm::vec3 &pos) { m_pos += pos; }
+void Camera::SetYaw(float yaw) { m_yaw = yaw; }
+void Camera::SetPitch(float pitch) { m_pitch = pitch; }
+void Camera::SetRoll(float roll) { m_roll = roll; }
+void Camera::AddYaw(float yaw) { m_yaw += yaw; }
+void Camera::AddPitch(float pitch) { m_pitch += pitch; }
+void Camera::AddRoll(float roll) { m_roll += roll; }
+
+void Camera::SetFOV(const float fov) { m_perspectiveData.fov = fov; }
+void Camera::SetNear(const float near) { m_perspectiveData.near = near; m_orthoData.near = near; }
+void Camera::SetFar(const float far) { m_perspectiveData.far = far; m_orthoData.far = far; }
+void Camera::SetAspectRatio(const float ratio) { m_perspectiveData.aspect = ratio; }
+void Camera::SetOrthoZoom(const float zoom) { m_orthoData.zoom = zoom; }
+void Camera::SetOrthoBounds(const OrthoData::OrthoBounds bounds) { m_orthoData.bounds = bounds; }
+void Camera::SetOrthoBounds(const float left, const float right, const float bottom, const float top) { m_orthoData.bounds.left = left; m_orthoData.bounds.right = right; m_orthoData.bounds.top = top; m_orthoData.bounds.bottom = bottom; }
+void Camera::SetOrthoData(const OrthoData &ortho_data) { m_orthoData = ortho_data; }
+void Camera::SetPerspectiveData(const PerspectiveData& perspective_data) { m_perspectiveData = perspective_data; m_orthoData.near = perspective_data.near; m_orthoData.far = perspective_data.far; }
+void Camera::SetProjectionMatrix(const glm::mat4 &proj) { m_proj = proj; }
+
+float Camera::GetMouseSensitivity() const { return m_mouseSensitivity; }
+float Camera::GetFOV() const { return m_perspectiveData.fov; }
+float Camera::GetNear() const { return m_perspectiveData.near; }
+float Camera::GetFar() const { return m_perspectiveData.far; }
+float Camera::GetAspectRatio() const { return m_perspectiveData.aspect; }
+float Camera::GetOrthoZoom() const { return m_orthoData.zoom; }
+OrthoData::OrthoBounds & Camera::GetOrthoBounds() { return m_orthoData.bounds; }
+OrthoData & Camera::GetOrthoData() { return m_orthoData; }
+PerspectiveData & Camera::GetPerspectiveData() { return m_perspectiveData; }
+glm::mat4 & Camera::GetProjectionMatrix() { return m_proj; }
+
+const glm::vec3 & Camera::GetTargetPos() const { return m_target; }
+float Camera::GetTargetDistance() const { return glm::length(m_pos - m_target); }
+CameraMode Camera::GetMode() const { return m_mode; }
+const glm::mat4& Camera::GetViewMatrix() const { return m_view; }
+const glm::vec3 &Camera::GetDirectionVector() const { return m_direction; }
+const glm::vec3 & Camera::GetUpVector() const { return m_up; }
+
+void Camera::SetTarget(const glm::vec3 &target) { m_target = target; }

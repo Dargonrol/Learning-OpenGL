@@ -24,6 +24,9 @@ namespace Scene
         void OnLeave() override;
 
     private:
+        void HandleInput(float deltaTime);
+
+    private:
         std::unique_ptr<Shader> m_shader;
         std::unique_ptr<VertexArray> m_va;
         std::unique_ptr<VertexBuffer> m_vbLight;
@@ -33,6 +36,7 @@ namespace Scene
 
         glm::mat4 m_modelCube{};
         glm::mat4 m_modelLight{};
-        glm::mat4 m_proj{};
+
+        int m_cameraModeIndex;
     };
 }

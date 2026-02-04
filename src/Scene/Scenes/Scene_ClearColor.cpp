@@ -16,10 +16,10 @@ namespace Scene
 
     void Scene_ClearColor::Update(float deltaTime)
     {
-        GLFWwindow* window = &p_SceneManager_Ref->GetRenderer().GetWindow();
+        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            p_SceneManager_Ref->SetScene("Menu");
+            sceneManager_->SetScene("Menu");
         }
     }
 
@@ -33,7 +33,7 @@ namespace Scene
     {
         ImGui::Begin("Clear Color Test");
         if (ImGui::Button("back"))
-            p_SceneManager_Ref->SetScene("Menu");
+            sceneManager_->SetScene("Menu");
         ImGui::ColorPicker4("Clear Color", m_ClearColor);
         ImGui::End();
     }

@@ -31,7 +31,7 @@ struct OrthoData
 struct PerspectiveData
 {
     float fov = 45;
-    float aspect = 0.0f;
+    float aspect = 300.0f/200.0f;
     float near = 0.1f;
     float far = 100.0f;
 };
@@ -48,6 +48,7 @@ public:
 
     void Update();
     void SetTarget(const glm::vec3 &target);
+    void SyncMouse(double x, double y);
 
     void SetPosition(const glm::vec3& pos);
     void AddPosition(const glm::vec3& pos);
@@ -83,6 +84,7 @@ public:
 
     void Reset();
     void SetMode(CameraMode mode);
+    void SetMouseSensitivity(float value);
 
     [[nodiscard]] const glm::mat4& GetViewMatrix() const;
     [[nodiscard]] const glm::vec3& GetDirectionVector() const;
@@ -90,6 +92,7 @@ public:
     [[nodiscard]] const glm::vec3& GetTargetPos() const;
     [[nodiscard]] float GetTargetDistance() const;
     [[nodiscard]] CameraMode GetMode() const;
+    [[nodiscard]] float GetMouseSensitivity() const;
 
     static const std::array<const char*, 4>& GetCameraModes()
     {
@@ -111,8 +114,10 @@ public:
 
     void HandleGenericCameraControls(GLFWwindow* window, float deltaTime, float camSpeed = 10.0f, float camSensitivity = 4.0f);
 
+public:
+    bool enableMouseControl = false;
+
 private:
-    void UpdateVectors();
     void Init();
     void HandleGenericCameraControlsFPS(GLFWwindow* window, float deltaTime, float camSpeed = 10.0f, float camSensitivity = 4.0f);
     void HandleGenericCameraControlsOrtho(GLFWwindow* window, float deltaTime, float camSpeed);
@@ -135,4 +140,10 @@ private:
 
     OrthoData m_orthoData;
     PerspectiveData m_perspectiveData;
+
+    float m_mouseSensitivity = 0.002f;
+    double m_mouseLastX = 0;
+    double m_mouseLastY = 0;
+    double m_mouseX = 0;
+    double m_mouseY = 0;
 };

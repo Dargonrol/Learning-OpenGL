@@ -26,6 +26,9 @@ public:
     void Draw(const VertexArray& va, Shader& shader, unsigned int count) const;
     void Clear() const;
 
+    void CaptureMouse() const;
+    void ReleaseMouse() const;
+
     [[nodiscard]] bool GetWindowShouldClose() const { return m_WindowShouldClose; }
     [[nodiscard]] int GetWindowWidth() const { return m_Window_Width; }
     [[nodiscard]] int GetWindowHeight() const { return m_Window_Height; }
