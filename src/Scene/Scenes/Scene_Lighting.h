@@ -22,21 +22,35 @@ namespace Scene
         void ImGuiRender() override;
         void OnEnter() override;
         void OnLeave() override;
+        void OnResize(int width, int height) override;
 
     private:
         void HandleInput(float deltaTime);
 
     private:
-        std::unique_ptr<Shader> m_shader;
-        std::unique_ptr<VertexArray> m_va;
-        std::unique_ptr<VertexBuffer> m_vbLight;
-        std::unique_ptr<VertexBuffer> m_vbCube;
-        std::unique_ptr<IndexBuffer> m_ib;
-        std::unique_ptr<Camera> m_camera;
+        std::unique_ptr<Camera> camera_;
 
-        glm::mat4 m_modelCube{};
-        glm::mat4 m_modelLight{};
+        std::unique_ptr<Shader> shaderObj_;
+        std::unique_ptr<VertexArray> vaObj_;
+        std::unique_ptr<VertexBuffer> vbCube_;
+        glm::mat4 modelObj_{};
 
-        int m_cameraModeIndex;
+        std::unique_ptr<Shader> shaderLight_;
+        std::unique_ptr<VertexArray> vaLight_;
+        glm::mat4 modelLight_{};
+
+
+        glm::vec3 red{1.0f, 0.0f, 0.0f};
+        glm::vec3 white{1.0f, 1.0f, 1.0f};
+        glm::vec3 coral{1.0f, 0.5f, 0.31f};
+        glm::vec3 lightColor_{1.0f, 1.0f, 1.0f};
+        int cameraModeIndex_;
+
+        float speed_ = 1.0f;
+        bool moving_ = true;
+        bool debug_ = false;
+        bool lockCam_ = false;
+        int pow_ = 32;
+        float strength_ = 0.5;
     };
 }

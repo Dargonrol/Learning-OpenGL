@@ -54,7 +54,7 @@ namespace Scene
         ib = std::make_unique<IndexBuffer>(indices, 6);
         ib->Bind();
 
-        proj = glm::ortho(0.0f, (float)renderer.GetWindowWidth(), 0.0f, (float)renderer.GetWindowHeight(), -1.0f, 1.0f);
+        proj = glm::ortho(0.0f, (float)renderer_->GetWindowWidth(), 0.0f, (float)renderer_->GetWindowHeight(), -1.0f, 1.0f);
         view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         ShaderFilePath paths = {

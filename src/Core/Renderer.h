@@ -30,14 +30,20 @@ public:
     void ReleaseMouse() const;
 
     [[nodiscard]] bool GetWindowShouldClose() const { return m_WindowShouldClose; }
-    [[nodiscard]] int GetWindowWidth() const { return m_Window_Width; }
-    [[nodiscard]] int GetWindowHeight() const { return m_Window_Height; }
+    [[nodiscard]] int GetWindowWidth();
+    [[nodiscard]] int GetWindowHeight();
     [[nodiscard]] GLFWwindow& GetWindow() const { return *m_window; }
     [[nodiscard]] std::string_view GetDefaultTitle() const;
+    [[nodiscard]] int GetDefaultWindowWidth() const;
+    [[nodiscard]] int GetDefaultWindowHeight() const;
 
     void SetTitle(std::string_view title);
     void SetDefaultTitle(std::string_view title);
     void SetWindowShouldClose() { m_WindowShouldClose = true; }
+    void SetDefaultWindowWidth(int v);
+    void SetDefaultWindowHeight(int v);
+    void SetWindowWidth(int value);
+    void SetWindowHeight(int value);
 
     void ImGui_BeginFrame() const;
     void ImGui_EndFrame() const;
@@ -47,6 +53,8 @@ private:
     GLFWwindow* m_window = nullptr;
     int m_Window_Height = 500;
     int m_Window_Width = 650;
+    int defaultWindowWidth = 500;
+    int defaultWindowHeight = 500;
     std::string m_Title = "Window Title";
     std::string m_DefaultTitle;
 };

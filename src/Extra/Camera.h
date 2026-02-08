@@ -81,6 +81,7 @@ public:
     [[nodiscard]] OrthoData& GetOrthoData();
     [[nodiscard]] PerspectiveData& GetPerspectiveData();
     [[nodiscard]] glm::mat4& GetProjectionMatrix();
+    [[nodiscard]] glm::vec3& GetPosition();
 
     void Reset();
     void SetMode(CameraMode mode);

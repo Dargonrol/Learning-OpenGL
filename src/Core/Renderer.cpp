@@ -140,9 +140,51 @@ void Renderer::ReleaseMouse() const
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 }
 
+int Renderer::GetWindowWidth()
+{
+    glfwGetFramebufferSize(m_window, &m_Window_Width, &m_Window_Height);
+    return m_Window_Width;
+}
+
+int Renderer::GetWindowHeight()
+{
+    glfwGetFramebufferSize(m_window, &m_Window_Width, &m_Window_Height);
+    return m_Window_Height;
+}
+
 std::string_view Renderer::GetDefaultTitle() const
 {
     return m_DefaultTitle;
+}
+
+int Renderer::GetDefaultWindowWidth() const
+{
+    return defaultWindowWidth;
+}
+
+int Renderer::GetDefaultWindowHeight() const
+{
+    return defaultWindowHeight;
+}
+
+void Renderer::SetDefaultWindowWidth(int v)
+{
+    defaultWindowWidth = v;
+}
+
+void Renderer::SetDefaultWindowHeight(int v)
+{
+    defaultWindowHeight = v;
+}
+
+void Renderer::SetWindowWidth(int value)
+{
+    m_Window_Width = value;
+}
+
+void Renderer::SetWindowHeight(int value)
+{
+    m_Window_Height = value;
 }
 
 void Renderer::SetTitle(std::string_view title)

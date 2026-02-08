@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include "../OpenGL.h"
 #include "../Core/Renderer.h"
@@ -20,7 +21,13 @@ namespace Scene
         glViewport(0, 0, width, height);
         SceneManager* sm = static_cast<SceneManager*>(glfwGetWindowUserPointer(window));
         if (sm)
+        {
             sm->OnResize(width, height);
+            sm->m_renderer.SetWindowWidth(width);
+            sm->m_renderer.SetWindowHeight(height);
+        }
+        std::cout << "Resize Callback: " << width << "x" << height << "\n";
+
     }
 
     void SceneManager::OnResize(int width, int height) const

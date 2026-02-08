@@ -12,53 +12,122 @@ namespace Scene
     {
         int error = 0;
 
-        ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/Lighting/Lighting_VERT.shader",
-            BASE_PATH / "resources/shaders/Lighting/Lighting_FRAG.shader"
+        ShaderFilePath pathsObj = {
+            BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
+            BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader"
         };
 
-        m_shader = std::make_unique<Shader>(paths, error);
+        shaderObj_ = std::make_unique<Shader>(pathsObj, error);
         if (error) return error;
-        m_shader->Bind();
+        shaderObj_->Bind();
 
-        float vertices[] = {
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, 0.5f, -0.5f,
-            0.0f, -0.5f, -0.5f
+        ShaderFilePath pathsLight = {
+            BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
+            BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader"
         };
 
-        const unsigned int indices[] = {
-            0, 1, 2
+        shaderLight_ = std::make_unique<Shader>(pathsLight, error);
+        if (error) return error;
+        shaderLight_->Bind();
+
+        std::vector<float> verticesObj = {
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         };
 
         VertexBufferLayout layout;
         layout.Push<float>(3);
+        layout.Push<float>(3);
 
-        m_va = std::make_unique<VertexArray>();
-        m_va->Bind();
+        vaObj_ = std::make_unique<VertexArray>();
+        vaObj_->Bind();
+        vbCube_ = std::make_unique<VertexBuffer>(verticesObj);
+        vbCube_->Bind();
+        vaObj_->AddBuffer(*vbCube_, layout);
 
-        m_vbCube = std::make_unique<VertexBuffer>(vertices, 3 * 3 * sizeof(float));
-        m_vbCube->Bind();
-        m_va->AddBuffer(*m_vbCube, layout);
+        vaLight_ = std::make_unique<VertexArray>();
+        vaLight_->Bind();
+        vaLight_->AddBuffer(*vbCube_, layout);
 
-        m_ib = std::make_unique<IndexBuffer>(indices, 3);
-        m_ib->Bind();
+        camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
+        camera_->SetPosition({5.0f, 5.0f, 5.0f});
+        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        camera_->enableMouseControl = true;
 
-        const auto& renderer = sceneManager_->GetRenderer();
-        m_camera = std::make_unique<Camera>(CameraMode::FPS);
-        m_camera->SetPosition({0.0f, 0.0f, 3.0f});
-        m_camera->SetAspectRatio(static_cast<float>(renderer.GetWindowWidth()) / static_cast<float>(renderer.GetWindowHeight()));
+        modelObj_ = {1.0f};
+        modelObj_ = glm::translate(modelObj_, glm::vec3{0.0f, 0.0f, 0.0f});
+        modelLight_ = {1.0f};
+        modelLight_ = glm::translate(modelObj_, glm::vec3{0.0f, 3.0f, 4.0f});
+        modelLight_ = glm::scale(modelLight_, glm::vec3(0.2f));
 
-        m_modelCube = {1.0f};
-        m_modelCube = glm::translate(m_modelCube, glm::vec3{0.0f, 0.0f, 0.0f});
+        speed_ = 1.0f;
+        moving_ = true;
+        debug_ = false;
+        lockCam_ = false;
+        pow_ = 32;
+        strength_ = 0.5;
 
         return error;
     }
 
     void Scene_Lighting::Update(float deltaTime)
     {
+        static float totalTime = 0.0f;
+        float radius = 5.0f;
+        if (moving_)
+        {
+        totalTime += deltaTime;
+        float angle = totalTime * speed_;
+        glm::vec3 pos;
+        pos.x = radius * cos(angle);
+        pos.y = radius * cos(angle) * sin(angle);
+        pos.z = radius * sin(angle);
+        modelLight_ = glm::mat4(1.0f);
+        modelLight_ = glm::translate(modelLight_, pos);
+        }
+
+
         HandleInput(deltaTime);
-        m_camera->Update();
+        camera_->Update();
     }
 
     void Scene_Lighting::Render()
@@ -66,16 +135,41 @@ namespace Scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         const auto& renderer = sceneManager_->GetRenderer();
-        m_shader->Bind();
-        m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
-        m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
-        m_shader->SetUniformMat4f("u_model", m_modelCube);
-        renderer.Draw(*m_va, *m_ib, *m_shader);
+
+        // Test Object
+        shaderObj_->Bind();
+        shaderObj_->SetUniformMat4f("u_view", camera_->GetViewMatrix());
+        shaderObj_->SetUniformMat4f("u_proj", camera_->GetProjectionMatrix());
+        vaObj_->Bind();
+        shaderObj_->SetUniformMat4f("u_model", modelObj_);
+        shaderObj_->SetUniformVec3("u_ObjColor", coral);
+        shaderObj_->SetUniformVec3("u_LightColor", lightColor_);
+        shaderObj_->SetUniformVec3("u_LightPos", glm::vec3(modelLight_[3]));
+        shaderObj_->SetUniformVec3("u_ViewPos", camera_->GetPosition());
+        shaderObj_->SetUniform1i("u_pow", pow_);
+        shaderObj_->SetUniform1f("u_specularStrength", strength_);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        renderer.Draw(*vaObj_, *shaderObj_, 36);
+        if (debug_)
+            shaderObj_->SetUniform1i("u_Debug", 1);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        renderer.Draw(*vaObj_, *shaderObj_, 36);
+        shaderObj_->SetUniform1i("u_Debug", 0);
+
+        // Light source
+        shaderLight_->Bind();
+        shaderLight_->SetUniformMat4f("u_view", camera_->GetViewMatrix());
+        shaderLight_->SetUniformMat4f("u_proj", camera_->GetProjectionMatrix());
+        vaLight_->Bind();
+        shaderLight_->SetUniformMat4f("u_model", modelLight_);
+        shaderLight_->SetUniformVec3("u_LightColor", lightColor_);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        renderer.Draw(*vaObj_, *shaderLight_, 36);
     }
 
     void Scene_Lighting::ImGuiRender()
     {
-        m_cameraModeIndex = static_cast<int>(m_camera->GetMode());
+        cameraModeIndex_ = static_cast<int>(camera_->GetMode());
 
         ImGui::Begin("Camera Control");
 
@@ -84,11 +178,20 @@ namespace Scene
 
         ImGui::SameLine(0.0f, 5.0f);
         if (ImGui::Button("reset Camera"))
-            m_camera->Reset();
+            camera_->Reset();
 
-        if (ImGui::Combo("Camera Mode", &m_cameraModeIndex, Camera::GetCameraModes().data(), Camera::GetCameraModes().size()))
-            m_camera->SetMode(static_cast<CameraMode>(m_cameraModeIndex));
+        if (ImGui::Combo("Camera Mode", &cameraModeIndex_, Camera::GetCameraModes().data(), Camera::GetCameraModes().size()))
+            camera_->SetMode(static_cast<CameraMode>(cameraModeIndex_));
 
+        ImGui::Checkbox("Debug", &debug_);
+        ImGui::SameLine(0.0f, 5.0f);
+        ImGui::Checkbox("Moving", &moving_);
+        ImGui::Checkbox("LockCam", &lockCam_);
+        ImGui::SameLine(0.0f, 5.0f);
+        ImGui::SliderFloat("Speed", &speed_, 0.1f, 5.0f);
+        ImGui::SliderInt("Power", &pow_, 0, 256);
+        ImGui::SliderFloat("Strength", &strength_, 0.0f, 1.0f);
+        ImGui::ColorPicker3("Light Color", &lightColor_[0]);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();
@@ -97,16 +200,26 @@ namespace Scene
     void Scene_Lighting::OnEnter()
     {
         glEnable(GL_DEPTH_TEST);
-        ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+        GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+        double windowWidth = mode->width * 0.6;
+        double windowHeight = mode->height * 0.8;
+        glfwSetWindowSize(&renderer_->GetWindow(), windowWidth, windowHeight);
+        double posX = (mode->width - windowWidth) / 2;
+        double posY = (mode->height - windowHeight) / 2;
+        glfwSetWindowPos(&renderer_->GetWindow(), posX, posY);
+        double x, y;
+        glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
+        camera_->SyncMouse(x, y);
         Scene::OnEnter();
     }
 
     void Scene_Lighting::OnLeave()
     {
-        m_shader->Unbind();
+        shaderObj_->Unbind();
         GLCall(glDisable(GL_DEPTH_TEST));
-        glfwSetInputMode(&sceneManager_->GetRenderer().GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        renderer_->ReleaseMouse();
+        glfwSetWindowSize(&renderer_->GetWindow(), renderer_->GetDefaultWindowWidth(), renderer_->GetDefaultWindowHeight());
         Scene::OnLeave();
     }
 
@@ -118,11 +231,28 @@ namespace Scene
             sceneManager_->SetScene("Menu");
         }
 
-        m_camera->HandleGenericCameraControls(window, deltaTime);
+        if (!lockCam_)
+        {
+            camera_->HandleGenericCameraControls(window, deltaTime);
 
-        if (m_camera->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+        }
+
+        if (camera_->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+        {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderer_->ReleaseMouse();
+            camera_->enableMouseControl = false;
+        }
         else
+        {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            renderer_->CaptureMouse();
+            camera_->enableMouseControl = true;
+        }
+    }
+
+    void Scene_Lighting::OnResize(int width, int height)
+    {
+        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
     }
 }

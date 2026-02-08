@@ -270,6 +270,7 @@ OrthoData::OrthoBounds & Camera::GetOrthoBounds() { return m_orthoData.bounds; }
 OrthoData & Camera::GetOrthoData() { return m_orthoData; }
 PerspectiveData & Camera::GetPerspectiveData() { return m_perspectiveData; }
 glm::mat4 & Camera::GetProjectionMatrix() { return m_proj; }
+glm::vec3 & Camera::GetPosition() { return m_pos; }
 
 const glm::vec3 & Camera::GetTargetPos() const { return m_target; }
 float Camera::GetTargetDistance() const { return glm::length(m_pos - m_target); }
