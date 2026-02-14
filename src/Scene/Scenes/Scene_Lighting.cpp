@@ -234,7 +234,6 @@ namespace Scene
         if (!lockCam_)
         {
             camera_->HandleGenericCameraControls(window, deltaTime);
-
         }
 
         if (camera_->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
