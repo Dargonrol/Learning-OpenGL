@@ -1,7 +1,7 @@
 #include "Scene_Lighting.h"
 
 #include "../../Core/IncludeAll.h"
-#include "../../Extra/Camera.h"
+#include "../../Extra/Objects/Camera.h"
 
 namespace Scene
 {
@@ -127,7 +127,7 @@ namespace Scene
 
 
         HandleInput(deltaTime);
-        camera_->Update();
+        camera_->Update(deltaTime);
     }
 
     void Scene_Lighting::Render()

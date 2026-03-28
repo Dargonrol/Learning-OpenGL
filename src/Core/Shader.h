@@ -1,8 +1,10 @@
 #pragma once
 #include <filesystem>
 #include <unordered_map>
-
 #include "glm/fwd.hpp"
+
+// fwd declares
+// fwd declares
 
 struct ShaderSourceCode
 {
@@ -15,6 +17,7 @@ struct ShaderFilePath
     std::filesystem::path vertexShader;
     std::filesystem::path fragmentShader;
 };
+
 
 class Shader
 {

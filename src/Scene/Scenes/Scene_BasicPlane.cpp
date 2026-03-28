@@ -1,7 +1,7 @@
 #include "Scene_BasicPlane.h"
 
 #include "../../Core/IncludeAll.h"
-#include "../../Extra/Camera.h"
+#include "../../Extra/Objects/Camera.h"
 
 namespace Scene
 {
@@ -65,7 +65,7 @@ namespace Scene
     {
         GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
 
-        m_camera->Update();
+        m_camera->Update(deltaTime);
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {

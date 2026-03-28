@@ -11,7 +11,7 @@
 #include "../../Core/VertexArray.h"
 #include "../../Core/VertexBuffer.h"
 #include "../SceneManager.h"
-#include "../../Extra/Camera.h"
+#include "../../Extra/Objects/Camera.h"
 #include "../../Core/Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -144,7 +144,7 @@ namespace Scene
     {
         HandleInput(deltaTime);
 
-        m_camera->Update();
+        m_camera->Update(deltaTime);
 
         for(unsigned int i = 0; i < 10; i++)
         {

@@ -13,7 +13,7 @@
 #include "../../Core/VertexBuffer.h"
 #include "../SceneManager.h"
 #include "../../Core/Renderer.h"
-#include "../../Extra/Camera.h"
+#include "../../Extra/Objects/Camera.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Scene
@@ -148,7 +148,7 @@ namespace Scene
         m_camZ = std::cos(m_angle) * m_radius;
 
         m_camera->SetPosition({m_camX, 0.0, m_camZ});
-        m_camera->Update();
+        m_camera->Update(deltaTime);
         m_time += deltaTime;
     }
 

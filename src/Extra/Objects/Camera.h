@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Object.h"
 #include "glm/gtc/type_ptr.hpp"
 
 class GLFWwindow;
@@ -40,13 +41,14 @@ struct PerspectiveData
  * Orbit Mode:  Camera always looks at target, Yaw Roll and Pitch is ignored
  * FPS Mode:    Target get's ignored
  */
-class Camera
+class Camera : public Object
 {
 public:
     explicit Camera(CameraMode mode = CameraMode::FPS);
-    ~Camera();
+    ~Camera() override;
 
-    void Update();
+    void Update(float deltaTime) override;
+    void Render() override {};
     void SetTarget(const glm::vec3 &target);
     void SyncMouse(double x, double y);
 

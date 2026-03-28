@@ -69,8 +69,8 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_Simple3D.h
         src/Scene/Scenes/Scene_Simple3D_Camera.h
         src/Scene/Scenes/Scene_Simple3D_Camera.cpp
-        src/Extra/Camera.cpp
-        src/Extra/Camera.h
+        src/Extra/Objects/Camera.cpp
+        src/Extra/Objects/Camera.h
         src/OpenGL.h
         src/Core/VertexBufferLayout.cpp
         src/Scene/Scenes/Scene_Lighting.cpp
@@ -78,6 +78,14 @@ add_executable(${PROJECT_NAME}
         src/Core/IncludeAll.h
         src/Scene/Scenes/Scene_BasicPlane.cpp
         src/Scene/Scenes/Scene_BasicPlane.h
+        src/Core/Material.h
+        src/Extra/Object.h
+        src/Extra/Objects/LightSource.cpp
+        src/Extra/Objects/LightSource.h
+        src/Core/ResourceManager.cpp
+        src/Core/ResourceManager.h
+        src/Core/AssetPool.cpp
+        src/Core/AssetPool.h
 )
 
 target_link_libraries(

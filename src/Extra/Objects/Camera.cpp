@@ -44,7 +44,7 @@ void Camera::Init()
         );
 }
 
-void Camera::Update()
+void Camera::Update(float deltaTime)
 {
     switch (m_mode)
     {

@@ -26,8 +26,6 @@ namespace Scene
             sm->m_renderer.SetWindowWidth(width);
             sm->m_renderer.SetWindowHeight(height);
         }
-        std::cout << "Resize Callback: " << width << "x" << height << "\n";
-
     }
 
     void SceneManager::OnResize(int width, int height) const
