@@ -1,0 +1,5 @@
+shader = "light.shader";
+ambient = {0.2f, 0.2f, 0.2f}
+diffuse = {0.5f, 0.5f, 0.5f};
+specular = {1.0f, 1.0f, 1.0f};
+shininess = 0.0f;

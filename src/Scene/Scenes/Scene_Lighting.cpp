@@ -1,6 +1,7 @@
 #include "Scene_Lighting.h"
 
 #include "../../Core/IncludeAll.h"
+#include "../../Core/ResourceManager.h"
 #include "../../Extra/Objects/Camera.h"
 
 namespace Scene
@@ -16,19 +17,25 @@ namespace Scene
             BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
             BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader"
         };
-
-        shaderObj_ = std::make_unique<Shader>(pathsObj, error);
-        if (error) return error;
-        shaderObj_->Bind();
-
         ShaderFilePath pathsLight = {
             BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
             BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader"
         };
 
-        shaderLight_ = std::make_unique<Shader>(pathsLight, error);
-        if (error) return error;
-        shaderLight_->Bind();
+        {
+            auto lightShader = std::make_unique<Shader>(pathsLight, error);
+            if (error)
+                return error;
+            h_lightShader = rm_->shaderPool.Register("Scene_Lighting_Cube", std::move(lightShader));
+
+            auto objShader = std::make_unique<Shader>(pathsObj, error);
+            if (error)
+                return error;
+            h_cubeShader = rm_->shaderPool.Register("Scene_Lighting_Light", std::move(objShader));
+        }
+
+        rm_->shaderPool.Get(h_lightShader)->Bind();
+        rm_->shaderPool.Get(h_cubeShader)->Bind();
 
         std::vector<float> verticesObj = {
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -134,33 +141,39 @@ namespace Scene
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto& renderer = sceneManager_->GetRenderer();
+        const auto& renderer = sm_->GetRenderer();
 
         // Test Object
-        shaderObj_->Bind();
-        shaderObj_->SetUniformMat4f("u_view", camera_->GetViewMatrix());
-        shaderObj_->SetUniformMat4f("u_proj", camera_->GetProjectionMatrix());
+        Shader* shaderObj = rm_->shaderPool.Get(h_cubeShader);
+        if (shaderObj == nullptr)
+            return;
         vaObj_->Bind();
-        shaderObj_->SetUniformMat4f("u_model", modelObj_);
-        shaderObj_->SetUniformVec3("u_ObjColor", coral);
-        shaderObj_->SetUniformVec3("u_LightColor", lightColor_);
-        shaderObj_->SetUniformVec3("u_LightPos", glm::vec3(modelLight_[3]));
-        shaderObj_->SetUniformVec3("u_ViewPos", camera_->GetPosition());
-        shaderObj_->SetUniform1i("u_pow", pow_);
-        shaderObj_->SetUniform1f("u_specularStrength", strength_);
+        shaderObj->Bind();
+        shaderObj->SetUniformMat4f("u_view", camera_->GetViewMatrix());
+        shaderObj->SetUniformMat4f("u_proj", camera_->GetProjectionMatrix());
+        shaderObj->SetUniformMat4f("u_model", modelObj_);
+        shaderObj->SetUniformVec3("u_ObjColor", coral);
+        shaderObj->SetUniformVec3("u_LightColor", lightColor_);
+        shaderObj->SetUniformVec3("u_LightPos", glm::vec3(modelLight_[3]));
+        shaderObj->SetUniformVec3("u_ViewPos", camera_->GetPosition());
+        shaderObj->SetUniform1i("u_pow", pow_);
+        shaderObj->SetUniform1f("u_specularStrength", strength_);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        renderer.Draw(*vaObj_, *shaderObj_, 36);
+        renderer.Draw(*vaObj_, *shaderObj, 36);
         if (debug_)
-            shaderObj_->SetUniform1i("u_Debug", 1);
+            shaderObj->SetUniform1i("u_Debug", 1);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        renderer.Draw(*vaObj_, *shaderObj_, 36);
-        shaderObj_->SetUniform1i("u_Debug", 0);
+        renderer.Draw(*vaObj_, *shaderObj, 36);
+        shaderObj->SetUniform1i("u_Debug", 0);
 
         // Light source
+        Shader* shaderLight_ = rm_->shaderPool.Get(h_lightShader);
+        if (shaderLight_ == nullptr)
+            return;
         shaderLight_->Bind();
+        vaLight_->Bind();
         shaderLight_->SetUniformMat4f("u_view", camera_->GetViewMatrix());
         shaderLight_->SetUniformMat4f("u_proj", camera_->GetProjectionMatrix());
-        vaLight_->Bind();
         shaderLight_->SetUniformMat4f("u_model", modelLight_);
         shaderLight_->SetUniformVec3("u_LightColor", lightColor_);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -174,7 +187,7 @@ namespace Scene
         ImGui::Begin("Camera Control");
 
         if (ImGui::Button("back"))
-            sceneManager_->SetScene("Menu");
+            sm_->SetScene("Menu");
 
         ImGui::SameLine(0.0f, 5.0f);
         if (ImGui::Button("reset Camera"))
@@ -216,7 +229,13 @@ namespace Scene
 
     void Scene_Lighting::OnLeave()
     {
-        shaderObj_->Unbind();
+        Shader* shaderObj = rm_->shaderPool.Get(h_cubeShader);
+        Shader* shaderLight = rm_->shaderPool.Get(h_lightShader);
+        if (shaderObj == nullptr || shaderObj == nullptr)
+            return;
+        shaderObj->Unbind();
+        shaderLight->Unbind();
+
         GLCall(glDisable(GL_DEPTH_TEST));
         renderer_->ReleaseMouse();
         glfwSetWindowSize(&renderer_->GetWindow(), renderer_->GetDefaultWindowWidth(), renderer_->GetDefaultWindowHeight());
@@ -225,10 +244,10 @@ namespace Scene
 
     void Scene_Lighting::HandleInput(float deltaTime)
     {
-        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            sceneManager_->SetScene("Menu");
+            sm_->SetScene("Menu");
         }
 
         if (!lockCam_)

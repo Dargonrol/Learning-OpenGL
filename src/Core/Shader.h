@@ -37,6 +37,9 @@ public:
     void SetUniformVec4(const std::string& name, const glm::vec4& value);
     void SetUniformMat4f(const std::string& name, glm::mat4 matrix);
 
+    Shader(Shader&& other) noexcept;
+    Shader& operator=(Shader&& other) noexcept;
+
 private:
     int GetUniformLocation(const std::string& name);
 

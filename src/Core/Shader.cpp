@@ -56,6 +56,27 @@ void Shader::SetUniformMat4f(const std::string &name, glm::mat4 matrix)
     GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
 }
 
+Shader::Shader(Shader &&other) noexcept : m_RendererID(other.m_RendererID), m_UniformLocationCache(std::move(other.m_UniformLocationCache)), m_GotUnbound(other.m_GotUnbound)
+{
+    other.m_RendererID = 0;
+}
+
+Shader & Shader::operator=(Shader &&other) noexcept
+{
+    if (this != &other)
+    {
+        if (m_RendererID != 0)
+            glDeleteProgram(m_RendererID);
+
+        m_RendererID = other.m_RendererID;
+        m_UniformLocationCache = std::move(other.m_UniformLocationCache);
+        m_GotUnbound = other.m_GotUnbound;
+
+        other.m_RendererID = 0;
+    }
+    return *this;
+}
+
 void Shader::SetUniform1f(const std::string &name, float v0)
 {
     GLCall(glUniform1f(GetUniformLocation(name), v0));

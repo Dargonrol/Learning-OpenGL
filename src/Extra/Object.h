@@ -1,9 +1,5 @@
 #pragma once
-#include <memory>
-
-// fwd declares
-struct Material;
-// fwd declares
+#include "../Core/AssetPool.h"
 
 class Object
 {
@@ -14,5 +10,6 @@ public:
     virtual void Render() = 0;
 
 public:
-    std::shared_ptr<Material> material = nullptr; // maybe a handle or weakptr in the actual engine?
+    Handle materialHandle;
+    Handle textureHandle;
 };

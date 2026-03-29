@@ -5,6 +5,8 @@
 #include "../../Core/Util.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "../../Core/AssetPool.h"
+
 FWD_DECLARE_ALL;
 class Camera;
 
@@ -30,12 +32,13 @@ namespace Scene
     private:
         std::unique_ptr<Camera> camera_;
 
-        std::unique_ptr<Shader> shaderObj_;
+        Handle h_lightShader;
+        Handle h_cubeShader;
+
         std::unique_ptr<VertexArray> vaObj_;
         std::unique_ptr<VertexBuffer> vbCube_;
         glm::mat4 modelObj_{};
 
-        std::unique_ptr<Shader> shaderLight_;
         std::unique_ptr<VertexArray> vaLight_;
         glm::mat4 modelLight_{};
 

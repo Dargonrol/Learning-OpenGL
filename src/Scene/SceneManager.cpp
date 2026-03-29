@@ -5,10 +5,11 @@
 
 #include "../OpenGL.h"
 #include "../Core/Renderer.h"
+#include "../Core/ResourceManager.h"
 
 namespace Scene
 {
-    SceneManager::SceneManager(Renderer &renderer) : m_renderer(renderer)
+    SceneManager::SceneManager(Renderer &renderer, ResourceManager& rm) : m_renderer(renderer), resourceManager_(rm)
     {
         glfwSetWindowUserPointer(&m_renderer.GetWindow(), this);
         glfwSetFramebufferSizeCallback(&m_renderer.GetWindow(), FrameBufferCallback);

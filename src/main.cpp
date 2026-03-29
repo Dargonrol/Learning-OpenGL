@@ -1,6 +1,7 @@
 #define GLFW_INCLUDE_NONE
 
 #include "Core/Renderer.h"
+#include "Core/ResourceManager.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scenes/Scene_BasicPlane.h"
 #include "Scene/Scenes/Scene_ClearColor.h"
@@ -17,7 +18,9 @@ int main()
     renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
 
-    Scene::SceneManager sceneManager{renderer};
+    ResourceManager resource_manager;
+
+    Scene::SceneManager sceneManager{renderer, resource_manager};
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);
     sceneManager.RegisterScene<Scene::Scene_ClearColor>("01 Clear Color"sv);
     sceneManager.RegisterScene<Scene::Scene_BasicPlane>("02 Basic Plane");

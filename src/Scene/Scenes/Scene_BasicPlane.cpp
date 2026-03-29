@@ -47,7 +47,7 @@ namespace Scene
         m_va->Bind();
         m_va->AddBuffer(*m_vb, layout);
 
-        Renderer* renderer = &sceneManager_->GetRenderer();
+        Renderer* renderer = &sm_->GetRenderer();
 
         m_camera = std::make_unique<Camera>(CameraMode::ORTHO);
 
@@ -63,21 +63,21 @@ namespace Scene
 
     void Scene_BasicPlane::Update(float deltaTime)
     {
-        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         m_camera->Update(deltaTime);
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {
-            sceneManager_->SetScene<Scene_Menu>();
+            sm_->SetScene<Scene_Menu>();
         }
         m_camera->HandleGenericCameraControls(window, deltaTime, 200.0f);
     }
 
     void Scene_BasicPlane::Render()
     {
-        if (!sceneManager_) return;
-        const auto& renderer = sceneManager_->GetRenderer();
+        if (!sm_) return;
+        const auto& renderer = sm_->GetRenderer();
 
         //m_view = m_camera->GetViewMatrix();
 

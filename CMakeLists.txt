@@ -82,7 +82,6 @@ add_executable(${PROJECT_NAME}
         src/Extra/Object.h
         src/Extra/Objects/LightSource.cpp
         src/Extra/Objects/LightSource.h
-        src/Core/ResourceManager.cpp
         src/Core/ResourceManager.h
         src/Core/AssetPool.h
 )

@@ -17,8 +17,8 @@ namespace Scene
 
     void Scene_Menu::OnEnter()
     {
-        s_prevEscapeState = glfwGetKey(&sceneManager_->GetRenderer().GetWindow(), GLFW_KEY_ESCAPE);
-        sceneManager_->GetRenderer().SetTitle("Menu"sv);
+        s_prevEscapeState = glfwGetKey(&sm_->GetRenderer().GetWindow(), GLFW_KEY_ESCAPE);
+        sm_->GetRenderer().SetTitle("Menu"sv);
     }
 
     void Scene_Menu::Render()
@@ -27,12 +27,12 @@ namespace Scene
 
     void Scene_Menu::Update(float deltaTime)
     {
-        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (s_prevEscapeState == GLFW_RELEASE && keyState == GLFW_PRESS) {
-            sceneManager_->GetRenderer().SetWindowShouldClose();
+            sm_->GetRenderer().SetWindowShouldClose();
         }
 
         // Update previous state
@@ -42,11 +42,11 @@ namespace Scene
     void Scene_Menu::ImGuiRender()
     {
         ImGui::Begin("Menu");
-        for (auto& scene: sceneManager_->GetSceneNames())
+        for (auto& scene: sm_->GetSceneNames())
         {
             if (scene != "Menu" && ImGui::Button(scene.c_str()))
             {
-                sceneManager_->SetScene(scene);
+                sm_->SetScene(scene);
                 ImGui::End();
                 return;
             }
@@ -63,7 +63,7 @@ namespace Scene
         if (ImGui::Button("Reset Scenes"))
         {
             std::cout << "Resetting all scenes\n";
-            for (auto& scene: sceneManager_->GetScenesVector())
+            for (auto& scene: sm_->GetScenesVector())
             {
                 if (scene->name == this->name)
                     continue;

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string_view>
 #include <vector>
 #include <ostream>
@@ -68,7 +69,7 @@ public:
     {
         Handle h = {0, 0};
         bool free = false;
-        T data;
+        std::unique_ptr<T> data;
 
         [[nodiscard]] bool operator==(const Slot &other) const { return h.id == other.h.id && h.gen == other.h.gen; }
         [[nodiscard]] bool operator!=(const Slot &other) const { return !(*this == other); }
@@ -76,7 +77,7 @@ public:
     };
 
     // [[nodiscard]] T* Get(std::string_view name) const; // I don't think I want this because it is slower than access by handle
-    [[nodiscard]] T* Get(Handle h) const noexcept;
+    [[nodiscard]] T* Get(Handle h) noexcept;
     /**
     * A Handle with gen = 0 is always invalid!
     */
@@ -86,7 +87,7 @@ public:
     /**
      * @return a @link Handle with generation != 0 if successful.
      */
-    Handle Register(T asset, std::string_view sv);
+    Handle Register(std::string_view sv, std::unique_ptr<T> asset);
     /**
      * @return true if successful
      */
@@ -125,13 +126,13 @@ private:
 
 
 template<typename T>
-T * AssetPool<T>::Get(const Handle h) const noexcept
+T * AssetPool<T>::Get(const Handle h) noexcept
 {
     if (h.id >= pool_.size())
         return nullptr;
-    const auto& slot = pool_[h.id];
+    auto& slot = pool_[h.id];
     if (slot.h == h && !slot.free)
-        return &slot.data;
+        return slot.data.get();
     return nullptr;
 }
 
@@ -154,7 +155,7 @@ std::string_view AssetPool<T>::GetName(const Handle h) const noexcept
 }
 
 template<typename T>
-Handle AssetPool<T>::Register(T asset, const std::string_view sv)
+Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asset)
 {
     auto iter = map_string_handle_.find(sv);
     if (iter == map_string_handle_.end())
@@ -163,14 +164,14 @@ Handle AssetPool<T>::Register(T asset, const std::string_view sv)
         if (freeSpaces_.empty())
         {
             index = pool_.size();
-            Slot newSlot = {{index, 1}, false, asset};
-            pool_.push_back(newSlot);
+            Slot newSlot = {{index, 1}, false, std::move(asset)};
+            pool_.push_back(std::move(newSlot));
         } else
         {
             index = freeSpaces_.front();
             Slot& slot = pool_[index];
             slot.free = false;
-            slot.data = asset;
+            slot.data = std::move(asset);
             ++slot.h.gen;
             slot.h.id = index;
             freeSpaces_.pop();
@@ -182,11 +183,14 @@ Handle AssetPool<T>::Register(T asset, const std::string_view sv)
         map_handle_string_.insert({pool_[index].h, std::move(name)});
         return pool_[index].h;
     }
-    // name already exists
+    // name already exists do nothing
     Index index = iter->second.id;
+    return pool_[index].h;
+
+    // overwriting old entry
     Handle oldHandle = pool_[index].h;
     ++pool_[index].h.gen;
-    pool_[index].data = asset;
+    pool_[index].data = std::move(asset);
     map_string_handle_[static_cast<std::string>(sv)] = pool_[index].h;
     auto node = map_handle_string_.extract(map_handle_string_.find(oldHandle));
     node.key() = pool_[index].h;

@@ -176,7 +176,7 @@ namespace Scene
         ImGui::Begin("Camera Control");
 
         if (ImGui::Button("back"))
-            sceneManager_->SetScene("Menu");
+            sm_->SetScene("Menu");
 
         ImGui::SameLine(0.0f, 5.0f);
         if (ImGui::Button("reset Camera"))
@@ -219,7 +219,7 @@ namespace Scene
         GLFWwindow* window = &renderer_->GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            sceneManager_->SetScene<Scene_Menu>();
+            sm_->SetScene<Scene_Menu>();
             return;
         }
 

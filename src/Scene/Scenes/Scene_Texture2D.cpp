@@ -28,7 +28,7 @@ namespace Scene
 
     int Scene_Texture2D::Init()
     {
-        const auto& renderer = sceneManager_->GetRenderer();
+        const auto& renderer = sm_->GetRenderer();
 
         float vertices[] = {
             -50.0f, -50.0f, 0.0f, 0.0f,
@@ -82,19 +82,19 @@ namespace Scene
         else if (r < 0.0f) inc = 0.05f;
         r += inc;
 
-        GLFWwindow* window = &sceneManager_->GetRenderer().GetWindow();
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
 
         if (keyState == GLFW_PRESS) {
-            sceneManager_->SetScene<Scene_Menu>();
+            sm_->SetScene<Scene_Menu>();
         }
     }
 
     void Scene_Texture2D::Render()
     {
-        if (!sceneManager_) return;
-        const auto& renderer = sceneManager_->GetRenderer();
+        if (!sm_) return;
+        const auto& renderer = sm_->GetRenderer();
 
         shader->Bind();
         {
@@ -116,7 +116,7 @@ namespace Scene
     {
         ImGui::Begin("Texture2D Test");
         if (ImGui::Button("back"))
-            sceneManager_->SetScene("Menu");
+            sm_->SetScene("Menu");
         ImGui::SliderFloat3("TranslationA", &translationA.x, 0.0f, 960.0f);
         ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 960.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -125,7 +125,7 @@ namespace Scene
 
     void Scene_Texture2D::OnEnter()
     {
-        sceneManager_->GetRenderer().SetTitle("Texture 2D test"sv);
+        sm_->GetRenderer().SetTitle("Texture 2D test"sv);
         shader->Bind();
         texture->Bind(0);
     }
