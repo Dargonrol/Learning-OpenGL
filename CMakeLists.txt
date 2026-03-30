@@ -86,6 +86,9 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_Material.h
         src/Core/Material.cpp
         src/Extra/Objects/Cube.h
+        src/Scene/Scenes/Scene_DiffuseMaps.cpp
+        src/Scene/Scenes/Scene_DiffuseMaps.h
+        src/Extra/Light.h
 )
 
 target_link_libraries(

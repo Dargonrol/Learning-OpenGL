@@ -18,7 +18,21 @@ Handle handleShader(const std::string_view shaderName, const std::filesystem::pa
         return {0, 0};
     }
 
-    return rm.shaderPool.Register(shaderName, std::move(shader));
+    return rm.shaderPool.ReplaceData(shaderName, std::move(shader));
+}
+
+Handle handleTexMaps(const std::filesystem::path& path, ResourceManager& rm, int slot = 0)
+{
+    if (path.empty())
+        return {0,0};
+    std::filesystem::path absolutePath;
+    if (path.is_relative())
+        absolutePath = BASE_PATH / path;
+    else
+        absolutePath = path;
+
+    auto texture = std::make_unique<Texture>(absolutePath);
+    return rm.texturePool.ReplaceData(absolutePath.filename().c_str(), std::move(texture));
 }
 
 glm::vec3 parseVec3(const std::string& line)
@@ -52,12 +66,13 @@ glm::vec3 parseVec3(const std::string& line)
     return result;
 }
 
-Handle Material::parseMaterial(std::string_view name, const std::filesystem::path &path, ResourceManager& rm, int& error)
+Handle Material::parseMaterial(std::string_view name, const std::filesystem::path &path, ResourceManager& rm, int& error, bool replace)
 {
-    if (rm.materialPool.Exists(name))
-        return rm.materialPool.GetHandle(name);
+    if (!replace)
+        if (rm.materialPool.Exists(name))
+            return rm.materialPool.GetHandle(name);
 
-    Material material;
+    auto material = std::make_unique<Material>();
     std::string line;
     std::stringstream ss;
 
@@ -72,6 +87,8 @@ Handle Material::parseMaterial(std::string_view name, const std::filesystem::pat
 
     std::string shaderName;
     std::string shaderPath;
+    std::string diffuseMapPath;
+    std::string specularMapPath;
     while (getline(stream, line))
     {
         std::string_view sv(line);
@@ -96,21 +113,41 @@ Handle Material::parseMaterial(std::string_view name, const std::filesystem::pat
             continue;
         }
 
+        if (sv.find("diffusemap") != std::string::npos)
+        {
+            size_t start = sv.find('"');
+            size_t end = sv.rfind('"');
+
+            if (start != std::string::npos && end != std::string::npos && end > start)
+                diffuseMapPath = line.substr(start + 1, end - start - 1);
+            continue;
+        }
+
+        if (sv.find("specularmap") != std::string::npos)
+        {
+            size_t start = sv.find('"');
+            size_t end = sv.rfind('"');
+
+            if (start != std::string::npos && end != std::string::npos && end > start)
+                specularMapPath = line.substr(start + 1, end - start - 1);
+            continue;
+        }
+
         if (sv.find("ambient") != std::string::npos)
         {
-                material.ambient = parseVec3(line);
+                material->ambient = parseVec3(line);
                 continue;
         }
 
         if (sv.find("diffuse") != std::string::npos)
         {
-            material.diffuse = parseVec3(line);
+            material->diffuse = parseVec3(line);
             continue;
         }
 
         if (sv.find("specular") != std::string::npos)
         {
-            material.specular = parseVec3(line);
+            material->specular = parseVec3(line);
             continue;
         }
 
@@ -127,15 +164,17 @@ Handle Material::parseMaterial(std::string_view name, const std::filesystem::pat
                 if (!part.empty() && part.back() == 'f')
                     part.pop_back();
 
-                material.shininess = std::stof(part);
+                material->shininess = std::stof(part);
             }
             continue;
         }
     }
 
-    material.shaderHandle = handleShader(shaderName, shaderPath, rm, error);
+    material->shaderHandle = handleShader(shaderName, shaderPath, rm, error);
+    material->diffuseMap = handleTexMaps(diffuseMapPath, rm, 0);
+    material->specularMap = handleTexMaps(specularMapPath, rm, 1);
 
-    return rm.materialPool.Register(name, std::make_unique<Material>(material));
+    return rm.materialPool.ReplaceData(name, std::move(material));
 }
 
 void Material::BindShader(ResourceManager &rm) const

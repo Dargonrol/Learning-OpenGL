@@ -1,0 +1,5 @@
+diffusemap = "resources/textures/crate.png"
+specularmap = "resources/textures/crate_specular.png"
+shaderpath = "resources/shaders"
+shadername = "texShadable"
+shininess = 32.0f

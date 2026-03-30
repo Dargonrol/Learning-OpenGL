@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 #include "../Object.h"
 #include "../../Core/VertexArray.h"
 #include "../../Core/VertexBuffer.h"
@@ -28,7 +30,13 @@ public:
     {
      Material* material = rm.materialPool.Get(materialHandle);
      if (material != nullptr)
+     {
          material->BindShader(rm);
+         Texture* texDiff = rm.texturePool.Get(material->diffuseMap);
+         if (texDiff != nullptr) texDiff->Bind(0);
+         Texture* texSpec = rm.texturePool.Get(material->specularMap);
+         if (texSpec != nullptr) texSpec->Bind(1);
+     }
      vertexArray->Bind();
     }
     size_t GetVerticesCount() override
@@ -40,6 +48,8 @@ public:
     glm::mat4 modelMatrix{1.0f};
     std::unique_ptr<VertexArray> vertexArray;
     std::unique_ptr<VertexBuffer> vertexBuffer;
+    bool lightSource = false;
+
 
 private:
 

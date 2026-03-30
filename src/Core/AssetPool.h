@@ -95,6 +95,12 @@ public:
      * @return a @link Handle with generation != 0 if successful.
      */
     Handle Register(std::string_view sv, std::unique_ptr<T> asset);
+
+    /**
+     * Replaces the specified element. If it doesn't exist, create one.
+     * @return
+     */
+    Handle ReplaceData(std::string_view sv, std::unique_ptr<T> asset);
     /**
      * @return true if successful
      */
@@ -199,10 +205,21 @@ Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asse
     // name already exists do nothing
     Index index = iter->second.id;
     return pool_[index].h;
+}
 
-    // overwriting old entry
+template<typename T>
+Handle AssetPool<T>::ReplaceData(const std::string_view sv, std::unique_ptr<T> asset)
+{
+    auto iter = map_string_handle_.find(sv);
+    if (iter == map_string_handle_.end())
+    {
+        // doesn't exist
+        return Register(sv, std::move(asset));
+    }
+    // already exists
+    Index index = iter->second.id;
     Handle oldHandle = pool_[index].h;
-    ++pool_[index].h.gen;
+    //++pool_[index].h.gen;
     pool_[index].data = std::move(asset);
     map_string_handle_[static_cast<std::string>(sv)] = pool_[index].h;
     auto node = map_handle_string_.extract(map_handle_string_.find(oldHandle));

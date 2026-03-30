@@ -11,18 +11,22 @@ class ResourceManager;
 struct Material
 {
     Handle shaderHandle = {0, 0};
+    Handle diffuseMap = {0, 0};
+    Handle specularMap = {0, 0};
     glm::vec3 ambient = {1.0f, 1.0f, 1.0f};     // ambient lighting color
     glm::vec3 diffuse = {1.0f, 1.0f, 1.0f};     // color of surface under diffuse lighting
-    glm::vec3 specular = {1.0f, 1.0f, 1.0f};    // color of specular highlight
+    glm::vec3 specular = {0.0f, 0.0f, 0.0f};    // color of specular highlight
     float shininess = 0.5f;
 
     void BindShader(ResourceManager& rm) const;
 
-    static Handle parseMaterial(std::string_view name, const std::filesystem::path& path, ResourceManager& rm, int& error);
+    static Handle parseMaterial(std::string_view name, const std::filesystem::path& path, ResourceManager& rm, int& error, bool replace = false);
 
     friend std::ostream& operator<<(std::ostream &os, const Material& mat)
     {
         os << "Material:\n Shader " << mat.shaderHandle << "\n" <<
+            "diffuse Map " << mat.diffuseMap << "\n" <<
+            "specular Map " << mat.specularMap << "\n" <<
             "Ambient: {" << mat.ambient.x << ", " << mat.ambient.y << ", " << mat.ambient.z << "}\n" <<
             "diffuse: {" << mat.diffuse.x << ", " << mat.diffuse.y << ", " << mat.diffuse.z << "}\n" <<
             "specular: {" << mat.specular.x << ", " << mat.specular.y << ", " << mat.specular.z << "}\n" <<
