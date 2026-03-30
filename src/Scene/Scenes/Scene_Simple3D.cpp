@@ -14,7 +14,7 @@
 #include "../SceneManager.h"
 #include "../../Core/Material.h"
 #include "../../Core/Renderer.h"
-#include "../../Extra/Objects/Camera.h"
+#include "../../Extra/Camera.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Scene

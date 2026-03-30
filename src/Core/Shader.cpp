@@ -32,6 +32,16 @@ Shader::Shader(const std::filesystem::path &path, const std::string& name, int &
         valid_ = true;
 }
 
+Shader::Shader(const char *vertex, const char *frag, int &error)
+{
+    ShaderSourceCode srcCode = {std::string(vertex), std::string(frag)};
+    if (srcCode.fragmentShader.empty() || srcCode.vertexShader.empty())
+        return;
+    m_RendererID = CreateShader(srcCode.vertexShader, srcCode.fragmentShader, error);
+    if (!error)
+        valid_ = true;
+}
+
 Shader::~Shader()
 {
     if (valid_)

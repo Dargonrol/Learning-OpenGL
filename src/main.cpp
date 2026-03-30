@@ -15,11 +15,13 @@
 int main()
 {
     using namespace std::literals;
-    Renderer renderer(650, 500);
+
+    ResourceManager resource_manager;
+
+    Renderer renderer(650, 500, resource_manager);
     renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
 
-    ResourceManager resource_manager;
 
     Scene::SceneManager sceneManager{renderer, resource_manager};
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);

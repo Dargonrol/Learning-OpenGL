@@ -5,13 +5,13 @@ layout (location = 1) in vec3 aNormal;
 out vec3 Normal;
 out vec3 FragPos;
 
-uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_proj;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProj;
 
 void main()
 {
-    gl_Position = u_proj * u_view * u_model * vec4(aPos, 1.0);
-    FragPos = vec3(u_model* vec4(aPos, 1.0));
+    gl_Position = uProj * uView * uModel * vec4(aPos, 1.0);
+    FragPos = vec3(uModel* vec4(aPos, 1.0));
     Normal = aNormal;
 }

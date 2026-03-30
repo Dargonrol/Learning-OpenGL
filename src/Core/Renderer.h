@@ -2,7 +2,11 @@
 
 #include <string>
 #include "Util.h"
+#include "AssetPool.h"
+#include "glm/fwd.hpp"
 
+class ResourceManager;
+class Object;
 class VertexArray;
 class IndexBuffer;
 class Shader;
@@ -15,7 +19,7 @@ class Renderer
 {
 public:
     Renderer();
-    Renderer(int width, int height);
+    Renderer(int width, int height, ResourceManager& resource_manager);
     ~Renderer();
 
     void Init();
@@ -24,6 +28,9 @@ public:
 
     void Draw(const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;
     void Draw(const VertexArray& va, Shader& shader, unsigned int count) const;
+    void Draw(Object& obj) const;
+    void Draw(Object& obj, Handle materialHandle) const;
+    void WireDraw(Object& obj, glm::mat4& MVP) const;
     void Clear() const;
 
     void CaptureMouse() const;
@@ -51,10 +58,14 @@ public:
 private:
     bool m_WindowShouldClose = false;
     GLFWwindow* m_window = nullptr;
+    ResourceManager* rm_ = nullptr;
     int m_Window_Height = 500;
     int m_Window_Width = 650;
     int defaultWindowWidth = 500;
     int defaultWindowHeight = 500;
     std::string m_Title = "Window Title";
     std::string m_DefaultTitle;
+
+    Handle debugMaterialHandle = {0,0};
+    Handle debugShaderHandle = {0,0};
 };

@@ -24,6 +24,7 @@ class Shader
 public:
     Shader(const ShaderFilePath& filepaths, int& error);
     Shader(const std::filesystem::path &path, const std::string& name, int &error);
+    Shader(const char* vertex, const char* frag, int &error);
     ~Shader();
 
     void Bind();

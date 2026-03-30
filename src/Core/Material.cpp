@@ -138,3 +138,9 @@ Handle Material::parseMaterial(std::string_view name, const std::filesystem::pat
     return rm.materialPool.Register(name, std::make_unique<Material>(material));
 }
 
+void Material::BindShader(ResourceManager &rm) const
+{
+    if (shaderHandle.gen != 0)
+        rm.shaderPool.Get(this->shaderHandle)->Bind();
+}
+

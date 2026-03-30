@@ -2,7 +2,7 @@
 
 #include "../../Core/IncludeAll.h"
 #include "../../Core/ResourceManager.h"
-#include "../../Extra/Objects/Camera.h"
+#include "../../Extra/Camera.h"
 
 namespace Scene
 {

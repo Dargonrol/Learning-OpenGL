@@ -192,8 +192,8 @@ Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asse
 
         std::string name = static_cast<std::string>(sv);
 
-        map_string_handle_.insert({std::move(name), pool_[index].h});
-        map_handle_string_.insert({pool_[index].h, std::move(name)});
+        map_string_handle_.insert({std::string(name), pool_[index].h});
+        map_handle_string_.insert({pool_[index].h, std::string(name)});
         return pool_[index].h;
     }
     // name already exists do nothing

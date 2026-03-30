@@ -16,6 +16,8 @@ struct Material
     glm::vec3 specular = {1.0f, 1.0f, 1.0f};    // color of specular highlight
     float shininess = 0.5f;
 
+    void BindShader(ResourceManager& rm) const;
+
     static Handle parseMaterial(std::string_view name, const std::filesystem::path& path, ResourceManager& rm, int& error);
 
     friend std::ostream& operator<<(std::ostream &os, const Material& mat)

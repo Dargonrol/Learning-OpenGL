@@ -13,6 +13,8 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
+#include "../Extra/Object.h"
+#include "glm/gtc/type_ptr.hpp"
 
 void GLClearError()
 {
@@ -41,7 +43,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 Renderer::Renderer() {};
 
-Renderer::Renderer(int width, int height) : m_Window_Height(height), m_Window_Width(width) {}
+Renderer::Renderer(int width, int height, ResourceManager& resource_manager) : m_Window_Height(height), m_Window_Width(width), rm_(&resource_manager){}
 
 void Renderer::Init()
 {
@@ -89,6 +91,34 @@ void Renderer::Init()
     glfwSetWindowTitle(m_window, m_Title.c_str());
 
     stbi_set_flip_vertically_on_load(true);
+
+    // set up basic shader and material
+    const char* vertex =
+        "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "uniform mat4 uMVP;\n"
+        "void main() { gl_Position = uMVP * vec4(aPos, 1.0); }\n";
+
+    const char* frag =
+        "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main(){FragColor = vec4(1.0, 0.0, 0.0, 1.0);}\n";
+    int error = 0;
+    auto shader = std::make_unique<Shader>(vertex, frag, error);
+    if (error)
+    {
+        std::cerr << "Failed Debug Shader creation!" << std::endl;
+        return;
+    }
+    auto material = std::make_unique<Material>();
+    material->shaderHandle = rm_->shaderPool.Register("debug", std::move(shader));
+    debugShaderHandle = material->shaderHandle;
+    material->ambient = {1.0f, 0.0f, 0.0f};
+    material->diffuse = {0.0f, 0.0f, 0.0f};
+    material->shininess = 0.0f;
+    material->specular = {0.0f, 0.0f, 0.0f};
+    debugMaterialHandle = rm_->materialPool.Register("debug", std::move(material));
+    std::cout << "Registering debug Material and Shader \n";
 }
 
 void Renderer::Update()
@@ -120,6 +150,34 @@ void Renderer::Draw(const VertexArray &va, Shader &shader, unsigned int count) c
     shader.Bind();
     va.Bind();
     GLCall(glDrawArrays(GL_TRIANGLES, 0, count));
+}
+
+void Renderer::Draw(Object &obj) const
+{
+    obj.BindAll(*rm_);
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
+}
+
+void Renderer::Draw(Object &obj, Handle materialHandle) const
+{
+    obj.BindAll(*rm_);
+    rm_->materialPool.Get(materialHandle)->BindShader(*rm_);
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
+}
+
+void Renderer::WireDraw(Object &obj, glm::mat4& MVP) const
+{
+    obj.BindAll(*rm_);
+    if (rm_->shaderPool.Exists(debugShaderHandle))
+    {
+        rm_->shaderPool.Get(debugShaderHandle)->Bind();
+        rm_->shaderPool.Get(debugShaderHandle)->SetUniformMat4f("uMVP", MVP);
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if (rm_->shaderPool.Exists(debugShaderHandle))
+        rm_->shaderPool.Get(debugShaderHandle)->Unbind();
 }
 
 void Renderer::Clear() const

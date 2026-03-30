@@ -1,7 +1,7 @@
 #include "Scene_BasicPlane.h"
 
 #include "../../Core/IncludeAll.h"
-#include "../../Extra/Objects/Camera.h"
+#include "../../Extra/Camera.h"
 
 namespace Scene
 {
