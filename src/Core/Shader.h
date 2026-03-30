@@ -23,6 +23,7 @@ class Shader
 {
 public:
     Shader(const ShaderFilePath& filepaths, int& error);
+    Shader(const std::filesystem::path &path, const std::string& name, int &error);
     ~Shader();
 
     void Bind();
@@ -51,6 +52,7 @@ private:
     unsigned int m_RendererID;
     std::unordered_map<std::string, int> m_UniformLocationCache;
     bool m_GotUnbound = false;
+    bool valid_ = false;
 };
 
 static unsigned int lastBoundShader = 0;

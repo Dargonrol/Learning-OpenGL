@@ -67,6 +67,9 @@ class AssetPool
 public:
     struct Slot
     {
+        Slot(Handle handle, bool isFree, std::unique_ptr<T>&& ptr)
+        : h(handle), free(isFree), data(std::move(ptr)) {}
+
         Handle h = {0, 0};
         bool free = false;
         std::unique_ptr<T> data;
@@ -74,6 +77,10 @@ public:
         [[nodiscard]] bool operator==(const Slot &other) const { return h.id == other.h.id && h.gen == other.h.gen; }
         [[nodiscard]] bool operator!=(const Slot &other) const { return !(*this == other); }
         [[nodiscard]] bool operator<(const Slot& other) const { return this->h.id < other.h.id || (this->h.id == other.h.id && this->h.gen < other.h.gen); }
+        Slot(const Slot&) = delete;
+        Slot& operator=(const Slot&) = delete;
+        Slot(Slot&&) = default;
+        Slot& operator=(Slot&&) = default;
     };
 
     // [[nodiscard]] T* Get(std::string_view name) const; // I don't think I want this because it is slower than access by handle
@@ -128,7 +135,7 @@ private:
 template<typename T>
 T * AssetPool<T>::Get(const Handle h) noexcept
 {
-    if (h.id >= pool_.size())
+    if (h.id >= pool_.size() || h.gen == 0)
         return nullptr;
     auto& slot = pool_[h.id];
     if (slot.h == h && !slot.free)
@@ -164,8 +171,14 @@ Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asse
         if (freeSpaces_.empty())
         {
             index = pool_.size();
-            Slot newSlot = {{index, 1}, false, std::move(asset)};
+            pool_.push_back(Slot({index,1}, false, std::move(asset)));
+            /*
+            Slot newSlot;
+            newSlot.h = {index, 1};
+            newSlot.free = false;
+            newSlot.data = std::move(asset);
             pool_.push_back(std::move(newSlot));
+            */
         } else
         {
             index = freeSpaces_.front();

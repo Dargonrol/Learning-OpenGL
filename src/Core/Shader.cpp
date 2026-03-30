@@ -14,11 +14,30 @@ Shader::Shader(const ShaderFilePath &filepaths, int& error)
     if (shaderSource.fragmentShader.empty() || shaderSource.vertexShader.empty())
         return;
     m_RendererID = CreateShader(shaderSource.vertexShader, shaderSource.fragmentShader, error);
+    if (!error)
+        valid_ = true;
+}
+
+Shader::Shader(const std::filesystem::path &path, const std::string& name, int &error)
+{
+    ShaderFilePath paths = {
+        path / std::string(name + ".vert"),
+        path / std::string(name + ".frag")
+    };
+    ShaderSourceCode shaderSource = parseShader(paths, error);
+    if (shaderSource.fragmentShader.empty() || shaderSource.vertexShader.empty())
+        return;
+    m_RendererID = CreateShader(shaderSource.vertexShader, shaderSource.fragmentShader, error);
+    if (!error)
+        valid_ = true;
 }
 
 Shader::~Shader()
 {
-    GLCall(glDeleteProgram(m_RendererID));
+    if (valid_)
+    {
+        GLCall(glDeleteProgram(m_RendererID));
+    }
 }
 
 void Shader::Bind()
@@ -65,7 +84,7 @@ Shader & Shader::operator=(Shader &&other) noexcept
 {
     if (this != &other)
     {
-        if (m_RendererID != 0)
+        if (m_RendererID != 0 && valid_)
             glDeleteProgram(m_RendererID);
 
         m_RendererID = other.m_RendererID;

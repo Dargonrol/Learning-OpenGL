@@ -84,6 +84,9 @@ add_executable(${PROJECT_NAME}
         src/Extra/Objects/LightSource.h
         src/Core/ResourceManager.h
         src/Core/AssetPool.h
+        src/Scene/Scenes/Scene_Material.cpp
+        src/Scene/Scenes/Scene_Material.h
+        src/Core/Material.cpp
 )
 
 target_link_libraries(

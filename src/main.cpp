@@ -6,6 +6,7 @@
 #include "Scene/Scenes/Scene_BasicPlane.h"
 #include "Scene/Scenes/Scene_ClearColor.h"
 #include "Scene/Scenes/Scene_Lighting.h"
+#include "Scene/Scenes/Scene_Material.h"
 #include "Scene/Scenes/Scene_Menu.h"
 #include "Scene/Scenes/Scene_Simple3D.h"
 #include "Scene/Scenes/Scene_Simple3D_Camera.h"
@@ -28,6 +29,7 @@ int main()
     sceneManager.RegisterScene<Scene::Scene_Simple3D>("04 Simple3D"sv);
     sceneManager.RegisterScene<Scene::Scene_Simple3D_Camera>("05 Simple3D Camera"sv);
     sceneManager.RegisterScene<Scene::Scene_Lighting>("06 Lighting"sv);
+    sceneManager.RegisterScene<Scene::Scene_Material>("07 Material"sv);
     sceneManager.SetScene<Scene::Scene_Menu>();
 
     while (!renderer.GetWindowShouldClose())
