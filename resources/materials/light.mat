@@ -1,5 +1,14 @@
-shaderpath = "resources/shaders"
-shadername = "light"
+// how to define shaders: (both absolute paths and relative paths work)
+shader = "resources/shaders/light.vert" // specifying one is enough, other shaders like .frag will be searched in the same path
+// or/and one by one.
+frag_shader = "resources/shaders/light.frag" // defining one by one overwrites the shaders that have been found with shader = "..."
+tc_shader = "" // not specifying or leaving string empty is both valid
+te_shader = ""
+geo_shader = ""
+
+diffusemap = ""
+specularmap = ""
+
 ambient = {0.2f, 0.2f, 0.2f}
 diffuse = {0.5f, 0.5f, 0.5f}
 specular = {0.5f, 0.5f, 0.5f}

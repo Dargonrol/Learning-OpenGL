@@ -35,6 +35,43 @@ Handle handleTexMaps(const std::filesystem::path& path, ResourceManager& rm, int
     return rm.texturePool.ReplaceData(absolutePath.filename().c_str(), std::move(texture));
 }
 
+std::string parseStringFromKeyWord(const std::string& line,const std::string_view keyWord, const char delimiter)
+{
+    if (line.find(keyWord) != std::string::npos)
+    {
+        const size_t start = line.find(delimiter);
+        const size_t end = line.rfind(delimiter);
+
+        if (start != std::string::npos && end != std::string::npos && end > start)
+            return line.substr(start + 1, end - start - 1);
+    }
+    return "";
+}
+
+float parseFloat(const std::string& line)
+{
+    size_t start = line.find('=');
+
+    if (start != std::string::npos)
+    {
+        std::string part = line.substr(start + 1);
+        part.erase(0, part.find_first_not_of(" \t"));
+        part.erase(part.find_last_not_of(" \t") + 1);
+
+        if (!part.empty() && part.back() == 'f')
+            part.pop_back();
+
+        return std::stof(part);
+    }
+}
+
+float parseFloatFromKeyWord(const std::string& line, const std::string_view keyWord)
+{
+    if (line.find(keyWord))
+        return parseFloat(line);
+    return 0.0f;
+}
+
 glm::vec3 parseVec3(const std::string& line)
 {
     glm::vec3 result{0.0f};
@@ -66,6 +103,15 @@ glm::vec3 parseVec3(const std::string& line)
     return result;
 }
 
+glm::vec3 parseVec3FromKeyWord(const std::string& line, const std::string_view keyWord)
+{
+    if (line.find(keyWord) != std::string::npos)
+    {
+        return parseVec3(line);
+    }
+    return {};
+}
+
 Handle Material::parseMaterial(std::string_view name, const std::filesystem::path &path, ResourceManager& rm, int& error, bool replace)
 {
     if (!replace)
@@ -85,89 +131,21 @@ Handle Material::parseMaterial(std::string_view name, const std::filesystem::pat
         return {};
     }
 
+
     std::string shaderName;
     std::string shaderPath;
     std::string diffuseMapPath;
     std::string specularMapPath;
     while (getline(stream, line))
     {
-        std::string_view sv(line);
-
-        if (sv.find("shadername") != std::string::npos)
-        {
-            size_t start = sv.find('"');
-            size_t end = sv.rfind('"');
-
-            if (start != std::string::npos && end != std::string::npos && end > start)
-                shaderName = line.substr(start + 1, end - start - 1);
-            continue;
-        }
-
-        if (sv.find("shaderpath") != std::string::npos)
-        {
-            size_t start = sv.find('"');
-            size_t end = sv.rfind('"');
-
-            if (start != std::string::npos && end != std::string::npos && end > start)
-                shaderPath = line.substr(start + 1, end - start - 1);
-            continue;
-        }
-
-        if (sv.find("diffusemap") != std::string::npos)
-        {
-            size_t start = sv.find('"');
-            size_t end = sv.rfind('"');
-
-            if (start != std::string::npos && end != std::string::npos && end > start)
-                diffuseMapPath = line.substr(start + 1, end - start - 1);
-            continue;
-        }
-
-        if (sv.find("specularmap") != std::string::npos)
-        {
-            size_t start = sv.find('"');
-            size_t end = sv.rfind('"');
-
-            if (start != std::string::npos && end != std::string::npos && end > start)
-                specularMapPath = line.substr(start + 1, end - start - 1);
-            continue;
-        }
-
-        if (sv.find("ambient") != std::string::npos)
-        {
-                material->ambient = parseVec3(line);
-                continue;
-        }
-
-        if (sv.find("diffuse") != std::string::npos)
-        {
-            material->diffuse = parseVec3(line);
-            continue;
-        }
-
-        if (sv.find("specular") != std::string::npos)
-        {
-            material->specular = parseVec3(line);
-            continue;
-        }
-
-        if (sv.find("shininess") != std::string::npos)
-        {
-            size_t start = sv.find('=');
-
-            if (start != std::string::npos)
-            {
-                std::string part = line.substr(start + 1);
-                part.erase(0, part.find_first_not_of(" \t"));
-                part.erase(part.find_last_not_of(" \t") + 1);
-
-                if (!part.empty() && part.back() == 'f')
-                    part.pop_back();
-
-                material->shininess = std::stof(part);
-            }
-            continue;
-        }
+        shaderName = parseStringFromKeyWord(line, "shadername", '"');
+        shaderPath = parseStringFromKeyWord(line, "shaderpath", '"');
+        diffuseMapPath = parseStringFromKeyWord(line, "diffusemap", '"');
+        specularMapPath = parseStringFromKeyWord(line, "specularmap", '"');
+        material->ambient = parseVec3FromKeyWord(line, "ambient");
+        material->diffuse = parseVec3FromKeyWord(line, "diffuse");
+        material->specular = parseVec3FromKeyWord(line, "specular");
+        material->shininess = parseFloatFromKeyWord(line, "shininess");
     }
 
     material->shaderHandle = handleShader(shaderName, shaderPath, rm, error);

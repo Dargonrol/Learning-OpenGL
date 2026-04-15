@@ -89,6 +89,8 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_DiffuseMaps.cpp
         src/Scene/Scenes/Scene_DiffuseMaps.h
         src/Extra/Light.h
+        src/Core/Parser.h
+        src/Core/Parser.cpp
 )
 
 target_link_libraries(
