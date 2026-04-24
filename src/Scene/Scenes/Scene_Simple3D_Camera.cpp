@@ -23,12 +23,13 @@ namespace Scene
     int Scene_Simple3D_Camera::Init()
     {
         int error = 0;
-        ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader"
-        };
 
-        m_shader = std::make_unique<Shader>(paths, error);
+        m_shader = std::make_unique<Shader>(
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
+            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader",
+            error
+            );
+
         if (error)
             return error;
 

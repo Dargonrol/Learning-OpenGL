@@ -5,7 +5,18 @@
 
 class Shader
 {
+
 public:
+    enum class Type
+    {
+        VERTEX,
+        TESS_CONTROL,
+        TESS_EVAL,
+        GEOMETRY,
+        FRAGMENT,
+        COMPUTE
+    };
+
     Shader(
         const std::filesystem::path &vs,
         const std::filesystem::path &tcs,
@@ -27,6 +38,11 @@ public:
         );
     Shader(
         const std::filesystem::path& cs,
+        int& error
+        );
+    Shader(
+        const std::filesystem::path& path,
+        Type type,
         int& error
         );
     ~Shader();

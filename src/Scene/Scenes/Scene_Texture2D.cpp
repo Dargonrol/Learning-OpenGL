@@ -57,13 +57,13 @@ namespace Scene
         proj = glm::ortho(0.0f, (float)renderer_->GetWindowWidth(), 0.0f, (float)renderer_->GetWindowHeight(), -1.0f, 1.0f);
         view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-        ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/Basic/basic_VERT.shader",
-            BASE_PATH / "resources/shaders/Basic/basic_FRAG.shader"
-        };
-
         int error = 0;
-        shader = std::make_unique<Shader>(paths, error);
+        shader = std::make_unique<Shader>(
+            BASE_PATH / "resources/shaders/Basic/basic_VERT.shader",
+            BASE_PATH / "resources/shaders/Basic/basic_FRAG.shader",
+            error
+            );
+
         if (error)
             return error;
         shader->Bind();

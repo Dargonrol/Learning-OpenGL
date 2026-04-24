@@ -13,22 +13,24 @@ namespace Scene
     {
         int error = 0;
 
-        ShaderFilePath pathsObj = {
-            BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
-            BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader"
-        };
-        ShaderFilePath pathsLight = {
-            BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
-            BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader"
-        };
-
         {
-            auto lightShader = std::make_unique<Shader>(pathsLight, error);
+            auto lightShader = std::make_unique<Shader>(
+                BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
+                BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader",
+                error
+            );
+
             if (error)
                 return error;
+
             h_lightShader = rm_->shaderPool.Register("Scene_Lighting_Cube", std::move(lightShader));
 
-            auto objShader = std::make_unique<Shader>(pathsObj, error);
+            auto objShader = std::make_unique<Shader>(
+                BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
+                BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader",
+                error
+            );
+
             if (error)
                 return error;
             h_cubeShader = rm_->shaderPool.Register("Scene_Lighting_Light", std::move(objShader));

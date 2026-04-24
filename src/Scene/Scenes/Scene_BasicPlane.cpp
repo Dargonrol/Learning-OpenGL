@@ -12,11 +12,6 @@ namespace Scene
     {
         int error = 0;
 
-        ShaderFilePath paths = {
-            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_VERT.shader",
-            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_FRAG.shader"
-        };
-
         float vertices[] = {
             -50.0f, -50.0f,
              50.0f, -50.0f,
@@ -29,7 +24,12 @@ namespace Scene
             2, 3, 0
         };
 
-        m_shader = std::make_unique<Shader>(paths, error);
+        m_shader = std::make_unique<Shader>(
+            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_VERT.shader",
+            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_FRAG.shader",
+            error
+            );
+
         if (error)
             return error;
         m_shader->Bind();
