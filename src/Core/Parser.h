@@ -29,6 +29,8 @@ public:
 
     void Parse();
 
+    [[nodiscard]] const std::unordered_map<std::string_view, Value>& GetTokensAndValuesMap() const noexcept;
+
     [[nodiscard]] const std::string& GetRaw() const noexcept;
     [[nodiscard]] const std::vector<std::string_view>& GetLines() const noexcept;
 
@@ -37,4 +39,6 @@ private:
     std::string buffer;
     std::vector<std::string_view> lines;
     std::unordered_map<std::string_view, Value> tokens;
+
+    std::filesystem::path path;
 };
