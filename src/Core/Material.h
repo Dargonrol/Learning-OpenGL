@@ -33,4 +33,40 @@ struct Material
             "shininess: " << mat.shininess;
         return os;
     }
+
+    enum class Tokens
+    {
+        SHADER_NAME,
+
+        VERT_SHADER_PATH,
+        FRAG_SHADER_PATH,
+        TC_SHADER_PATH,
+        TE_SHADER_PATH,
+        GEO_SHADER_PATH,
+
+        DIFF_MAP_PATH,
+        SPEC_MAP_PATH,
+
+        AMBIENT_VALUE,
+        DIFFUSE_VALUE,
+        SPECULAR_VALUE,
+        SHININESS_VALUE
+    };
+
+    static inline const std::unordered_map<Tokens, std::string> tokenEnumStrMap = {
+        {Tokens::SHADER_NAME, "shader_name"},
+        {Tokens::VERT_SHADER_PATH, "vert_shader"},
+        {Tokens::FRAG_SHADER_PATH, "frag_shader"},
+        {Tokens::TC_SHADER_PATH, "tc_shader"},
+        {Tokens::TE_SHADER_PATH, "te_shader"},
+        {Tokens::GEO_SHADER_PATH, "geo_shader"},
+
+        {Tokens::DIFF_MAP_PATH, "diffuse_map"},
+        {Tokens::SPEC_MAP_PATH, "specular_map"},
+
+        {Tokens::AMBIENT_VALUE, "ambient"},
+        {Tokens::DIFFUSE_VALUE, "diffuse"},
+        {Tokens::SPECULAR_VALUE, "specular"},
+        {Tokens::SHININESS_VALUE, "shininess"}
+    };
 };

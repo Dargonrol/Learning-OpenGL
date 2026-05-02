@@ -208,7 +208,6 @@ void Parser::Parse()
                     continue;
 
             }
-
         } else
         {
             if (value.front() == '{' && value.back() != '}')
@@ -224,6 +223,7 @@ void Parser::Parse()
                     "in line: " << line << " | Error: \"" << value.front() << "\" is not a valid beginning" << std::endl;
                 continue;
             }
+            continue;
         }
 
 
@@ -257,6 +257,7 @@ void Parser::Parse()
         }
     }
 }
+
 
 const std::unordered_map<std::string_view, Parser::Value> & Parser::GetTokensAndValuesMap() const noexcept
 {
