@@ -20,20 +20,8 @@ Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs
         fs,
         cs
     };
-    if (!cs.empty())
-    {
-        if (!(vs.empty() && tcs.empty() && tes.empty() && gs.empty() && fs.empty()))
-        {
-            valid_ = false;
-            return;
-        }
-    }
-    if (vs.empty() || fs.empty())
-    {
-        valid_ = false;
-        return;
-    }
-    ShaderSourceCode source = parseShaders(paths, error);
+
+    const ShaderSourceCode source = parseShaders(paths, error);
     if (error)
     {
         valid_ = false;
@@ -44,6 +32,8 @@ Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs
         valid_ = true;
 }
 
+Shader::Shader(const ShaderContext &shaderContext, int &error) : Shader(shaderContext.vs, shaderContext.tcs, shaderContext.tes, shaderContext.gs, shaderContext.fs, shaderContext.cs, error) {}
+
 Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs, const std::filesystem::path &tes, const std::filesystem::path &gs, const std::filesystem::path &fs, int &error) : Shader(vs, tcs, tes, gs, fs, {}, error) {}
 
 Shader::Shader(const std::filesystem::path& vs, const std::filesystem::path &gs, const std::filesystem::path& fs, int &error) : Shader(vs, {}, {}, gs, fs, error){}
@@ -51,6 +41,24 @@ Shader::Shader(const std::filesystem::path& vs, const std::filesystem::path &gs,
 Shader::Shader(const std::filesystem::path& vs, const std::filesystem::path& fs, int &error) : Shader(vs, {}, fs, error) {}
 
 Shader::Shader(const std::filesystem::path& cs, int &error) : Shader({}, {}, {}, {}, {}, cs, error) {}
+
+Shader::Shader(const std::string &vs, const std::string &fs, int &error)
+{
+    error = 0;
+    ShaderSourceCode shaderSource = {
+        vs,
+        "",
+        "",
+        "",
+        fs,
+        ""
+    };
+    m_RendererID = CreateShaders(shaderSource, error);
+    if (!error)
+        valid_ = true;
+}
+
+Shader::Shader(const char *vs, const char *fs, int &error) : Shader(std::string(vs), std::string(fs), error) {}
 
 Shader::~Shader()
 {

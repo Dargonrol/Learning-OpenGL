@@ -9,76 +9,47 @@
 
 struct ShaderContext
 {
-    std::string_view shaderName;
-    std::string_view vertShaderPath, fragShaderPath, tcShaderPath, teShaderPath, geoShaderPath;
+    std::string vertShaderPath, fragShaderPath, tcShaderPath, teShaderPath, geoShaderPath;
 };
 
-Handle handleShader(const ShaderContext& shaderContext, ResourceManager& rm, int& error)
+inline std::filesystem::path makeSVPathAbsolute(const std::string_view& sv)
 {
-    if (rm.shaderPool.Exists(shaderContext.shaderName))
-        return rm.shaderPool.GetHandle(shaderContext.shaderName);
+    if (sv.empty())
+        return "";
+    std::filesystem::path path(sv);
+    if (path.is_relative())
+        path = BASE_PATH / path;
+    return path;
+}
 
-     std::array<std::filesystem::path, 5> paths = {
-         std::filesystem::path(shaderContext.vertShaderPath),
-         std::filesystem::path(shaderContext.fragShaderPath),
-         std::filesystem::path(shaderContext.tcShaderPath),
-         std::filesystem::path(shaderContext.teShaderPath),
-         std::filesystem::path(shaderContext.geoShaderPath)
-     };
-
-    for (auto& path: paths)
-    {
-        if (path.empty())
-            continue;
-        if (path.is_relative())
-            path = BASE_PATH / path;
-    }
-
-    if (paths[0].empty() || paths[1].empty())
+Handle handleShader(const ShaderContext& shaderContext, const std::string_view& shaderName, ResourceManager& rm, int& error, const std::string_view& matName)
+{
+    if (shaderName.empty())
     {
         error = -1;
-        std::cerr << "Vertex and Fragment-shader cannot by unspecified!";
+        std::cerr << "Error creating Material " << matName << ": Shader_name cannot be empty!" << std::endl;
         return {0, 0};
     }
 
-    std::unique_ptr<Shader> shader;
+    if (rm.shaderPool.Exists(shaderName))
+        return rm.shaderPool.GetHandle(shaderName);
 
-    if (!paths[2].empty() && !paths[3].empty() && !paths[4].empty())
-    {
-        shader = std::make_unique<Shader>(
-            paths[0],
-            paths[1],
-            paths[2],
-            paths[3],
-            paths[4],
-            error
-            );
-    } else if (!paths[4].empty())
-    {
-        shader = std::make_unique<Shader>(
-            paths[0],
-            paths[4],
-            paths[1],
-            error
-            );
-    } else
-    {
-        shader = std::make_unique<Shader>(
-            paths[0],
-            paths[1],
-            error
-            );
-    }
+    Shader::ShaderContext sc = {
+        makeSVPathAbsolute(shaderContext.vertShaderPath),
+        makeSVPathAbsolute(shaderContext.tcShaderPath),
+        makeSVPathAbsolute(shaderContext.teShaderPath),
+        makeSVPathAbsolute(shaderContext.geoShaderPath),
+        makeSVPathAbsolute(shaderContext.fragShaderPath),
+        {}
+    };
+
+    auto shader = std::make_unique<Shader>(sc, error);
 
     if (error)
     {
-        std::cerr << "Error parsing material with shader: " << shaderContext.shaderName << std::endl;
+        std::cerr << "Error parsing material with shader: " << shaderName << std::endl;
         return {0, 0};
     }
-
-    std::string shaderName = std::string(shaderContext.shaderName);
-    if (!shaderName.empty())
-        shaderName = std::string(shaderContext.shaderName);
 
     return rm.shaderPool.ReplaceData(shaderName, std::move(shader));
 }
@@ -96,7 +67,6 @@ Handle handleTexMaps(const std::filesystem::path& path, ResourceManager& rm, int
     auto texture = std::make_unique<Texture>(absolutePath);
     return rm.texturePool.ReplaceData(absolutePath.filename().c_str(), std::move(texture));
 }
-
 
 template<typename T, typename Variant>
 struct is_in_variant;
@@ -133,7 +103,8 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
     const auto enumValueMap = parser.getTokensAsEnum(Material::tokenEnumStrMap);
 
     ShaderContext shader_context;
-    std::string_view diffuseMapPath, specularMapPath;
+    std::string shaderName;
+    std::string diffuseMapPath, specularMapPath;
 
 
     for (const auto& [key, value] : enumValueMap)
@@ -141,30 +112,30 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
         switch (key)
         {
             case Tokens::SHADER_NAME:
-                assignValue<std::string_view>(value, shader_context.shaderName);
+                assignValue<std::string>(value, shaderName);
                 break;
 
             case Tokens::VERT_SHADER_PATH:
-                assignValue<std::string_view>(value, shader_context.vertShaderPath);
+                assignValue<std::string>(value, shader_context.vertShaderPath);
                 break;
             case Tokens::FRAG_SHADER_PATH:
-                assignValue<std::string_view>(value, shader_context.fragShaderPath);
+                assignValue<std::string>(value, shader_context.fragShaderPath);
                 break;
             case Tokens::TC_SHADER_PATH:
-                assignValue<std::string_view>(value, shader_context.tcShaderPath);
+                assignValue<std::string>(value, shader_context.tcShaderPath);
                 break;
             case Tokens::TE_SHADER_PATH:
-                assignValue<std::string_view>(value, shader_context.teShaderPath);
+                assignValue<std::string>(value, shader_context.teShaderPath);
                 break;
             case Tokens::GEO_SHADER_PATH:
-                assignValue<std::string_view>(value, shader_context.geoShaderPath);
+                assignValue<std::string>(value, shader_context.geoShaderPath);
                 break;
 
             case Tokens::DIFF_MAP_PATH:
-                assignValue<std::string_view>(value, diffuseMapPath);
+                assignValue<std::string>(value, diffuseMapPath);
                 break;
             case Tokens::SPEC_MAP_PATH:
-                assignValue<std::string_view>(value, specularMapPath);
+                assignValue<std::string>(value, specularMapPath);
                 break;
 
             case Tokens::AMBIENT_VALUE:
@@ -182,7 +153,7 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
         }
     }
 
-    material->shaderHandle = handleShader(shader_context, rm, error);
+    material->shaderHandle = handleShader(shader_context, shaderName, rm, error, name);
     material->diffuseMap = handleTexMaps(diffuseMapPath, rm, 0);
     material->specularMap = handleTexMaps(specularMapPath, rm, 1);
 

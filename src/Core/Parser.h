@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <iostream>
+#include <unordered_set>
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
@@ -18,7 +20,7 @@ class Parser
 {
 public:
     using Value = std::variant<
-        std::string_view,
+        std::string,
         int,
         float,
         glm::vec2,
@@ -38,7 +40,7 @@ public:
 
     void Parse();
 
-    [[nodiscard]] const std::unordered_map<std::string_view, Value>& GetTokensAndValuesMap() const noexcept;
+    [[nodiscard]] const std::unordered_map<std::string, Value>& GetTokensAndValuesMap() const noexcept;
 
     [[nodiscard]] const std::string& GetRaw() const noexcept;
     [[nodiscard]] const std::vector<std::string_view>& GetLines() const noexcept;
@@ -47,24 +49,40 @@ public:
     requires(std::is_enum_v<T>)
     [[nodiscard]] std::unordered_map<T, Parser::Value, Parser::EnumHash> getTokensAsEnum(const std::unordered_map<T, std::string>& enumMap) const noexcept
     {
-        std::unordered_map<T, Parser::Value, Parser::EnumHash> map;
+        std::unordered_map<T, Value, EnumHash> map;
         map.reserve(enumMap.size());
+        std::unordered_set<std::string> used;
 
         for (const auto& [key, value] : enumMap)
         {
             const auto iter = tokens.find(value);
             if (iter == tokens.end())
+            {
                 continue;
+            }
             map.emplace(key, iter->second);
+            used.insert(iter->first);
         }
+
+        // report extras
+        for (const auto& [k, v] : tokens)
+        {
+            if (!used.contains(k))
+                std::cerr << "[Parser] Unused token in file: " << k << "\n";
+        }
+
         return map;
     }
 
+private:
+    void parseString(const std::string_view& line, const std::string_view& key, const std::string_view& value);
+    void parseVector(const std::string_view& line, const std::string_view& key, const std::string_view& inner);
+    void parseScalar(const std::string_view& line, const std::string_view& key, const std::string_view& value);
 
 private:
     std::string buffer;
     std::vector<std::string_view> lines;
-    std::unordered_map<std::string_view, Value> tokens;
+    std::unordered_map<std::string, Value> tokens;
 
     std::filesystem::path path;
 };

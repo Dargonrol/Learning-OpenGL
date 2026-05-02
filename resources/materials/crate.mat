@@ -1,5 +1,6 @@
-diffusemap = "resources/textures/crate.png"
-specularmap = "resources/textures/crate_specular.png"
-shaderpath = "resources/shaders"
-shadername = "texShadable"
+diffuse_map = "resources/textures/crate.png"
+specular_map = "resources/textures/crate_specular.png"
+vert_shader = "resources/shaders/texShadable.vert"
+frag_shader = "resources/shaders/texShadable.frag"
+shader_name = "texShadable"
 shininess = 32.0f

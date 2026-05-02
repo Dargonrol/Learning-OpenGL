@@ -125,141 +125,177 @@ Parser::Parser(const std::filesystem::path &path) : path(path)
     lines.shrink_to_fit();
 }
 
+inline bool isQuoted(const std::string_view& sv)
+{
+    return sv.size() >= 2 && sv.front() == '"' && sv.back() == '"';
+}
+
+inline bool isBraceList(const std::string_view& sv)
+{
+    return sv.front() == '{' && sv.back() == '}';
+}
+
+inline bool getKeyAndValue(const std::string_view& line, std::string_view& key, std::string_view& value)
+{
+    size_t start = 0;
+    size_t end = line.find_first_of('=');
+    if (end == std::string_view::npos)
+        return false;
+    key = trim(line.substr(0, end));
+    value = trim(line.substr(end + 1));
+    return true;
+}
+
 void Parser::Parse()
 {
     for (const auto& line: lines)
     {
-        size_t start = 0;
-        size_t end = line.size();
-        end = line.find_first_of('=');
-        if (end == std::string_view::npos)
+        std::string_view key, value;
+        if (!getKeyAndValue(line, key, value))
             continue;
-        std::string_view key = trim(line.substr(0, end));
-        std::string_view value = trim(line.substr(end + 1));
 
-        // do the parsing
-        // value is a string
-        if (value.size() >= 2 && value.front() == '"' && value.back() == '"')
+        if (isQuoted(value)) // must be a string
         {
-            value.remove_prefix(1);
-            value.remove_suffix(1);
-            tokens[key] = value;
+            parseString(line, key, value);
             continue;
         }
 
-        // value is a vec-n
-        if (value.front() == '{' && value.back() == '}')
+        if (isBraceList(value)) // must (for now) be a vector
         {
-            std::vector<std::string_view> values;
-
-            value.remove_prefix(1);
-            value.remove_suffix(1);
-
-            size_t pos = 0;
-            while (pos < value.size())
-            {
-                const size_t comma = value.find_first_of(',', pos);
-
-                if (comma == std::string_view::npos)
-                {
-                    values.emplace_back(trim(value.substr(pos)));
-                    break;
-                }
-
-                values.emplace_back(trim(value.substr(pos, comma - pos)));
-                pos = comma + 1;
-            }
-            std::vector<float> floats;
-            floats.reserve(values.size());
-            for (auto str_val: values)
-            {
-                if (str_val.empty())
-                {
-                    std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                        "in line: " << line << " | Error: values cannot be empty" << std::endl;
-                    continue;
-                }
-                float float_val;
-                auto result = std::from_chars(str_val.data(), str_val.data() + str_val.size(), float_val);
-                if (result.ec != std::errc() || result.ptr != str_val.data() + str_val.size())
-                {
-                    std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                        "in line: " << line << " | Error: " << make_error_code(result.ec).message() << std::endl;
-                    continue;
-                }
-                floats.emplace_back(float_val);
-            }
-
-            if (floats.size() != values.size())
-            {
-                std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                        "in line: " << line << " | Error: Error parsing one of the values" << std::endl;
-                continue;
-            }
-
-            switch (floats.size())
-            {
-                case 2: tokens[key] = glm::vec2{floats[0], floats[1]}; break;
-                case 3: tokens[key] = glm::vec3{floats[0], floats[1], floats[2]}; break;
-
-                default:
-                    std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                        "in line: " << line << " | Error: Vector size not supported" << std::endl;
-                    continue;
-
-            }
-        } else
-        {
-            if (value.front() == '{' && value.back() != '}')
-            {
-                std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                    "in line: " << line << " | Error: \"" << value.back() << "\" is not a valid ending" << std::endl;
-                continue;
-            }
-
-            if (value.back() == '}' && value.front() != '{')
-            {
-                std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                    "in line: " << line << " | Error: \"" << value.front() << "\" is not a valid beginning" << std::endl;
-                continue;
-            }
+            parseVector(line, key, value);
             continue;
         }
-
-
-        // value is a float
-        if (value.back() == 'f' || value.find('.') != std::string_view::npos)
+        if (true) // must be float or int
         {
-            float val;
-            auto result = std::from_chars(value.data(), value.data() + value.size(), val);
-            if (result.ec != std::errc() || result.ptr != value.data() + value.size())
-            {
-                std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                    "in line: " << line << " | Error: " << make_error_code(result.ec).message() << std::endl;
-                continue;
-            }
-            tokens[key] = val;
-            continue;
-        }
-
-        // value is an int
-        {
-            int val;
-            auto result = std::from_chars(value.data(), value.data() + value.size(), val);
-            if (result.ec != std::errc() || result.ptr != value.data() + value.size())
-            {
-                std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
-                    "in line: " << line << " | Error: " << make_error_code(result.ec).message() << std::endl;
-                continue;
-            }
-            tokens[key] = val;
+            parseScalar(line, key, value);
             continue;
         }
     }
 }
 
+void Parser::parseString(const std::string_view& line, const std::string_view& key, const std::string_view& value)
+{
+    std::string_view inner = value;
+    inner.remove_prefix(1);
+    inner.remove_suffix(1);
+    tokens[std::string(key)] = std::string(inner);
+}
 
-const std::unordered_map<std::string_view, Parser::Value> & Parser::GetTokensAndValuesMap() const noexcept
+void Parser::parseVector(const std::string_view& line, const std::string_view& key, const std::string_view& value)
+{
+    std::string_view inner = trim(value);
+    std::vector<std::string_view> strValues;
+
+    inner.remove_prefix(1);
+    inner.remove_suffix(1);
+
+    if (inner.empty())
+    {
+        std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: Vector cannot be empty" << std::endl;
+    }
+
+    size_t pos = 0;
+    while (pos < inner.size())
+    {
+        const size_t comma = inner.find_first_of(',', pos);
+
+        if (comma == std::string_view::npos)
+        {
+            strValues.emplace_back(trim(inner.substr(pos)));
+            break;
+        }
+
+        strValues.emplace_back(trim(inner.substr(pos, comma - pos)));
+        pos = comma + 1;
+    }
+
+    std::vector<float> floats;
+    floats.reserve(strValues.size());
+
+    for (auto strVal: strValues)
+    {
+        if (strVal.empty())
+        {
+            std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: values cannot be empty" << std::endl;
+            strVal = "0.0";
+        }
+
+        if (strVal.back() == 'f')
+            strVal.remove_suffix(1);
+
+        float floatVal;
+        auto result = std::from_chars(strVal.data(), strVal.data() + strVal.size(), floatVal);
+        if (result.ec != std::errc() || result.ptr != strVal.data() + strVal.size())
+        {
+            std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: " << make_error_code(result.ec).message() << std::endl;
+            continue;
+        }
+        floats.emplace_back(floatVal);
+    }
+
+    if (floats.size() != strValues.size())
+    {
+        std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: Error parsing one of the values" << std::endl;
+    }
+
+    switch (floats.size())
+    {
+        case 2: tokens[std::string(key)] = glm::vec2{floats[0], floats[1]}; break;
+        case 3: tokens[std::string(key)] = glm::vec3{floats[0], floats[1], floats[2]}; break;
+
+        default:
+            std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: Vector size not supported" << std::endl;
+    }
+}
+
+void Parser::parseScalar(const std::string_view& line, const std::string_view& key, const std::string_view& value)
+{
+    std::string_view inner = trim(value);
+
+    if (inner.empty())
+    {
+        std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: Value cannot be empty" << std::endl;
+        return;
+    }
+
+    if (inner.back() == 'f')
+        inner.remove_suffix(1);
+
+    std::from_chars_result result{};
+
+    // try float
+    {
+        float val;
+        result = std::from_chars(inner.data(), inner.data() + inner.size(), val);
+        if (result.ec == std::errc() && result.ptr == inner.data() + inner.size())
+        {
+            tokens[std::string(key)] = val;
+            return;
+        }
+    }
+
+    // try int
+    {
+        int val;
+        result = std::from_chars(inner.data(), inner.data() + inner.size(), val);
+        if (result.ec == std::errc() && result.ptr == inner.data() + inner.size())
+        {
+            tokens[std::string(key)] = val;
+            return;
+        }
+    }
+
+    std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+                "in line: " << line << " | Error: " << make_error_code(result.ec).message() << std::endl;
+}
+
+const std::unordered_map<std::string, Parser::Value> & Parser::GetTokensAndValuesMap() const noexcept
 {
     return tokens;
 }
@@ -273,3 +309,4 @@ const std::vector<std::string_view> & Parser::GetLines() const noexcept
 {
     return lines;
 }
+

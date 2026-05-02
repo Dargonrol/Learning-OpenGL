@@ -17,6 +17,20 @@ public:
         COMPUTE
     };
 
+    struct ShaderContext
+    {
+        const std::filesystem::path &vs;
+        const std::filesystem::path &tcs;
+        const std::filesystem::path &tes;
+        const std::filesystem::path &gs;
+        const std::filesystem::path &fs;
+        const std::filesystem::path &cs;
+    };
+
+    Shader(
+        const ShaderContext& shaderContext,
+        int& error
+        );
     Shader(
         const std::filesystem::path &vs,
         const std::filesystem::path &tcs,
@@ -43,6 +57,16 @@ public:
     Shader(
         const std::filesystem::path& path,
         Type type,
+        int& error
+        );
+    Shader(
+        const std::string& vs,
+        const std::string& fs,
+        int& error
+        );
+    Shader(
+        const char* vs,
+        const char* fs,
         int& error
         );
     ~Shader();
