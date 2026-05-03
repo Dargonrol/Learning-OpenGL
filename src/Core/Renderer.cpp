@@ -1,15 +1,15 @@
 #include "Renderer.h"
 
 #define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
+#include <glad/glad.h>
 #undef GLAD_GL_IMPLEMENTATION
 #include <GLFW/glfw3.h>
 #include <fstream>
 #include <iostream>
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
-#include "stb_image/stb_image.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <stb_image.h>
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
@@ -66,7 +66,7 @@ void Renderer::Init()
     glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
-    gladLoadGL(glfwGetProcAddress);
+    gladLoadGL();
     glfwSwapInterval(1);
 
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;

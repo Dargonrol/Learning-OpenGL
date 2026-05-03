@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 #if defined(__clang__) || defined(__GNUC__)
     #define DEBUG_BREAK() __builtin_trap()
@@ -26,3 +27,17 @@
     class VertexBuffer;\
     class VertexArray;\
     class Shader
+
+inline void debug_info()
+{
+#ifdef DEBUG_BUILD
+    std::cout << "Debug build\n";
+    if (sizeof(void*) == 8) {
+        std::cout << "Runtime: 64-bit process\n";
+    } else if (sizeof(void*) == 4) {
+        std::cout << "Runtime: 32-bit process\n";
+    } else {
+        std::cout << "Unknown pointer size\n";
+    }
+#endif
+}

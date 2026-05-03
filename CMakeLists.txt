@@ -1,40 +1,36 @@
 cmake_minimum_required(VERSION 3.0...${CMAKE_VERSION})
-project(OpenGLAPP VERSION 0.3 LANGUAGES CXX)
+project(OpenGLAPP VERSION 0.4 LANGUAGES C CXX)
+
+if(CMAKE_BUILD_TYPE)
+    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+else()
+    message(STATUS "Build type: multi-config (${CMAKE_CONFIGURATION_TYPES})")
+endif()
+message(STATUS "C++ compiler id: ${CMAKE_CXX_COMPILER_ID}")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(FetchContent)
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
 
-FetchContent_Declare(
-        GLFW
-        GIT_REPOSITORY https://github.com/glfw/glfw
-        GIT_TAG 3.3.10
-)
-FetchContent_MakeAvailable(GLFW)
+include(CheckIPOSupported)
+check_ipo_supported(RESULT result)
 
-FetchContent_Declare(
-        GLM
-        GIT_REPOSITORY https://github.com/g-truc/glm
-        GIT_TAG 1.0.2
-)
-FetchContent_MakeAvailable(GLM)
+if(result)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(options)
+include(dependencies)
+include(compiler_warnings)
 
 add_executable(${PROJECT_NAME}
-        include/imgui/imgui.h
-        include/imgui/imgui.cpp
-        include/imgui/imconfig.h
-        include/imgui/imgui_demo.cpp
-        include/imgui/imgui_draw.cpp
-        include/imgui/imgui_internal.h
-        include/imgui/imgui_tables.cpp
-        include/imgui/imgui_widgets.cpp
-        include/imgui/backends/imgui_impl_glfw.h
-        include/imgui/backends/imgui_impl_glfw.cpp
-        include/imgui/backends/imgui_impl_opengl3.h
-        include/imgui/backends/imgui_impl_opengl3.cpp
-
         src/main.cpp
         src/Core/Renderer.h
         src/Core/Renderer.cpp
@@ -48,10 +44,8 @@ add_executable(${PROJECT_NAME}
         src/Core/VertexBufferLayout.h
         src/Core/Shader.cpp
         src/Core/Shader.h
-        include/stb_image/stb_image.h
         src/Core/Texture.cpp
         src/Core/Texture.h
-        src/Core/stb_image.cpp
         src/Scene/Scene.h
         src/Scene/Scenes/Scene_ClearColor.cpp
         src/Scene/Scenes/Scene_ClearColor.h
@@ -95,19 +89,35 @@ add_executable(${PROJECT_NAME}
         src/Scene/Scenes/Scene_ModelLoading.h
 )
 
+
 target_link_libraries(
-        ${PROJECT_NAME} PRIVATE glfw glm
+        ${PROJECT_NAME}
+        PRIVATE
+        glfw
+        glad
+        glm
+        imgui
+        stb_image
 )
 
-target_include_directories(${PROJECT_NAME}
-        PUBLIC
-        ${PROJECT_SOURCE_DIR}/include/imgui
-        ${PROJECT_SOURCE_DIR}/include/imgui/backends
-        ${PROJECT_SOURCE_DIR}/include
+set_target_properties(
+        ${PROJECT_NAME}
+        PROPERTIES
+        OUTPUT_NAME "${PROJECT_NAME}"
 )
 
-target_compile_definitions(
-        ${PROJECT_NAME} PRIVATE SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-        ${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}"
+target_compile_definitions( ${PROJECT_NAME} PRIVATE
+        SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+        PROJECT_NAME="${PROJECT_NAME}"
+        $<$<CONFIG:Debug>:DEBUG_BUILD>
+        $<$<CONFIG:Release>:RELEASE_BUILD>
 )
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_64)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_32)
+endif()
+
+enable_warnings("${PROJECT_NAME}")
 

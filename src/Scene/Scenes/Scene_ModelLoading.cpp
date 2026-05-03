@@ -32,7 +32,7 @@ namespace Scene
 
     void Scene_ModelLoading::ImGuiRender()
     {
-        ImGui::Begin("Diffuse/Specular Maps");
+        ImGui::Begin("Model Loading");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         if (ImGui::Button("back"))
             sm_->SetScene("Menu");

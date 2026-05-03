@@ -15,6 +15,7 @@
 
 int main()
 {
+    debug_info();
     using namespace std::literals;
 
     ResourceManager resource_manager;
@@ -22,7 +23,6 @@ int main()
     Renderer renderer(650, 500, resource_manager);
     renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
-
 
     Scene::SceneManager sceneManager{renderer, resource_manager};
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);
