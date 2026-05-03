@@ -1,7 +1,7 @@
 // how to define shaders: (both absolute paths and relative paths work)
 shader_name = "light"
 vert_shader = "resources/shaders/light.vert"
-frag_shader = "resources/shaders/light.frag" // defining one by one overwrites the shaders that have been found with shader = "..."
+frag_shader = "resources/shaders/light.frag"
 tc_shader = "" // not specifying or leaving string empty is both valid
 te_shader = ""
 geo_shader = ""

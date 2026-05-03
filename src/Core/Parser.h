@@ -64,11 +64,10 @@ public:
             used.insert(iter->first);
         }
 
-        // report extras
         for (const auto& [k, v] : tokens)
         {
             if (!used.contains(k))
-                std::cerr << "[Parser] Unused token in file: " << k << "\n";
+                std::cerr << "[Parser] Unknown token: " << k << "in file: " << path.filename() << "." << path.extension() << "\n";
         }
 
         return map;

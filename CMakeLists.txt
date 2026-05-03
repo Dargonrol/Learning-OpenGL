@@ -88,9 +88,11 @@ add_executable(${PROJECT_NAME}
         src/Extra/Objects/Cube.h
         src/Scene/Scenes/Scene_DiffuseMaps.cpp
         src/Scene/Scenes/Scene_DiffuseMaps.h
-        src/Extra/Light.h
         src/Core/Parser.h
         src/Core/Parser.cpp
+        src/Extra/Light.h
+        src/Scene/Scenes/Scene_ModelLoading.cpp
+        src/Scene/Scenes/Scene_ModelLoading.h
 )
 
 target_link_libraries(

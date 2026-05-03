@@ -7,8 +7,6 @@
 #include "../../Core/VertexBufferLayout.h"
 #include <vector>
 
-#include "glm/vec3.hpp"
-
 class Cube : public Object
 {
 public:
@@ -45,13 +43,10 @@ public:
     }
 
 public:
-    glm::mat4 modelMatrix{1.0f};
     std::unique_ptr<VertexArray> vertexArray;
     std::unique_ptr<VertexBuffer> vertexBuffer;
-    bool lightSource = false;
 
-
-private:
+protected:
 
     std::vector<float> vertices = {
      //    position      |     normals        | tex coords (uv)

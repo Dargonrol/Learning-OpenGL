@@ -29,6 +29,15 @@ namespace Scene
         cube_->modelMatrix = glm::translate(cube_->modelMatrix, glm::vec3{0.0f, 0.0f, 0.0f});
         light_->modelMatrix = glm::translate(light_->modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
         light_->modelMatrix = glm::scale(light_->modelMatrix, glm::vec3(0.5f));
+        light_->lightSource = true;
+        light_->light.lightType = Light::LightType::POINT;
+        light_->light.ambient = {1.0f, 1.0f, 1.0f};
+        light_->light.diffuse = {1.0f, 1.0f, 1.0f};
+        light_->light.specular = {0.5f, 0.5f, 0.5f};
+        light_->light.constant = 1.0f;
+        light_->light.linear = 0.5f;
+        light_->light.quadratic = 0.5f;
+        light_->light.position = light_->modelMatrix[3];
 
         return error;
     }
@@ -37,8 +46,8 @@ namespace Scene
     {
         camera_->Update(deltaTime);
 
-        rm_->materialPool.Get(light_->materialHandle)->diffuse = lightColor_;
-        rm_->materialPool.Get(light_->materialHandle)->specular = lightColor_;
+        light_->light.diffuse = lightColor_;
+        light_->light.specular = lightColor_;
 
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
         camera_->HandleGenericCameraControls(window, deltaTime);
@@ -66,10 +75,8 @@ namespace Scene
         shaderCube->SetUniform1i("material.diffuse", 0);
         shaderCube->SetUniform1i("material.specular", 1);
         shaderCube->SetUniform1f("material.shininess", materialCube->shininess);
-        shaderCube->SetUniformVec3("light.ambient", materialLight->ambient);
-        shaderCube->SetUniformVec3("light.diffuse", materialLight->diffuse);
-        shaderCube->SetUniformVec3("light.specular", materialLight->specular);
-        shaderCube->SetUniformVec3("light.position", light_->modelMatrix[3]);
+        light_->SetLightUniforms(*rm_, *cube_, 0, Light::LightType::POINT);
+        shaderCube->SetUniform1i("uPointLightCount", 1);
         renderer.Draw(*cube_);
 
         light_->BindAll(*rm_);

@@ -24,7 +24,7 @@ Parser::Parser(const std::filesystem::path &path) : path(path)
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file)
     {
-        std::cerr << "Failed to open file: " << std::filesystem::absolute(path) << std::endl;
+        std::cerr << "[Parser] Failed to open file: " << std::filesystem::absolute(path) << std::endl;
         return;
     }
     const std::streamsize size = file.tellg();
@@ -32,7 +32,7 @@ Parser::Parser(const std::filesystem::path &path) : path(path)
 
     if (size <= 0)
     {
-        std::cerr << "Invalid file size" << std::endl;
+        std::cerr << "[Parser] Invalid file size" << std::endl;
         return;
     }
 
@@ -42,13 +42,13 @@ Parser::Parser(const std::filesystem::path &path) : path(path)
 
     if (!file)
     {
-        std::cerr << "Failed to read file: " << std::filesystem::absolute(path) << std::endl;
+        std::cerr << "[Parser] Failed to read file: " << std::filesystem::absolute(path) << std::endl;
         return;
     }
 
     if (file.gcount() != size)
     {
-        std::cerr << "Incomplete read in: " << std::filesystem::absolute(path) << "\n";
+        std::cerr << "[Parser] Incomplete read in: " << std::filesystem::absolute(path) << "\n";
         return;
     }
 
@@ -191,7 +191,7 @@ void Parser::parseVector(const std::string_view& line, const std::string_view& k
 
     if (inner.empty())
     {
-        std::cerr << "Error parsing file: " << std::filesystem::absolute(path) << "\n" <<
+        std::cerr << "[Parser] Error parsing file: " << path.filename() << "\n" <<
                 "in line: " << line << " | Error: Vector cannot be empty" << std::endl;
     }
 
