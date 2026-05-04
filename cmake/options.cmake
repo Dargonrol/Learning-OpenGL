@@ -11,4 +11,5 @@ option(ENABLE_SANITIZERS "Enable ASAN/UBSAN" OFF)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_UNITY_BUILD OFF)
 
-option(USE_SYSTEM_GLFW "Use system-installed GLFW if available" OFF)
+option(USE_SYSTEM_GLFW "Use system-installed GLFW if available" ON)
+option(USE_SYSTEM_ASSIMP "Use system-installed assimp if available" ON)

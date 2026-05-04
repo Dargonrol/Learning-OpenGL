@@ -93,12 +93,17 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
-        glfw
+        ${GLFW_TARGET}
         glad
         glm
         imgui
         stb_image
+        ${ASSIMP_TARGET}
 )
+
+#target_include_directories(${PROJECT_NAME} PRIVATE
+#        ${MINIZIP_INCLUDE_DIRS}
+#)
 
 set_target_properties(
         ${PROJECT_NAME}
@@ -113,11 +118,11 @@ target_compile_definitions( ${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Release>:RELEASE_BUILD>
 )
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_64)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_32)
-endif()
+#if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_64)
+#elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+#    target_compile_definitions(${PROJECT_NAME} PRIVATE ARCH_32)
+#endif()
 
 enable_warnings("${PROJECT_NAME}")
 

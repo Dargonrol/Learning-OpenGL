@@ -1,14 +1,23 @@
 # glfw
+set(GLFW_TARGET "")
+
 if(USE_SYSTEM_GLFW)
-    find_package(glfw3 QUIET)
+    find_package(glfw3 CONFIG QUIET)
+    find_package(glfw CONFIG QUIET)
 endif()
 
-if(NOT glfw3_FOUND)
+if(TARGET glfw)
+    set(GLFW_TARGET glfw)
+    message(STATUS "Using system GLFW")
+elseif(TARGET glfw::glfw)
+    set(GLFW_TARGET glfw::glfw)
+    message(STATUS "Using system GLFW")
+else()
     message(STATUS "Using vendored GLFW")
 
     add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
-else()
-    message(STATUS "Using system GLFW")
+
+    set(GLFW_TARGET glfw)
 endif()
 
 # glad
@@ -55,3 +64,27 @@ add_library(stb_image STATIC
 target_include_directories(stb_image PUBLIC
         ${CMAKE_SOURCE_DIR}/vendor/stb
 )
+
+# assimp
+set(ASSIMP_TARGET "")
+if(USE_SYSTEM_ASSIMP ANDc OFF)
+    SET (ASSIMP_SOVERSION "${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
+    find_package(assimp REQUIRED)
+    set(ASSIMP_TARGET assimp::assimp)
+    message(STATUS "Using system ASSIMP")
+else()
+    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ARCHIVE_IMPORTER OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
+    add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/assimp)
+    set(ASSIMP_TARGET assimp)
+    message(STATUS "Using vendor ASSIMP")
+endif()
+
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(MINIZIP REQUIRED minizip)
+
+# assimp
+#add_subdirectory(vendor/assimp)
