@@ -11,9 +11,14 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
+
+    // ==========================================
+    // LINUX (CLion / VS Code / CLI)
+    // ==========================================
     {
-      "name": "x64",
-      "displayName": "x64 Linux Multi-Config",
+      "name": "x64-linux",
+      "displayName": "x64 Multi-Config",
+      "hidden": true,
       "inherits": "base",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux"
@@ -25,36 +30,9 @@
       }
     },
     {
-      "name": "x64",
-      "displayName": "x64 Windows (CLion MinGW)",
-      "inherits": "base",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
-      },
-      "condition": {
-        "and": [
-          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
-          { "type": "inList", "string": "true", "list": [ "${env.CLION_IDE}" ] }
-        ]
-      }
-    },
-    {
-      "name": "x64",
-      "displayName": "x64 Windows (Portable MinGW)",
-      "inherits": "base",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
-      },
-      "condition": {
-        "and": [
-          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
-          { "type": "notInList", "string": "true", "list": [ "${env.CLION_IDE}" ] }
-        ]
-      }
-    },
-    {
-      "name": "x86",
-      "displayName": "x86 Linux Multi-Config",
+      "name": "x86-linux",
+      "displayName": "x86 Multi-Config",
+      "hidden": true,
       "inherits": "base",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x86-linux"
@@ -65,40 +43,117 @@
         "rhs": "Linux"
       }
     },
+
+    // ==========================================
+    // WINDOWS - CLION (MinGW)
+    // ==========================================
     {
-      "name": "x86",
-      "displayName": "x86 Windows (CLion MinGW)",
+      "name": "x64-win-clion",
+      "displayName": "x64 Multi-Config",
       "inherits": "base",
+      "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x86-mingw-dynamic"
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
       },
       "condition": {
-        "and": [
-          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
-          { "type": "inList", "string": "true", "list": [ "${env.CLION_IDE}" ] }
-        ]
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
-      "name": "x86",
-      "displayName": "x86 Windows (Portable MinGW)",
+      "name": "x86-win-clion",
+      "displayName": "x86 Multi-Config",
       "inherits": "base",
+      "hidden": true,
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x86-mingw-dynamic"
       },
       "condition": {
-        "and": [
-          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
-          { "type": "notInList", "string": "true", "list": [ "${env.CLION_IDE}" ] }
-        ]
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+
+    // ==========================================
+    // WINDOWS - VISUAL STUDIO (MSVC)
+    // ==========================================
+    {
+      "name": "x64-win-vs",
+      "displayName": "x64 MSVC Multi-Config",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x86-win-vs",
+      "displayName": "x86 MSVC Multi-Config",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x86-windows"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+
+    // ==========================================
+    // WINDOWS - STANDALONE CLI (Portable MinGW)
+    // ==========================================
+    {
+      "name": "x64-win-standalone",
+      "displayName": "x64 Multi-Config",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
+      }
+    },
+    {
+      "name": "x86-win-standalone",
+      "displayName": "x86 Multi-Config",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x86-mingw-dynamic"
       }
     }
   ],
 
   "buildPresets": [
-    { "name": "x64-debug", "configurePreset": "x64", "configuration": "Debug" },
-    { "name": "x64-release", "configurePreset": "x64", "configuration": "Release" },
-    { "name": "x86-debug", "configurePreset": "x86", "configuration": "Debug" },
-    { "name": "x86-release", "configurePreset": "x86", "configuration": "Release" }
+    // Linux UI Targets
+    { "name": "x64-debug", "configurePreset": "x64-linux", "configuration": "Debug" },
+    { "name": "x64-release", "configurePreset": "x64-linux", "configuration": "Release" },
+    { "name": "x86-debug", "configurePreset": "x86-linux", "configuration": "Debug" },
+    { "name": "x86-release", "configurePreset": "x86-linux", "configuration": "Release" },
+
+    // Windows CLion Targets
+    { "name": "x64-win-debug", "configurePreset": "x64-win-clion", "configuration": "Debug" },
+    { "name": "x64-win-release", "configurePreset": "x64-win-clion", "configuration": "Release" },
+    { "name": "x86-win-debug", "configurePreset": "x86-win-clion", "configuration": "Debug" },
+    { "name": "x86-win-release", "configurePreset": "x86-win-clion", "configuration": "Release" },
+
+    // Windows Visual Studio Targets
+    { "name": "x64-msvc-debug", "configurePreset": "x64-win-vs", "configuration": "Debug" },
+    { "name": "x64-msvc-release", "configurePreset": "x64-win-vs", "configuration": "Release" },
+    { "name": "x86-msvc-debug", "configurePreset": "x86-win-vs", "configuration": "Debug" },
+    { "name": "x86-msvc-release", "configurePreset": "x86-win-vs", "configuration": "Release" },
+
+    // Windows Standalone CLI Targets
+    { "name": "x64-standalone-debug", "configurePreset": "x64-win-standalone", "configuration": "Debug", "hidden": true },
+    { "name": "x64-standalone-release", "configurePreset": "x64-win-standalone", "configuration": "Release", "hidden": true },
+    { "name": "x86-standalone-debug", "configurePreset": "x86-win-standalone", "configuration": "Debug", "hidden": true },
+    { "name": "x86-standalone-release", "configurePreset": "x86-win-standalone", "configuration": "Release", "hidden": true }
   ]
 }

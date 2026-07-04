@@ -5,7 +5,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
 # glad
-add_library(glad STATIC
+add_library(glad STATIC EXCLUDE_FROM_ALL
         vendor/glad/src/glad.c
 )
 
