@@ -71,7 +71,7 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE
         glad
         glm::glm
         imgui::imgui
-        #assimp::assimp
+        assimp::assimp
 )
 
 enable_warnings("${PROJECT_NAME}")
