@@ -66,25 +66,23 @@ target_include_directories(stb_image PUBLIC
 )
 
 # assimp
-set(ASSIMP_TARGET "")
-if(USE_SYSTEM_ASSIMP ANDc OFF)
-    SET (ASSIMP_SOVERSION "${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-    find_package(assimp REQUIRED)
+find_package(assimp CONFIG QUIET)
+
+if(TARGET assimp::assimp)
     set(ASSIMP_TARGET assimp::assimp)
-    message(STATUS "Using system ASSIMP")
-else()
-    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
-    set(ASSIMP_BUILD_ARCHIVE_IMPORTER OFF CACHE BOOL "" FORCE)
-    set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-
-    add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/assimp)
+elseif(TARGET assimp)
     set(ASSIMP_TARGET assimp)
-    message(STATUS "Using vendor ASSIMP")
+else()
+    message(FATAL_ERROR
+            "System Assimp not found.\n"
+            "Install the Assimp development package.\n"
+            "Linux:\n"
+            "  Ubuntu/Debian : sudo apt install libassimp-dev\n"
+            "  Fedora        : sudo dnf install assimp-devel\n"
+            "  Arch Linux    : sudo pacman -S assimp\n"
+
+            "Windows:\n"
+            "  vcpkg         : vcpkg install assimp\n"
+            "  or install Assimp manually and set assimp_DIR\n"
+    )
 endif()
-
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(MINIZIP REQUIRED minizip)
-
-# assimp
-#add_subdirectory(vendor/assimp)
