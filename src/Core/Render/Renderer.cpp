@@ -13,7 +13,7 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
-#include "../Extra/Object.h"
+#include "Extra/Object.h"
 #include "glm/gtc/type_ptr.hpp"
 
 void GLClearError()

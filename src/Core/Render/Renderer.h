@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include "Util.h"
-#include "AssetPool.h"
+#include "Core/Util.h"
+#include "Core/AssetPool.h"
 #include "glm/fwd.hpp"
 
 class ResourceManager;

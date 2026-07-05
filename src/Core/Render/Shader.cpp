@@ -6,8 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
-#include "Util.h"
-#include "../OpenGL.h"
+#include "Core/Util.h"
+#include "OpenGL.h"
 
 Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs, const std::filesystem::path &tes, const std::filesystem::path &gs, const std::filesystem::path &fs, const std::filesystem::path &cs, int &error)
 {

@@ -1,6 +1,6 @@
 #include "Scene_Material.h"
 
-#include "Core/Material.h"
+#include "Core/Render/Material.h"
 #include "Core/ResourceManager.h"
 #include "imgui.h"
 #include "Scene/SceneManager.h"

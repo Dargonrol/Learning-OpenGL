@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-#include "../Object.h"
-#include "Core/VertexArray.h"
-#include "Core/VertexBuffer.h"
-#include "Core/VertexBufferLayout.h"
+#include "Extra/Object.h"
+#include "Core/Render/VertexArray.h"
+#include "Core/Render/VertexBuffer.h"
+#include "Core/Render/VertexBufferLayout.h"
 #include <vector>
 
 class Cube : public Object

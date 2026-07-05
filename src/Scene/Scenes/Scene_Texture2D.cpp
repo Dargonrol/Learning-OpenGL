@@ -8,13 +8,13 @@
 #include "Scene_Menu.h"
 #include "Scene/SceneManager.h"
 #include "Core/Util.h"
-#include "Core/Renderer.h"
-#include "Core/VertexArray.h"
-#include "Core/VertexBufferLayout.h"
-#include "Core/VertexBuffer.h"
-#include "Core/IndexBuffer.h"
-#include "Core/Shader.h"
-#include "Core/Texture.h"
+#include "Core/Render/Renderer.h"
+#include "Core/Render/VertexArray.h"
+#include "Core/Render/VertexBufferLayout.h"
+#include "Core/Render/VertexBuffer.h"
+#include "Core/Render/IndexBuffer.h"
+#include "Core/Render/Shader.h"
+#include "Core/Render/Texture.h"
 
 
 namespace Scene

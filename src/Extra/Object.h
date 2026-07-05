@@ -1,7 +1,7 @@
 #pragma once
 #include "Light.h"
-#include "../Core/AssetPool.h"
-#include "../Core/ResourceManager.h"
+#include "Core/AssetPool.h"
+#include "Core/ResourceManager.h"
 #include "glm/matrix.hpp"
 
 class Object

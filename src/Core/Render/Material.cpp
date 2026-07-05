@@ -4,8 +4,8 @@
 #include <iostream>
 
 #include "Parser.h"
-#include "ResourceManager.h"
-#include "Util.h"
+#include "Core/ResourceManager.h"
+#include "Core/Util.h"
 
 struct ShaderContext
 {

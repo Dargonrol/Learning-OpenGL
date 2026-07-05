@@ -1,6 +1,6 @@
 #define GLFW_INCLUDE_NONE
 
-#include "Core/Renderer.h"
+#include "Core/Render/Renderer.h"
 #include "Core/ResourceManager.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scenes/Scene_BasicPlane.h"
