@@ -1,6 +1,6 @@
 #pragma once
-#include "../Scene.h"
-#include "../../Core/Util.h"
+#include "Scene/Scene.h"
+#include "Core/Util.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>

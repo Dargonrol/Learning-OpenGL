@@ -1,9 +1,9 @@
 #pragma once
-#include "../Scene.h"
+#include "Scene/Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
-#include "../../Core/Util.h"
+#include "Core/Util.h"
 
 FWD_DECLARE_ALL;
 class Texture;

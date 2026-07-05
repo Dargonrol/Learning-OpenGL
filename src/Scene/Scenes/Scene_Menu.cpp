@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "imgui.h"
-#include "../SceneManager.h"
-#include "../../Core/Renderer.h"
+#include "Scene/SceneManager.h"
+#include "Core/Renderer.h"
 #include "GLFW/glfw3.h"
 
 namespace Scene

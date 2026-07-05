@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 
-#include "../Scene.h"
-#include "../../Extra/Camera.h"
-#include "../../Extra/Objects/Cube.h"
+#include "Scene/Scene.h"
+#include "Extra/Camera.h"
+#include "Extra/Objects/Cube.h"
 
 namespace Scene
 {

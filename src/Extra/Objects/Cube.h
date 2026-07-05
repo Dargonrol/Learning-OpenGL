@@ -2,9 +2,9 @@
 #include <iostream>
 
 #include "../Object.h"
-#include "../../Core/VertexArray.h"
-#include "../../Core/VertexBuffer.h"
-#include "../../Core/VertexBufferLayout.h"
+#include "Core/VertexArray.h"
+#include "Core/VertexBuffer.h"
+#include "Core/VertexBufferLayout.h"
 #include <vector>
 
 class Cube : public Object

@@ -1,11 +1,11 @@
 #pragma once
 #include <memory>
 
-#include "../Scene.h"
-#include "../../Core/Util.h"
+#include "Scene/Scene.h"
+#include "Core/Util.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "../../Core/AssetPool.h"
+#include "Core/AssetPool.h"
 
 FWD_DECLARE_ALL;
 class Camera;

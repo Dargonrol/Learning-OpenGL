@@ -3,7 +3,7 @@
 #include <memory>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "../Scene.h"
+#include "Scene/Scene.h"
 
 class Shader;
 class Texture;

@@ -6,15 +6,15 @@
 
 #include "imgui.h"
 #include "Scene_Menu.h"
-#include "../SceneManager.h"
-#include "../../Core/Util.h"
-#include "../../Core/Renderer.h"
-#include "../../Core/VertexArray.h"
-#include "../../Core/VertexBufferLayout.h"
-#include "../../Core/VertexBuffer.h"
-#include "../../Core/IndexBuffer.h"
-#include "../../Core/Shader.h"
-#include "../../Core/Texture.h"
+#include "Scene/SceneManager.h"
+#include "Core/Util.h"
+#include "Core/Renderer.h"
+#include "Core/VertexArray.h"
+#include "Core/VertexBufferLayout.h"
+#include "Core/VertexBuffer.h"
+#include "Core/IndexBuffer.h"
+#include "Core/Shader.h"
+#include "Core/Texture.h"
 
 
 namespace Scene

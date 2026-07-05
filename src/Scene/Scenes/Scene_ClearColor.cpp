@@ -1,10 +1,10 @@
 #include "Scene_ClearColor.h"
 
 #include "imgui.h"
-#include "../SceneManager.h"
-#include "../../Core/Renderer.h"
-#include "../../Core/Util.h"
-#include "../../OpenGL.h"
+#include "Scene/SceneManager.h"
+#include "Core/Renderer.h"
+#include "Core/Util.h"
+#include "OpenGL.h"
 
 namespace Scene
 {

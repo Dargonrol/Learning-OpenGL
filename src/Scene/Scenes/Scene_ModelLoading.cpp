@@ -1,9 +1,9 @@
 #include "Scene_ModelLoading.h"
 
 #include "imgui.h"
-#include "../SceneManager.h"
-#include "../../Core/Renderer.h"
-#include "../../Core/IncludeAll.h"
+#include "Scene/SceneManager.h"
+#include "Core/Renderer.h"
+#include "Core/IncludeAll.h"
 
 #include "GLFW/glfw3.h"
 

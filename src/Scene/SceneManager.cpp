@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
-#include "../OpenGL.h"
-#include "../Core/Renderer.h"
-#include "../Core/ResourceManager.h"
+#include "OpenGL.h"
+#include "Core/Renderer.h"
+#include "Core/ResourceManager.h"
 
 namespace Scene
 {

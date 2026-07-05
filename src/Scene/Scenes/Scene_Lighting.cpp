@@ -1,8 +1,8 @@
 #include "Scene_Lighting.h"
 
-#include "../../Core/IncludeAll.h"
-#include "../../Core/ResourceManager.h"
-#include "../../Extra/Camera.h"
+#include "Core/IncludeAll.h"
+#include "Core/ResourceManager.h"
+#include "Extra/Camera.h"
 
 namespace Scene
 {

@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-#include "../../Core/Material.h"
-#include "../../Core/ResourceManager.h"
+#include "Core/Material.h"
+#include "Core/ResourceManager.h"
 #include "imgui.h"
-#include "../SceneManager.h"
-#include "../../Core/IncludeAll.h"
-#include "../../Extra/Camera.h"
-#include "../../Extra/Objects/Cube.h"
+#include "Scene/SceneManager.h"
+#include "Core/IncludeAll.h"
+#include "Extra/Camera.h"
+#include "Extra/Objects/Cube.h"
 
 namespace Scene
 {
