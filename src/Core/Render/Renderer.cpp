@@ -104,19 +104,19 @@ void Renderer::Init()
         "out vec4 FragColor;\n"
         "void main(){FragColor = vec4(1.0, 0.0, 0.0, 1.0);}\n";
     int error = 0;
-    auto shader = std::make_unique<Shader>(vertex, frag, error);
+    auto shader = Shader(vertex, frag, error);
     if (error)
     {
         std::cerr << "Failed Debug Shader creation!" << std::endl;
         return;
     }
-    auto material = std::make_unique<Material>();
-    material->shaderHandle = rm_->shaderPool.Register("debug", std::move(shader));
-    debugShaderHandle = material->shaderHandle;
-    material->ambient = {1.0f, 0.0f, 0.0f};
-    material->diffuse = {0.0f, 0.0f, 0.0f};
-    material->shininess = 0.0f;
-    material->specular = {0.0f, 0.0f, 0.0f};
+    auto material = Material();
+    material.shaderHandle = rm_->shaderPool.Register("debug", std::move(shader));
+    debugShaderHandle = material.shaderHandle;
+    material.ambient = {1.0f, 0.0f, 0.0f};
+    material.diffuse = {0.0f, 0.0f, 0.0f};
+    material.shininess = 0.0f;
+    material.specular = {0.0f, 0.0f, 0.0f};
     debugMaterialHandle = rm_->materialPool.Register("debug", std::move(material));
     std::cout << "Registering debug Material and Shader \n";
 }

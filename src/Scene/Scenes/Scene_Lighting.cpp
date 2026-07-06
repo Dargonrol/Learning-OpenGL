@@ -14,7 +14,7 @@ namespace Scene
         int error = 0;
 
         {
-            auto lightShader = std::make_unique<Shader>(
+            auto lightShader = Shader(
                 BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
                 BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader",
                 error
@@ -25,7 +25,7 @@ namespace Scene
 
             h_lightShader = rm_->shaderPool.Register("Scene_Lighting_Cube", std::move(lightShader));
 
-            auto objShader = std::make_unique<Shader>(
+            auto objShader = Shader(
                 BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
                 BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader",
                 error

@@ -137,7 +137,6 @@ inline bool isBraceList(const std::string_view& sv)
 
 inline bool getKeyAndValue(const std::string_view& line, std::string_view& key, std::string_view& value)
 {
-    size_t start = 0;
     size_t end = line.find_first_of('=');
     if (end == std::string_view::npos)
         return false;

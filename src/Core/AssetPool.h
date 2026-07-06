@@ -67,12 +67,14 @@ class AssetPool
 public:
     struct Slot
     {
-        Slot(Handle handle, bool isFree, std::unique_ptr<T>&& ptr)
-        : h(handle), free(isFree), data(std::move(ptr)) {}
+        Slot(Handle handle, bool isFree, T&& asset)
+        : h(handle), free(isFree), data(std::move(asset)) {}
+
+        Slot() : h({0, 0}), free(true), data() {}
 
         Handle h = {0, 0};
         bool free = false;
-        std::unique_ptr<T> data;
+        std::optional<T> data;
 
         [[nodiscard]] bool operator==(const Slot &other) const { return h.id == other.h.id && h.gen == other.h.gen; }
         [[nodiscard]] bool operator!=(const Slot &other) const { return !(*this == other); }
@@ -94,13 +96,13 @@ public:
     /**
      * @return a @link Handle with generation != 0 if successful.
      */
-    Handle Register(std::string_view sv, std::unique_ptr<T> asset);
+    Handle Register(std::string_view sv, T asset);
 
     /**
      * Replaces the specified element. If it doesn't exist, create one.
      * @return
      */
-    Handle ReplaceData(std::string_view sv, std::unique_ptr<T> asset);
+    Handle ReplaceData(std::string_view sv, T asset);
     /**
      * @return true if successful
      */
@@ -143,9 +145,12 @@ T * AssetPool<T>::Get(const Handle h) noexcept
 {
     if (h.id >= pool_.size() || h.gen == 0)
         return nullptr;
+
     auto& slot = pool_[h.id];
+
     if (slot.h == h && !slot.free)
-        return slot.data.get();
+        return &slot.data.value();
+
     return nullptr;
 }
 
@@ -168,7 +173,7 @@ std::string_view AssetPool<T>::GetName(const Handle h) const noexcept
 }
 
 template<typename T>
-Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asset)
+Handle AssetPool<T>::Register(const std::string_view sv, T asset)
 {
     auto iter = map_string_handle_.find(sv);
     if (iter == map_string_handle_.end())
@@ -191,7 +196,7 @@ Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asse
             Slot& slot = pool_[index];
             slot.free = false;
             slot.data = std::move(asset);
-            ++slot.h.gen;
+            //++slot.h.gen;
             slot.h.id = index;
             freeSpaces_.pop();
         }
@@ -208,7 +213,7 @@ Handle AssetPool<T>::Register(const std::string_view sv, std::unique_ptr<T> asse
 }
 
 template<typename T>
-Handle AssetPool<T>::ReplaceData(const std::string_view sv, std::unique_ptr<T> asset)
+Handle AssetPool<T>::ReplaceData(const std::string_view sv, T asset)
 {
     auto iter = map_string_handle_.find(sv);
     if (iter == map_string_handle_.end())
@@ -229,7 +234,7 @@ Handle AssetPool<T>::ReplaceData(const std::string_view sv, std::unique_ptr<T> a
 }
 
 template<typename T>
-bool AssetPool<T>::Remove(Handle h)
+bool AssetPool<T>::Remove(const Handle h)
 {
     // doesn't actually remove the element but marks it as free
     auto iter1 = map_handle_string_.find(h);
@@ -237,8 +242,18 @@ bool AssetPool<T>::Remove(Handle h)
         return false;
 
     Index index = h.id;
+
     ++pool_[index].h.gen;
     pool_[index].free = true;
+
+    /*
+    //pool_[index].data = T(); // Shader has no default constructor so this does not work
+    {
+        T tmp = std::move(pool_[index].data); // so instead we are moving T to a local variable that get's destroyed at the end of the scope.
+    }
+    */
+    pool_[index].data.reset(); // using std::optional is cleaner
+
     map_string_handle_.erase(iter1->second);
     map_handle_string_.erase(h);
 

@@ -11,5 +11,5 @@
 #include "Core/Render/Renderer.h"
 #include "Scene/Scenes/Scene_Menu.h"
 #include <imgui.h>
-#include <GLFW/glfw3.h>
+#include "OpenGL.h"
 #include "Util.h"

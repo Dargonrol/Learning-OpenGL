@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
-class Texture;
+struct Texture;
 class IndexBuffer;
 class VertexBuffer;
 class VertexArray;

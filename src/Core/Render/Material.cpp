@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "Parser.h"
+#include "../Parser.h"
 #include "Core/ResourceManager.h"
 #include "Core/Util.h"
 
@@ -43,7 +43,7 @@ Handle handleShader(const ShaderContext& shaderContext, const std::string_view& 
         {}
     };
 
-    auto shader = std::make_unique<Shader>(sc, error);
+    auto shader = Shader(sc, error);
 
     if (error)
     {
@@ -54,18 +54,24 @@ Handle handleShader(const ShaderContext& shaderContext, const std::string_view& 
     return rm.shaderPool.ReplaceData(shaderName, std::move(shader));
 }
 
-Handle handleTexMaps(const std::filesystem::path& path, ResourceManager& rm, int slot = 0)
+Handle handleTexMaps(const std::filesystem::path& path, ResourceManager& rm)
 {
     if (path.empty())
         return {0,0};
-    std::filesystem::path absolutePath;
-    if (path.is_relative())
-        absolutePath = BASE_PATH / path;
-    else
-        absolutePath = path;
 
-    auto texture = std::make_unique<Texture>(absolutePath);
-    return rm.texturePool.ReplaceData(absolutePath.filename().c_str(), std::move(texture));
+    const std::filesystem::path absolutePath = path.is_relative() ? (BASE_PATH / path) : path;
+
+    const std::string textKey = absolutePath.string();
+
+    if (const Handle h = rm.texturePool.GetHandle(textKey))
+        return h;
+
+    Texture texture(absolutePath);
+
+    if (texture.m_RendererID == 0) return
+    {0, 0};
+
+    return rm.texturePool.Register(textKey, std::move(texture));
 }
 
 template<typename T, typename Variant>
@@ -96,7 +102,9 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
         if (rm.materialPool.Exists(name))
             return rm.materialPool.GetHandle(name);
 
-    auto material = std::make_unique<Material>();
+    Material mat = Material();
+    Material* material = &mat;
+
 
     Parser parser(path);
     parser.Parse();
@@ -154,10 +162,10 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
     }
 
     material->shaderHandle = handleShader(shader_context, shaderName, rm, error, name);
-    material->diffuseMap = handleTexMaps(diffuseMapPath, rm, 0);
-    material->specularMap = handleTexMaps(specularMapPath, rm, 1);
+    material->diffuseMap = handleTexMaps(diffuseMapPath, rm);
+    material->specularMap = handleTexMaps(specularMapPath, rm);
 
-    return rm.materialPool.ReplaceData(name, std::move(material));
+    return rm.materialPool.ReplaceData(name, mat);
 }
 
 void Material::BindShader(ResourceManager &rm) const

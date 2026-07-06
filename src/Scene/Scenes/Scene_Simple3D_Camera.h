@@ -6,7 +6,7 @@
 #include "Core/Util.h"
 
 FWD_DECLARE_ALL;
-class Texture;
+struct Texture;
 class Camera;
 
 namespace Scene

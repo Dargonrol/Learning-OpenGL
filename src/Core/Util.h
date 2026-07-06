@@ -20,7 +20,7 @@
     #define GLCall(x) x;
 #else
     #define ASSERT(x) if (!(x)) DEBUG_BREAK();
-    #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+    #define GLCall(x) {GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))}
 #endif
 
 #define FWD_DECLARE_ALL class IndexBuffer;\

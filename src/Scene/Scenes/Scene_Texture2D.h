@@ -6,7 +6,7 @@
 #include "Scene/Scene.h"
 
 class Shader;
-class Texture;
+struct Texture;
 class VertexBuffer;
 class IndexBuffer;
 class VertexArray;

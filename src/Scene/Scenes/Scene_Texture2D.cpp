@@ -2,7 +2,7 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <GLFW/glfw3.h>
+#include <OpenGL.h>
 
 #include "imgui.h"
 #include "Scene_Menu.h"
