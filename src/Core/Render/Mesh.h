@@ -11,12 +11,12 @@ struct Vertex;
 
 struct Mesh
 {
-    VertexArray VAO;
-    VertexBuffer VBO;
-    IndexBuffer IBO;
+    VertexArray     VAO;
+    VertexBuffer    VBO;
+    IndexBuffer     IBO;
 
     Mesh() = default;
-    ~Mesh() = default;
+    Mesh(VertexArray&& vao, VertexBuffer&& vbo, IndexBuffer&& ibo) : VAO(std::move(vao)), VBO(std::move(vbo)), IBO(std::move(ibo)) {}
 
     Mesh(Mesh&& other) noexcept = default;
     Mesh& operator=(Mesh&& other) noexcept = default;
@@ -30,4 +30,19 @@ struct MeshData
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+
+    Mesh UploadToGPU()
+    {
+        if (vertices.empty() || indices.empty())
+            return {};
+
+        VertexArray VAO{};
+        VertexBuffer VBO{vertices.data(), static_cast<unsigned int>(vertices.size() * sizeof(Vertex))};
+
+        VAO.AddBuffer(VBO, Vertex::GetLayout());
+
+        IndexBuffer IBO{indices.data(),  static_cast<unsigned int>(indices.size())};
+
+        return {std::move(VAO), std::move(VBO), std::move(IBO)};
+    }
 };

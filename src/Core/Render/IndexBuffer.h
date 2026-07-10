@@ -8,6 +8,7 @@
 class IndexBuffer
 {
 public:
+    IndexBuffer(): m_RendererID(0), m_Count(0) {}
     IndexBuffer(const unsigned int* data, unsigned int count);
     IndexBuffer(const std::vector<unsigned int> &data) : IndexBuffer(data.data(), static_cast<unsigned int>(data.size())) {}
     template<std::size_t N>

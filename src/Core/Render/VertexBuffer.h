@@ -7,6 +7,7 @@
 class VertexBuffer
 {
 public:
+    VertexBuffer();
     VertexBuffer(const void* data, unsigned int size);
 
     template<typename T>

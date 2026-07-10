@@ -3,6 +3,8 @@
 #include "Core/Util.h"
 #include "OpenGL.h"
 
+VertexBuffer::VertexBuffer() : m_RendererID(0) {}
+
 VertexBuffer::VertexBuffer(const void *data, GLuint size)
 {
     GLCall(glGenBuffers(1, &m_RendererID));
