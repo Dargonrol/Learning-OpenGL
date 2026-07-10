@@ -8,16 +8,16 @@
 struct Vertex
 {
     glm::vec3 Position;
-    glm::vec2 TexCoords;
     glm::vec3 Normal;
+    glm::vec2 TexCoords;
 
     static VertexBufferLayout GetLayout()
     {
         VertexBufferLayout layout;
-
+a
+        layout.Push<float>(3);
         layout.Push<float>(3);
         layout.Push<float>(2);
-        layout.Push<float>(3);
 
         return layout;
     }

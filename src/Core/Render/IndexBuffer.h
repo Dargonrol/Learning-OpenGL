@@ -20,7 +20,7 @@ public:
 
     [[nodiscard]] inline unsigned int GetCount() const { return m_Count; }
 
-    IndexBuffer(IndexBuffer&& other) noexcept : m_RendererID(other.m_RendererID) { other.m_RendererID = 0; other.m_Count = 0; }
+    IndexBuffer(IndexBuffer&& other) noexcept : m_RendererID(other.m_RendererID), m_Count(other.m_Count) { other.m_RendererID = 0; other.m_Count = 0; }
     IndexBuffer& operator=(IndexBuffer&& other) noexcept
     {
         if (this != &other)

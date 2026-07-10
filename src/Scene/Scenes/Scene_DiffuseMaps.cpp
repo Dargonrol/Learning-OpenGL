@@ -49,6 +49,12 @@ namespace Scene
         light_->light.diffuse = lightColor_;
         light_->light.specular = lightColor_;
 
+        Material* materialLight = light_->GetMaterial(*rm_);
+        if (materialLight)
+        {
+            materialLight->diffuse = lightColor_;
+        }
+
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
         camera_->HandleGenericCameraControls(window, deltaTime);
 
@@ -75,7 +81,7 @@ namespace Scene
         shaderCube->SetUniform1i("material.diffuse", 0);
         shaderCube->SetUniform1i("material.specular", 1);
         shaderCube->SetUniform1f("material.shininess", materialCube->shininess);
-        light_->SetLightUniforms(*rm_, *cube_, 0, Light::LightType::POINT);
+        light_->SetLightUniforms(*rm_, *cube_->GetShader(*rm_), 0, Light::LightType::POINT);
         shaderCube->SetUniform1i("uPointLightCount", 1);
         renderer.Draw(*cube_);
 

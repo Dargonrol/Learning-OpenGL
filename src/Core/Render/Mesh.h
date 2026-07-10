@@ -2,12 +2,11 @@
 #include <cstdint>
 #include <vector>
 
-// Forward declarations
-class IndexBuffer;
-class VertexBuffer;
-class VertexArray;
-struct Vertex;
-// --------------------
+#include "Core/Render/Vertex.h"
+#include "Core/Render/VertexBuffer.h"
+#include "Core/Render/VertexArray.h"
+#include "Core/Render/IndexBuffer.h"
+
 
 struct Mesh
 {
@@ -37,11 +36,12 @@ struct MeshData
             return {};
 
         VertexArray VAO{};
-        VertexBuffer VBO{vertices.data(), static_cast<unsigned int>(vertices.size() * sizeof(Vertex))};
+        VertexBuffer VBO{vertices};
 
         VAO.AddBuffer(VBO, Vertex::GetLayout());
 
-        IndexBuffer IBO{indices.data(),  static_cast<unsigned int>(indices.size())};
+        std::cout << "Indices count: " << indices.size() << std::endl;
+        IndexBuffer IBO{indices};
 
         return {std::move(VAO), std::move(VBO), std::move(IBO)};
     }

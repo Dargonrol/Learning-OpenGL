@@ -43,8 +43,7 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
         "src/*.c"
 )
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES}
-        src/Core/Render/Model.h)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # this allows #include "Core/Renderer.h" instead of #include "../../Core/Renderer.h"
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")

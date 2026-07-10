@@ -5,6 +5,7 @@
 #include "Core/AssetPool.h"
 #include "glm/fwd.hpp"
 
+struct Mesh;
 class ResourceManager;
 class Object;
 class VertexArray;
@@ -30,6 +31,7 @@ public:
     void Draw(const VertexArray& va, Shader& shader, unsigned int count) const;
     void Draw(Object& obj) const;
     void Draw(Object& obj, Handle materialHandle) const;
+    static void Draw(const Mesh& mesh);
     void WireDraw(Object& obj, glm::mat4& MVP) const;
     void Clear() const;
 

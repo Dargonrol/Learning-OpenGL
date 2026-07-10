@@ -15,6 +15,7 @@
 #include "IndexBuffer.h"
 #include "Extra/Object.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "Mesh.h"
 
 void GLClearError()
 {
@@ -163,6 +164,13 @@ void Renderer::Draw(Object &obj, Handle materialHandle) const
     obj.BindAll(*rm_);
     rm_->materialPool.Get(materialHandle)->BindShader(*rm_);
     GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
+}
+
+void Renderer::Draw(const Mesh& mesh)
+{
+    mesh.VAO.Bind();
+    mesh.IBO.Bind();
+    GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
 void Renderer::WireDraw(Object &obj, glm::mat4& MVP) const

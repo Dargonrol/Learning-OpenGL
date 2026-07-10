@@ -12,19 +12,20 @@
 #include "Scene/Scenes/Scene_Simple3D.h"
 #include "Scene/Scenes/Scene_Simple3D_Camera.h"
 #include "Scene/Scenes/Scene_Texture2D.h"
+#include "Scene/Scenes/ModelLoading/Scene_ModelLoading.h"
 
 int main()
 {
     debug_info();
     using namespace std::literals;
 
-    ResourceManager resource_manager;
+    ResourceManager* resource_manager = &ResourceManager::Get();
 
-    Renderer renderer(650, 500, resource_manager);
+    Renderer renderer(650, 500, *resource_manager);
     renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
 
-    Scene::SceneManager sceneManager{renderer, resource_manager};
+    Scene::SceneManager sceneManager{renderer, *resource_manager};
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);
     sceneManager.RegisterScene<Scene::Scene_ClearColor>("01 Clear Color"sv);
     sceneManager.RegisterScene<Scene::Scene_BasicPlane>("02 Basic Plane");
@@ -34,6 +35,7 @@ int main()
     sceneManager.RegisterScene<Scene::Scene_Lighting>("06 Lighting"sv);
     sceneManager.RegisterScene<Scene::Scene_Material>("07 Material"sv);
     sceneManager.RegisterScene<Scene::Scene_DiffuseMaps>("08 Diffuse Maps");
+    sceneManager.RegisterScene<Scene::Scene_ModelLoading>("09 Model Loading");
     sceneManager.SetScene<Scene::Scene_Menu>();
 
     while (!renderer.GetWindowShouldClose())
