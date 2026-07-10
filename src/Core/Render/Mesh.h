@@ -40,7 +40,6 @@ struct MeshData
 
         VAO.AddBuffer(VBO, Vertex::GetLayout());
 
-        std::cout << "Indices count: " << indices.size() << std::endl;
         IndexBuffer IBO{indices};
 
         return {std::move(VAO), std::move(VBO), std::move(IBO)};

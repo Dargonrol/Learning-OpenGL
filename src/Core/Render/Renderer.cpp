@@ -16,6 +16,7 @@
 #include "Extra/Object.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Mesh.h"
+#include "Extra/Camera.h"
 
 void GLClearError()
 {
@@ -183,6 +184,21 @@ void Renderer::WireDraw(Object &obj, glm::mat4& MVP) const
     }
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if (rm_->shaderPool.Exists(debugShaderHandle))
+        rm_->shaderPool.Get(debugShaderHandle)->Unbind();
+}
+
+void Renderer::WireDraw(const Mesh& mesh, glm::mat4& MVP) const
+{
+    mesh.VAO.Bind();
+    if (rm_->shaderPool.Exists(debugShaderHandle))
+    {
+        rm_->shaderPool.Get(debugShaderHandle)->Bind();
+        rm_->shaderPool.Get(debugShaderHandle)->SetUniformMat4f("uMVP", MVP);
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if (rm_->shaderPool.Exists(debugShaderHandle))
         rm_->shaderPool.Get(debugShaderHandle)->Unbind();

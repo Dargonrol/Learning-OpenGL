@@ -188,7 +188,7 @@ void Camera::HandleGenericCameraControlsFPS(GLFWwindow *window, float deltaTime,
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         AddPosition(m_up * camSpeed * deltaTime);
-    if ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) | glfwGetKey(window, GLFW_KEY_C) | glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) == GLFW_PRESS)
+    if ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) | glfwGetKey(window, GLFW_KEY_C)) == GLFW_PRESS)
         AddPosition(-m_up * camSpeed * deltaTime);
 
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)

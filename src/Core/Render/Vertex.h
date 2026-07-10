@@ -14,7 +14,7 @@ struct Vertex
     static VertexBufferLayout GetLayout()
     {
         VertexBufferLayout layout;
-a
+
         layout.Push<float>(3);
         layout.Push<float>(3);
         layout.Push<float>(2);

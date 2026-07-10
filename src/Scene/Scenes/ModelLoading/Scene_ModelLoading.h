@@ -24,9 +24,16 @@ namespace Scene
         void OnResize(int width, int height) override;
 
     private:
+        void HandleInput(float deltaTime);
+
+    private:
         std::unique_ptr<Model> model_;
         std::unique_ptr<Cube> light_;
         std::unique_ptr<Camera> camera_;
+
+        float m_camSpeed;
+        float m_camSensitivity;
+        float m_mouseSensitivity;
 
         glm::vec3 lightColor_{0.5f, 0.5f, 0.5f};
         glm::mat4 modelMatrix_{};

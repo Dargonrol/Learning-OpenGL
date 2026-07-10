@@ -20,11 +20,18 @@ namespace Scene
     int Scene_ModelLoading::Init()
     {
         int error = 0;
+
+        m_camSpeed = 5.0f;
+        m_camSensitivity = 4.0f;
+        m_mouseSensitivity = 0.002f;
+
         light_ = std::make_unique<Cube>();
         light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
+        camera_->SetTarget({0.0, 0.0, 0.0});
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
+        camera_->SetMode(CameraMode::FPS);
         camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
         camera_->enableMouseControl = true;
         light_->modelMatrix = glm::translate(light_->modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
@@ -48,6 +55,7 @@ namespace Scene
 
     void Scene_ModelLoading::Update(float deltaTime)
     {
+        HandleInput(deltaTime);
         camera_->Update(deltaTime);
 
         light_->light.diffuse = lightColor_;
@@ -60,7 +68,6 @@ namespace Scene
         }
 
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
-        camera_->HandleGenericCameraControls(window, deltaTime);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             sm_->SetScene("Menu");
@@ -112,6 +119,8 @@ namespace Scene
             shader->SetUniform1i("uPointLightCount", 1);
 
             shader->SetUniformVec3("material.diffuseColor", materialLight->diffuse);
+            glm::mat4 MVP = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * modelMatrix_;
+            //renderer.WireDraw(*mesh, MVP);
             renderer.Draw(*mesh);
         }
 
@@ -138,15 +147,40 @@ namespace Scene
         glEnable(GL_DEPTH_TEST);
         int error = 0;
         light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
+        double x, y;
+        glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
+        camera_->SyncMouse(x, y);
     }
 
     void Scene_ModelLoading::OnLeave()
     {
         glDisable(GL_DEPTH_TEST);
+        renderer_->ReleaseMouse();
     }
 
     void Scene_ModelLoading::OnResize(int width, int height)
     {
         camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+    }
+
+    void Scene_ModelLoading::HandleInput(const float deltaTime)
+    {
+        GLFWwindow* window = &renderer_->GetWindow();
+        camera_->HandleGenericCameraControls(window, deltaTime, m_camSpeed, m_camSensitivity);
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+            m_camSpeed = 0.08f;
+        else
+            m_camSpeed = 10.0f;
+
+        if (camera_->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+        {
+            renderer_->ReleaseMouse();
+            camera_->enableMouseControl = false;
+        }
+        else
+        {
+            renderer_->CaptureMouse();
+            camera_->enableMouseControl = true;
+        }
     }
 }

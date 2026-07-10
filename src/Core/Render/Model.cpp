@@ -23,7 +23,7 @@ Model::Model(const std::filesystem::path& path)
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
         return;
     }
 
@@ -34,7 +34,6 @@ Model::Model(const std::filesystem::path& path)
 
 void Model::processNode(aiNode* node, const aiScene* scene, const std::filesystem::path& path)
 {
-    std::cout << "Processing Node: " << node->mName.C_Str() << std::endl;
     for (unsigned int i = 0; i< node->mNumMeshes; ++i)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -90,19 +89,13 @@ Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std:
         }
     }
 
-    std::cout << "Processing Mesh: " << index << " with numVertices: " << mesh->mNumVertices << " and numIndices: " << indices.size() << std::endl;
-
     // material
     if (mesh->mMaterialIndex >= 0)
     {
-        std::cout << "Has Material" << std::endl;
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         materialHandle = processMaterial(material, path, mesh->mMaterialIndex);
     } else
-    {
-        std::cout << "Does not have Material, applying defualt one" << std::endl;
         materialHandle = rm::Get().materialPool.GetHandle("default");
-    }
 
     MeshData meshData;
     meshData.indices = indices;
@@ -120,26 +113,19 @@ Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std:
 
 Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index)
 {
-    std::cout << "Processing Material" << std::endl;
     std::string materialKey = path.string() + "::mat_" + std::to_string(index);
 
     if (Handle materialHandle = rm::Get().materialPool.GetHandle(materialKey))
-    {
-        std::cout << "Material: " << materialKey << " already exists with handle: " << materialHandle << std::endl;
         return materialHandle;
-    }
 
     Material material;
-    std::cout << "creating new material" << std::endl;
     if (mat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
     {
-        std::cout << "found diffuse texture" << std::endl;
         aiString str;
         mat->GetTexture(aiTextureType_DIFFUSE, 0, &str);
         std::string texFileName = str.C_Str();
 
         std::filesystem::path fullTexPath = DetermineTexturePath(path, texFileName);
-        std::cout << "Texture path: " << fullTexPath << std::endl;
 
         std::string texKey = fullTexPath.string();
         Handle texHandle = rm::Get().texturePool.GetHandle(texKey);
@@ -152,13 +138,11 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
 
     if (mat->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
-        std::cout << "found specular texture" << std::endl;
         aiString str;
         mat->GetTexture(aiTextureType_SPECULAR, 0, &str);
         std::string texFileName = str.C_Str();
 
         std::filesystem::path fullTexPath = DetermineTexturePath(path, texFileName);
-        std::cout << "Texture path: " << fullTexPath << std::endl;
 
         std::string texKey = fullTexPath.string();
         Handle texHandle = rm::Get().texturePool.GetHandle(texKey);
@@ -191,7 +175,6 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         return {0, 0};
     }
     material.shaderHandle = rm::Get().shaderPool.ReplaceData("texShadable", std::move(shader));
-    std::cout << "adding default shader... with handle: " << material.shaderHandle << std::endl;
 
     return rm::Get().materialPool.Register(materialKey, material);
 }

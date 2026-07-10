@@ -5,6 +5,7 @@
 #include "Core/AssetPool.h"
 #include "glm/fwd.hpp"
 
+class Camera;
 struct Mesh;
 class ResourceManager;
 class Object;
@@ -33,6 +34,7 @@ public:
     void Draw(Object& obj, Handle materialHandle) const;
     static void Draw(const Mesh& mesh);
     void WireDraw(Object& obj, glm::mat4& MVP) const;
+    void WireDraw(const Mesh& mesh, glm::mat4& MVP) const;
     void Clear() const;
 
     void CaptureMouse() const;
