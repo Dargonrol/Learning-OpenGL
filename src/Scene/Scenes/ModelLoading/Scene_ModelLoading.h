@@ -3,9 +3,10 @@
 
 #include "Scene/Scene.h"
 #include "Extra/Camera.h"
-#include "Extra/Objects/Cube.h"
 
 
+class LightObject;
+class GameObject;
 class Model;
 
 namespace Scene
@@ -28,7 +29,7 @@ namespace Scene
 
     private:
         std::unique_ptr<GameObject> object_;
-        std::vector<Cube> lights_;
+        std::vector<LightObject> lights_;
         std::unique_ptr<Camera> camera_;
 
         float m_camSpeed;

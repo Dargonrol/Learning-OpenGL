@@ -134,10 +134,20 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         material.diffuseMap = texHandle;
     }
 
+    aiString str;
+    bool specularFound = false;
     if (mat->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
-        aiString str;
         mat->GetTexture(aiTextureType_SPECULAR, 0, &str);
+        specularFound = true;
+    } else if (mat->GetTextureCount(aiTextureType_SHININESS) > 0)
+    {
+        mat->GetTexture(aiTextureType_SHININESS, 0, &str);
+        specularFound = true;
+    }
+
+    if (specularFound)
+    {
         std::string texFileName = str.C_Str();
 
         std::filesystem::path fullTexPath = DetermineTexturePath(path, texFileName);

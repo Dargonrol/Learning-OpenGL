@@ -22,10 +22,9 @@ class Model
     };
 
 public:
-    Model() = default;
     explicit Model(const std::filesystem::path& path, ResourceManager* rm);
 
-    [[nodiscard]] const std::vector<SubMesh>& GetSubMeshes() const { return subMeshes_; }
+    [[nodiscard]] std::vector<SubMesh>& GetSubMeshes() { return subMeshes_; }
 
 
     Model(Model&& other) noexcept : subMeshes_(std::move(other.subMeshes_)) { }

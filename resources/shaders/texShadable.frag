@@ -3,8 +3,8 @@ layout(location = 0) out vec4 FragColor;
 
 #define MAX_LIGHTS 3
 
-in vec3 Normal;
 in vec3 FragPos;
+in vec3 Normal;
 in vec2 TexCoords;
 
 uniform vec3 uViewPos;

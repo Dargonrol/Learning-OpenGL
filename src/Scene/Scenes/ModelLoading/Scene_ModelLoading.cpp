@@ -10,6 +10,7 @@
 #include "Scene/SceneManager.h"
 #include "Core/Render/Model.h"
 #include "Extra/GameObject.h"
+#include "Extra/LightObject.h"
 
 namespace Scene
 {
@@ -27,8 +28,9 @@ namespace Scene
         m_camSensitivity = 4.0f;
         m_mouseSensitivity = 0.002f;
 
-        lights_.emplace_back();
-        lights_[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
+        LightObject obj(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
+        lights_.emplace_back(obj);
+        lights_[0].SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
 
         camera_ = std::make_unique<Camera>(CameraMode::FPS);
 
@@ -50,17 +52,16 @@ namespace Scene
         camera_->enableMouseControl = true;
         lights_[0].modelMatrix = glm::translate(lights_[0].modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
         lights_[0].modelMatrix = glm::scale(lights_[0].modelMatrix, glm::vec3(0.5f));
-        lights_[0].lightSource = true;
-        lights_[0].light.lightType = Light::LightType::POINT;
-        lights_[0].light.ambient = {1.0f, 1.0f, 1.0f};
-        lights_[0].light.diffuse = {1.0f, 1.0f, 1.0f};
-        lights_[0].light.specular = {0.5f, 0.5f, 0.5f};
-        lights_[0].light.constant = 1.0f;
-        lights_[0].light.linear = 0.3f;
-        lights_[0].light.quadratic = 0.3f;
-        lights_[0].light.position = lights_[0].modelMatrix[3];
+        lights_[0].lightData.lightType = LightData::LightType::POINT;
+        lights_[0].lightData.ambient = {1.0f, 1.0f, 1.0f};
+        lights_[0].lightData.diffuse = {1.0f, 1.0f, 1.0f};
+        lights_[0].lightData.specular = {0.5f, 0.5f, 0.5f};
+        lights_[0].lightData.constant = 1.0f;
+        lights_[0].lightData.linear = 0.3f;
+        lights_[0].lightData.quadratic = 0.3f;
+        lights_[0].lightData.position = lights_[0].modelMatrix[3];
 
-        Model model(BASE_PATH / "resources/models/backpack/backpack.obj", rm_);
+        Model model(BASE_PATH / "resources/models/custom/backpack/backpack.obj", rm_);
         Handle h = rm_->modelPool.Register("backpack", std::move(model));
         object_ = std::make_unique<GameObject>(h);
         object_->modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.8f));
@@ -73,10 +74,10 @@ namespace Scene
         HandleInput(deltaTime);
         camera_->Update(deltaTime);
 
-        lights_[0].light.diffuse = lightColor_;
-        lights_[0].light.specular = lightColor_;
+        lights_[0].lightData.diffuse = lightColor_;
+        lights_[0].lightData.specular = lightColor_;
 
-        Material* materialLight = lights_[0].GetMaterial(*rm_);
+        Material* materialLight = rm_->materialPool.Get(rm_->modelPool.Get(lights_[0].GetModelHandle())->GetSubMeshes()[0].materialHandle);
         if (materialLight)
         {
             materialLight->diffuse = lightColor_;
@@ -94,17 +95,8 @@ namespace Scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         const auto& renderer = sm_->GetRenderer();
 
-        Shader* shaderLight = lights_[0].GetShader(*rm_);
-        const Material* materialLight = lights_[0].GetMaterial(*rm_);
-
         renderer.Draw(*object_, *camera_, lights_);
-
-        lights_[0].BindAll(*rm_);
-        shaderLight->SetUniformMat4f("uView", camera_->GetViewMatrix());
-        shaderLight->SetUniformMat4f("uProj", camera_->GetProjectionMatrix());
-        shaderLight->SetUniformMat4f("uModel", lights_[0].modelMatrix);
-        shaderLight->SetUniformVec3("uLightColor", materialLight->diffuse);
-        renderer.Draw(lights_[0]);
+        renderer.DrawLight(lights_[0], *camera_);
     }
 
     void Scene_ModelLoading::ImGuiRender()
@@ -121,7 +113,7 @@ namespace Scene
     {
         glEnable(GL_DEPTH_TEST);
         int error = 0;
-        lights_[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
+        lights_[0].SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
         double x, y;
         glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
         camera_->SyncMouse(x, y);

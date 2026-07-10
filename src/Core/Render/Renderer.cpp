@@ -13,13 +13,12 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
-#include "Extra/Object.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Mesh.h"
 #include "Core/Render/Model.h"
 #include "Extra/GameObject.h"
 #include "Extra/Camera.h"
-#include "Extra/Objects/Cube.h"
+#include "Extra/LightObject.h"
 
 void GLClearError()
 {
@@ -157,39 +156,32 @@ void Renderer::Draw(const VertexArray &va, Shader &shader, unsigned int count) c
     GLCall(glDrawArrays(GL_TRIANGLES, 0, count));
 }
 
-void Renderer::Draw(Object &obj) const
-{
-    obj.BindAll(*rm_);
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
-}
-
-void Renderer::Draw(Object &obj, Handle materialHandle) const
-{
-    obj.BindAll(*rm_);
-    rm_->materialPool.Get(materialHandle)->BindShader(*rm_);
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
-}
-
-void Renderer::Draw(const Mesh& mesh)
+void Renderer::Draw(const Mesh& mesh) const
 {
     mesh.VAO.Bind();
     mesh.IBO.Bind();
     GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& pointLights) const
+void Renderer::Draw(const GameObject& gameObj, Camera& cam, const std::vector<LightObject>& lights) const
 {
     Handle modelHandle = gameObj.GetModelHandle();
     Model* model = rm_->modelPool.Get(modelHandle);
     if (!model) return;
 
+    int i = 0;
     for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
     {
-        Mesh* mesh          = rm_->meshPool.Get(meshHandle);
-        Material* material  = rm_->materialPool.Get(materialHandle);
+        const Mesh* mesh          = rm_->meshPool.Get(meshHandle);
+        const Material* material  = rm_->materialPool.Get(materialHandle);
+
+        Handle overrideHandle = gameObj.GetMaterialHandleOverride(i);
+        if (overrideHandle)
+            material = rm_->materialPool.Get(overrideHandle);
+
         Shader* shader      = rm_->shaderPool.Get(material->shaderHandle);
 
-        if (!mesh || !material || !shader) continue;
+        if (!mesh || !material || !shader) { ++i; continue; }
 
         shader->Bind();
         mesh->VAO.Bind();
@@ -217,42 +209,81 @@ void Renderer::Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& p
         shader->SetUniformVec3("material.diffuseColor", material->diffuse);
         shader->SetUniform1f("material.shininess", material->shininess);
 
-        for (size_t i = 0; i < pointLights.size(); ++i)
+        for (size_t i = 0; i < lights.size(); ++i)
         {
-            pointLights[i].SetLightUniforms(*rm_, *shader, i, Light::LightType::POINT);
+            std::string prefix = "lights[" + std::to_string(i) + "].";
+            shader->SetUniformVec3(prefix + "ambient", lights[i].lightData.ambient);
+            shader->SetUniformVec3(prefix + "diffuse", lights[i].lightData.diffuse);
+            shader->SetUniformVec3(prefix + "specular", lights[i].lightData.specular);
+            shader->SetUniform1f(prefix + "constant", lights[i].lightData.constant);
+            shader->SetUniform1f(prefix + "linear", lights[i].lightData.linear);
+            shader->SetUniform1f(prefix + "quadratic", lights[i].lightData.quadratic);
+            shader->SetUniformVec3(prefix + "position", lights[i].GetPosition());
+            shader->SetUniform1i(prefix + "type", static_cast<int>(lights[i].lightData.lightType));
         }
-        shader->SetUniform1i("uPointLightCount", static_cast<int>(pointLights.size()));
+        shader->SetUniform1i("uPointLightCount", static_cast<int>(lights.size()));
 
         Draw(*mesh);
+        ++i;
     }
 }
 
-void Renderer::WireDraw(Object &obj, glm::mat4& MVP) const
+void Renderer::DrawLight(LightObject& obj, Camera& cam) const
 {
-    obj.BindAll(*rm_);
+    Handle modelHandle = obj.GetModelHandle();
+    Model* model = rm_->modelPool.Get(modelHandle);
+    if (!model) return;
+
+    int i = 0;
+    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
+    {
+        const Mesh* mesh          = rm_->meshPool.Get(meshHandle);
+        const Material* material  = rm_->materialPool.Get(materialHandle);
+
+        Handle overrideHandle{};
+        if (overrideHandle = obj.GetMaterialHandleOverride(i))
+            material = rm_->materialPool.Get(overrideHandle);
+
+        Shader* shader      = rm_->shaderPool.Get(material->shaderHandle);
+
+        if (!mesh || !material || !shader) { ++i; continue; }
+
+        shader->Bind();
+        mesh->VAO.Bind();
+        mesh->IBO.Bind();
+        mesh->VBO.Bind();
+
+        shader->SetUniformMat4f("uView", cam.GetViewMatrix());
+        shader->SetUniformMat4f("uProj", cam.GetProjectionMatrix());
+        shader->SetUniformMat4f("uModel", obj.modelMatrix);
+        shader->SetUniformVec3("uViewPos", cam.GetPosition());
+        shader->SetUniformVec3("uLightColor", obj.lightData.diffuse);
+
+
+        Draw(*mesh);
+        ++i;
+    }
+}
+
+void Renderer::WireDraw(const GameObject& gameObj, const glm::mat4& MVP) const
+{
     if (rm_->shaderPool.Exists(debugShaderHandle))
     {
         rm_->shaderPool.Get(debugShaderHandle)->Bind();
         rm_->shaderPool.Get(debugShaderHandle)->SetUniformMat4f("uMVP", MVP);
     }
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, obj.GetVerticesCount()));
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (rm_->shaderPool.Exists(debugShaderHandle))
-        rm_->shaderPool.Get(debugShaderHandle)->Unbind();
-}
 
-void Renderer::WireDraw(const Mesh& mesh, glm::mat4& MVP) const
-{
-    mesh.VAO.Bind();
-    if (rm_->shaderPool.Exists(debugShaderHandle))
+    Model* model = rm_->modelPool.Get(gameObj.GetModelHandle());
+    if (!model)
+        return;
+
+    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
     {
-        rm_->shaderPool.Get(debugShaderHandle)->Bind();
-        rm_->shaderPool.Get(debugShaderHandle)->SetUniformMat4f("uMVP", MVP);
+        const Mesh* mesh = rm_->meshPool.Get(meshHandle);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        Draw(*mesh);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if (rm_->shaderPool.Exists(debugShaderHandle))
         rm_->shaderPool.Get(debugShaderHandle)->Unbind();
 }

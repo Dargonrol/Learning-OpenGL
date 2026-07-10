@@ -5,6 +5,7 @@
 #include "Core/AssetPool.h"
 #include "glm/fwd.hpp"
 
+class LightObject;
 class Cube;
 class GameObject;
 class Model;
@@ -33,12 +34,11 @@ public:
 
     void Draw(const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;
     void Draw(const VertexArray& va, Shader& shader, unsigned int count) const;
-    void Draw(Object& obj) const;
-    void Draw(Object& obj, Handle materialHandle) const;
-    static void Draw(const Mesh& mesh);
-    void Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& pointLights) const;
-    void WireDraw(Object& obj, glm::mat4& MVP) const;
-    void WireDraw(const Mesh& mesh, glm::mat4& MVP) const;
+
+    void Draw(const GameObject& gameObj, Camera& cam, const std::vector<LightObject>& lights) const;
+    void DrawLight(LightObject& obj, Camera& cam) const;
+    void WireDraw(const GameObject& gameObj, const glm::mat4& MVP) const;
+
     void Clear() const;
 
     void CaptureMouse() const;
@@ -62,6 +62,9 @@ public:
 
     void ImGui_BeginFrame() const;
     void ImGui_EndFrame() const;
+
+private:
+    void Draw(const Mesh& mesh) const;
 
 private:
     bool m_WindowShouldClose = false;

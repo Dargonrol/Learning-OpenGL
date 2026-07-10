@@ -1,9 +1,8 @@
 #pragma once
 
-//fwd delcare
 #include <glm/vec3.hpp>
 
-struct Light
+struct LightData
 {
     enum class LightType
     {

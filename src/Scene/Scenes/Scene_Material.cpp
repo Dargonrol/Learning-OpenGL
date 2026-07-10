@@ -6,17 +6,21 @@
 #include "Scene/SceneManager.h"
 #include "Core/IncludeAll.h"
 #include "Extra/Camera.h"
-#include "Extra/Objects/Cube.h"
+#include "Extra/LightObject.h"
+#include "Extra/GameObject.h"
 
 namespace Scene
 {
     int Scene_Material::Init()
     {
         int error = 0;
-        light_ = std::make_unique<Cube>();
-        light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
-        cube_ = std::make_unique<Cube>();
-        cube_->materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error);
+        light_ = std::make_unique<LightObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
+        cube_ = std::make_unique<GameObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
+        Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
+        Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
+
+        lightModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error, true);
         debugMaterial = Material::parseMaterial("debug", BASE_PATH / "resources/materials/debug.mat", *rm_, error);
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
@@ -35,8 +39,9 @@ namespace Scene
     {
         camera_->Update(deltaTime);
 
-        rm_->materialPool.Get(light_->materialHandle)->diffuse = lightColor_;
-        rm_->materialPool.Get(light_->materialHandle)->specular = lightColor_;
+        Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
+        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->diffuse = lightColor_;
+        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->specular = lightColor_;
 
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
         camera_->HandleGenericCameraControls(window, deltaTime);
@@ -51,32 +56,9 @@ namespace Scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         const auto& renderer = sm_->GetRenderer();
-        Shader* shaderCube = cube_->GetShader(*rm_);
-        Material* materialCube = cube_->GetMaterial(*rm_);
-        Shader* shaderLight = light_->GetShader(*rm_);
-        Material* materialLight = light_->GetMaterial(*rm_);
 
-        cube_->BindAll(*rm_);
-        shaderCube->SetUniformMat4f("uView", camera_->GetViewMatrix());
-        shaderCube->SetUniformMat4f("uProj", camera_->GetProjectionMatrix());
-        shaderCube->SetUniformMat4f("uModel", cube_->modelMatrix);
-        shaderCube->SetUniformVec3("uViewPos", camera_->GetPosition());
-        shaderCube->SetUniformVec3("material.ambient", materialCube->ambient);
-        shaderCube->SetUniformVec3("material.diffuse", materialCube->diffuse);
-        shaderCube->SetUniformVec3("material.specular", materialCube->specular);
-        shaderCube->SetUniform1f("material.shininess", materialCube->shininess);
-        shaderCube->SetUniformVec3("light.ambient", materialLight->ambient);
-        shaderCube->SetUniformVec3("light.diffuse", materialLight->diffuse);
-        shaderCube->SetUniformVec3("light.specular", materialLight->specular);
-        shaderCube->SetUniformVec3("light.position", light_->modelMatrix[3]);
-        renderer.Draw(*cube_);
-
-        light_->BindAll(*rm_);
-        shaderLight->SetUniformMat4f("uView", camera_->GetViewMatrix());
-        shaderLight->SetUniformMat4f("uProj", camera_->GetProjectionMatrix());
-        shaderLight->SetUniformMat4f("uModel", light_->modelMatrix);
-        shaderLight->SetUniformVec3("uLightColor", materialLight->diffuse);
-        renderer.Draw(*light_);
+        renderer.Draw(*cube_, *camera_, {*light_});
+        renderer.DrawLight(*light_, *camera_);
 
         glm::mat4 MVP_Cube = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * cube_->modelMatrix;
         glm::mat4 MVP_Light = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * light_->modelMatrix;
@@ -98,17 +80,21 @@ namespace Scene
     {
         glEnable(GL_DEPTH_TEST);
         int error = 0;
-        light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
-        cube_->materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error);
+        Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
+        Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
+        lightModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error, true);
     }
 
     void Scene_Material::OnLeave()
     {
         glDisable(GL_DEPTH_TEST);
+        /*
         rm_->shaderPool.Remove(rm_->materialPool.Get(cube_->materialHandle)->shaderHandle);
         rm_->materialPool.Remove(cube_->materialHandle);
         rm_->shaderPool.Remove(rm_->materialPool.Get(light_->materialHandle)->shaderHandle);
         rm_->materialPool.Remove(light_->materialHandle);
+        */
     }
 
     void Scene_Material::OnResize(int width, int height)
