@@ -35,6 +35,8 @@ namespace Scene
         float m_camSensitivity;
         float m_mouseSensitivity;
 
+        Renderer* renderer_;
+
         glm::vec3 lightColor_{0.5f, 0.5f, 0.5f};
     };
 } // Scene

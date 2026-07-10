@@ -5,6 +5,7 @@
 #include "../AssetPool.h"
 
 
+class ResourceManager;
 struct Material;
 struct MeshData;
 class aiNode;
@@ -22,7 +23,7 @@ class Model
 
 public:
     Model() = default;
-    explicit Model(const std::filesystem::path& path);
+    explicit Model(const std::filesystem::path& path, ResourceManager* rm);
 
     [[nodiscard]] const std::vector<SubMesh>& GetSubMeshes() const { return subMeshes_; }
 
@@ -44,9 +45,9 @@ public:
 
 
 private:
-    void processNode(aiNode *node, const aiScene *scene, const std::filesystem::path& path);
-    static SubMesh processMesh(aiMesh *mesh, const aiScene * scene, const std::filesystem::path& path, unsigned int index);
-    static Handle processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index);
+    void processNode(aiNode *node, const aiScene *scene, const std::filesystem::path& path, ResourceManager* rm);
+    static SubMesh processMesh(aiMesh *mesh, const aiScene * scene, const std::filesystem::path& path, unsigned int index, ResourceManager* rm);
+    static Handle processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index, ResourceManager* rm);
     static std::filesystem::path DetermineTexturePath(const std::filesystem::path& modelPath, const std::string& textureFilename);
 
 private:

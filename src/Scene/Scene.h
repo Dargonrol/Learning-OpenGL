@@ -27,8 +27,7 @@ namespace Scene
         std::string name;
 
     protected:
-        SceneManager* sm_;
-        Renderer* renderer_;
-        ResourceManager* rm_;
+        SceneManager* sm_ = nullptr;
+        ResourceManager* rm_ = nullptr;
     };
 }

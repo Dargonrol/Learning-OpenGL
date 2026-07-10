@@ -49,6 +49,8 @@ namespace Scene
         glm::vec3 lightColor_{1.0f, 1.0f, 1.0f};
         int cameraModeIndex_;
 
+        Renderer* renderer_;
+
         float speed_ = 1.0f;
         bool moving_ = true;
         bool debug_ = false;

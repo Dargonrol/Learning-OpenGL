@@ -12,18 +12,18 @@ class GameObject
 public:
     GameObject() {}
     GameObject(const Handle handle) : modelHandle_(handle) {}
-    GameObject(const std::filesystem::path& path)
+    GameObject(const std::filesystem::path& path, ResourceManager* rm)
     {
         if (!exists(path))
             return;
 
-        if (const Handle modelHandle = rm::Get().modelPool.GetHandle(path.string()))
+        if (const Handle modelHandle = rm->modelPool.GetHandle(path.string()))
         {
             modelHandle_ = modelHandle;
             return;
         }
 
-        modelHandle_ = rm::Get().modelPool.Register(path.string(), Model(path));
+        modelHandle_ = rm->modelPool.Register(path.string(), Model(path, rm));
     }
     ~GameObject() {}
 

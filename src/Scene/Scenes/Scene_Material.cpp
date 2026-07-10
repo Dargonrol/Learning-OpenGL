@@ -21,7 +21,7 @@ namespace Scene
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
-        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        camera_->SetAspectRatio(static_cast<float>(sm_->GetRenderer().GetWindowWidth()) / static_cast<float>(sm_->GetRenderer().GetWindowHeight()));
         camera_->enableMouseControl = true;
 
         cube_->modelMatrix = glm::translate(cube_->modelMatrix, glm::vec3{0.0f, 0.0f, 0.0f});
@@ -113,6 +113,6 @@ namespace Scene
 
     void Scene_Material::OnResize(int width, int height)
     {
-        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        camera_->SetAspectRatio(static_cast<float>(sm_->GetRenderer().GetWindowWidth()) / static_cast<float>(sm_->GetRenderer().GetWindowHeight()));
     }
 }

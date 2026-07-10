@@ -13,9 +13,7 @@
 
 struct Vertex;
 
-using rm = ResourceManager;
-
-Model::Model(const std::filesystem::path& path)
+Model::Model(const std::filesystem::path& path, ResourceManager* rm)
 {
     std::cout << "Loading Model: " << path << std::endl;
     Assimp::Importer importer;
@@ -29,24 +27,24 @@ Model::Model(const std::filesystem::path& path)
 
     std::filesystem::path modelDir = path.parent_path();
 
-    processNode(scene->mRootNode, scene, path);
+    processNode(scene->mRootNode, scene, path, rm);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, const std::filesystem::path& path)
+void Model::processNode(aiNode* node, const aiScene* scene, const std::filesystem::path& path, ResourceManager* rm)
 {
     for (unsigned int i = 0; i< node->mNumMeshes; ++i)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        subMeshes_.push_back(processMesh(mesh, scene, path, node->mMeshes[i]));
+        subMeshes_.push_back(processMesh(mesh, scene, path, node->mMeshes[i], rm));
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; ++i)
     {
-        processNode(node->mChildren[i], scene, path);
+        processNode(node->mChildren[i], scene, path, rm);
     }
 }
 
-Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std::filesystem::path& path, unsigned int index)
+Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std::filesystem::path& path, unsigned int index, ResourceManager* rm)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -93,9 +91,9 @@ Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std:
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        materialHandle = processMaterial(material, path, mesh->mMaterialIndex);
+        materialHandle = processMaterial(material, path, mesh->mMaterialIndex, rm);
     } else
-        materialHandle = rm::Get().materialPool.GetHandle("default");
+        materialHandle = rm->materialPool.GetHandle("default");
 
     MeshData meshData;
     meshData.indices = indices;
@@ -106,16 +104,16 @@ Model::SubMesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const std:
     SubMesh subMesh;
     subMesh.materialHandle = materialHandle;
     std::string meshKey = path.string() + "::mesh_" + std::to_string(index);
-    subMesh.meshHandle = rm::Get().meshPool.Register(meshKey, std::move(gpuMesh));
+    subMesh.meshHandle = rm->meshPool.Register(meshKey, std::move(gpuMesh));
 
     return subMesh;
 }
 
-Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index)
+Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index, ResourceManager* rm)
 {
     std::string materialKey = path.string() + "::mat_" + std::to_string(index);
 
-    if (Handle materialHandle = rm::Get().materialPool.GetHandle(materialKey))
+    if (Handle materialHandle = rm->materialPool.GetHandle(materialKey))
         return materialHandle;
 
     Material material;
@@ -128,10 +126,10 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         std::filesystem::path fullTexPath = DetermineTexturePath(path, texFileName);
 
         std::string texKey = fullTexPath.string();
-        Handle texHandle = rm::Get().texturePool.GetHandle(texKey);
+        Handle texHandle = rm->texturePool.GetHandle(texKey);
 
         if (!texHandle)
-            texHandle = rm::Get().texturePool.Register(texKey, Texture(fullTexPath.string()));
+            texHandle = rm->texturePool.Register(texKey, Texture(fullTexPath.string()));
 
         material.diffuseMap = texHandle;
     }
@@ -145,10 +143,10 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         std::filesystem::path fullTexPath = DetermineTexturePath(path, texFileName);
 
         std::string texKey = fullTexPath.string();
-        Handle texHandle = rm::Get().texturePool.GetHandle(texKey);
+        Handle texHandle = rm->texturePool.GetHandle(texKey);
 
         if (!texHandle)
-            texHandle = rm::Get().texturePool.Register(texKey, Texture(fullTexPath.string()));
+            texHandle = rm->texturePool.Register(texKey, Texture(fullTexPath.string()));
 
         material.specularMap = texHandle;
     }
@@ -174,9 +172,9 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         std::cerr << "Error parsing material with shader: " << "texShadable" << std::endl;
         return {0, 0};
     }
-    material.shaderHandle = rm::Get().shaderPool.ReplaceData("texShadable", std::move(shader));
+    material.shaderHandle = rm->shaderPool.ReplaceData("texShadable", std::move(shader));
 
-    return rm::Get().materialPool.Register(materialKey, material);
+    return rm->materialPool.Register(materialKey, material);
 }
 
 std::filesystem::path Model::DetermineTexturePath(const std::filesystem::path& modelPath, const std::string& textureFilename)

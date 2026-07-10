@@ -180,14 +180,14 @@ void Renderer::Draw(const Mesh& mesh)
 void Renderer::Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& pointLights) const
 {
     Handle modelHandle = gameObj.GetModelHandle();
-    Model* model = rm::Get().modelPool.Get(modelHandle);
+    Model* model = rm_->modelPool.Get(modelHandle);
     if (!model) return;
 
     for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
     {
-        Mesh* mesh          = rm::Get().meshPool.Get(meshHandle);
-        Material* material  = rm::Get().materialPool.Get(materialHandle);
-        Shader* shader      = rm::Get().shaderPool.Get(material->shaderHandle);
+        Mesh* mesh          = rm_->meshPool.Get(meshHandle);
+        Material* material  = rm_->materialPool.Get(materialHandle);
+        Shader* shader      = rm_->shaderPool.Get(material->shaderHandle);
 
         if (!mesh || !material || !shader) continue;
 
@@ -198,13 +198,13 @@ void Renderer::Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& p
 
         if (material->diffuseMap)
         {
-            const Texture* diffTex = rm::Get().texturePool.Get(material->diffuseMap);
+            const Texture* diffTex = rm_->texturePool.Get(material->diffuseMap);
             diffTex->Bind(0);
             shader->SetUniform1i("material.diffuse", 0);
         }
         if (material->specularMap)
         {
-            const Texture* specTex = rm::Get().texturePool.Get(material->specularMap);
+            const Texture* specTex = rm_->texturePool.Get(material->specularMap);
             specTex->Bind(1);
             shader->SetUniform1i("material.specular", 1);
         }

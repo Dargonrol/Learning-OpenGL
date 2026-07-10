@@ -11,6 +11,7 @@ namespace Scene
 
     int Scene_Lighting::Init()
     {
+        renderer_ = &sm_->GetRenderer();
         int error = 0;
 
         {
@@ -99,7 +100,7 @@ namespace Scene
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
-        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        camera_->SetAspectRatio(static_cast<float>(sm_->GetRenderer().GetWindowWidth()) / static_cast<float>(sm_->GetRenderer().GetWindowHeight()));
         camera_->enableMouseControl = true;
 
         modelObj_ = {1.0f};

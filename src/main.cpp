@@ -23,13 +23,13 @@ int main()
 
     using namespace std::literals;
 
-    ResourceManager* resource_manager = &ResourceManager::Get();
+    ResourceManager resource_manager;
 
-    Renderer renderer(650, 500, *resource_manager);
+    Renderer renderer(650, 500, resource_manager);
     renderer.SetDefaultTitle("OpenGL Test"sv);
     renderer.Init();
 
-    Scene::SceneManager sceneManager{renderer, *resource_manager};
+    Scene::SceneManager sceneManager{renderer, resource_manager};
     sceneManager.RegisterScene<Scene::Scene_Menu>("Menu"sv);
     sceneManager.RegisterScene<Scene::Scene_ClearColor>("01 Clear Color"sv);
     sceneManager.RegisterScene<Scene::Scene_BasicPlane>("02 Basic Plane");

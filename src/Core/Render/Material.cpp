@@ -7,8 +7,6 @@
 #include "Core/ResourceManager.h"
 #include "Core/Util.h"
 
-using RM = ResourceManager;
-
 struct ShaderContext
 {
     std::string vertShaderPath, fragShaderPath, tcShaderPath, teShaderPath, geoShaderPath;
@@ -101,8 +99,8 @@ bool assignValue(const Parser::Value& value, T& target)
 Handle Material::parseMaterial(const std::string_view name, const std::filesystem::path &path, ResourceManager& rm, int& error, bool replace)
 {
     if (!replace)
-        if (RM::Get().materialPool.Exists(name))
-            return RM::Get().materialPool.GetHandle(name);
+        if (rm.materialPool.Exists(name))
+            return rm.materialPool.GetHandle(name);
 
     Material mat = Material();
     Material* material = &mat;
@@ -167,11 +165,11 @@ Handle Material::parseMaterial(const std::string_view name, const std::filesyste
     material->diffuseMap = handleTexMaps(diffuseMapPath, rm);
     material->specularMap = handleTexMaps(specularMapPath, rm);
 
-    return RM::Get().materialPool.ReplaceData(name, mat);
+    return rm.materialPool.ReplaceData(name, mat);
 }
 
 void Material::BindShader(ResourceManager &rm) const
 {
     if (shaderHandle.gen != 0)
-        RM::Get().shaderPool.Get(this->shaderHandle)->Bind();
+        rm.shaderPool.Get(this->shaderHandle)->Bind();
 }

@@ -11,16 +11,8 @@
 class ResourceManager
 {
 public:
-    static ResourceManager& Get()
-    {
-        static ResourceManager instance;
-        return instance;
-    }
-
-    ResourceManager(const ResourceManager&) = delete;
-    ResourceManager& operator=(const ResourceManager&) = delete;
-    ResourceManager(ResourceManager&&) = delete;
-    ResourceManager& operator=(ResourceManager&&) = delete;
+    ResourceManager() = default;
+    ~ResourceManager() = default;
 
 
 public:
@@ -29,9 +21,4 @@ public:
     AssetPool<Texture>  texturePool{};
     AssetPool<Mesh>     meshPool{};
     AssetPool<Model>    modelPool{};
-
-
-private:
-    ResourceManager() = default;
-    ~ResourceManager() = default;
 };

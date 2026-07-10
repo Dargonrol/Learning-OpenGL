@@ -20,6 +20,7 @@ namespace Scene
 
     int Scene_ModelLoading::Init()
     {
+        renderer_ = &sm_->GetRenderer();
         int error = 0;
 
         m_camSpeed = 5.0f;
@@ -45,7 +46,7 @@ namespace Scene
 
         camera_->SetYaw(yaw);
         camera_->SetPitch(pitch);
-        camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        camera_->SetAspectRatio(static_cast<float>(sm_->GetRenderer().GetWindowWidth()) / static_cast<float>(sm_->GetRenderer().GetWindowHeight()));
         camera_->enableMouseControl = true;
         lights_[0].modelMatrix = glm::translate(lights_[0].modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
         lights_[0].modelMatrix = glm::scale(lights_[0].modelMatrix, glm::vec3(0.5f));
@@ -59,8 +60,8 @@ namespace Scene
         lights_[0].light.quadratic = 0.3f;
         lights_[0].light.position = lights_[0].modelMatrix[3];
 
-        Model model(BASE_PATH / "resources/models/backpack/backpack.obj");
-        Handle h = rm::Get().modelPool.Register("backpack", std::move(model));
+        Model model(BASE_PATH / "resources/models/backpack/backpack.obj", rm_);
+        Handle h = rm_->modelPool.Register("backpack", std::move(model));
         object_ = std::make_unique<GameObject>(h);
         object_->modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.8f));
 

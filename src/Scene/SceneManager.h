@@ -29,7 +29,6 @@ namespace Scene
             }
             auto scene = std::make_unique<T>();
             scene->sm_ = this;
-            scene->renderer_ = &m_renderer;
             scene->rm_ = &resourceManager_;
             scene->name = std::string(name);
             m_Scenes_Vector.push_back(std::move(scene));

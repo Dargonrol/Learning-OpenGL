@@ -114,7 +114,7 @@ namespace Scene
 
         m_camera = std::make_unique<Camera>();
 
-        m_camera->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
+        m_camera->SetAspectRatio(static_cast<float>(sm_->GetRenderer().GetWindowWidth()) / static_cast<float>(sm_->GetRenderer().GetWindowHeight()));
         m_camera->enableMouseControl = true;
 
         m_camSpeed = 10.0f;
@@ -166,7 +166,7 @@ namespace Scene
         for (const auto & i : m_model)
         {
             m_shader->SetUniformMat4f("u_model", i);
-            renderer_->Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            sm_->GetRenderer().Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
         }
     }
 
@@ -202,7 +202,7 @@ namespace Scene
         m_tex2->Bind(1);
         GLCall(glEnable(GL_DEPTH_TEST));
         double x, y;
-        glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
+        glfwGetCursorPos(&sm_->GetRenderer().GetWindow(), &x, &y);
         m_camera->SyncMouse(x, y);
     }
 
@@ -212,12 +212,12 @@ namespace Scene
         m_tex2->Unbind();
         m_shader->Unbind();
         GLCall(glDisable(GL_DEPTH_TEST));
-        renderer_->ReleaseMouse();
+        sm_->GetRenderer().ReleaseMouse();
     }
 
     void Scene_Simple3D_Camera::HandleInput(const float deltaTime)
     {
-        GLFWwindow* window = &renderer_->GetWindow();
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             sm_->SetScene<Scene_Menu>();
@@ -245,12 +245,12 @@ namespace Scene
 
         if (m_camera->GetMode() != CameraMode::FPS || glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
         {
-            renderer_->ReleaseMouse();
+            sm_->GetRenderer().ReleaseMouse();
             m_camera->enableMouseControl = false;
         }
         else
         {
-            renderer_->CaptureMouse();
+            sm_->GetRenderer().CaptureMouse();
             m_camera->enableMouseControl = true;
         }
 
