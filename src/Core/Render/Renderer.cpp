@@ -16,7 +16,10 @@
 #include "Extra/Object.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Mesh.h"
+#include "Core/Render/Model.h"
+#include "Extra/GameObject.h"
 #include "Extra/Camera.h"
+#include "Extra/Objects/Cube.h"
 
 void GLClearError()
 {
@@ -172,6 +175,56 @@ void Renderer::Draw(const Mesh& mesh)
     mesh.VAO.Bind();
     mesh.IBO.Bind();
     GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& pointLights) const
+{
+    Handle modelHandle = gameObj.GetModelHandle();
+    Model* model = rm::Get().modelPool.Get(modelHandle);
+    if (!model) return;
+
+    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
+    {
+        Mesh* mesh          = rm::Get().meshPool.Get(meshHandle);
+        Material* material  = rm::Get().materialPool.Get(materialHandle);
+        Shader* shader      = rm::Get().shaderPool.Get(material->shaderHandle);
+
+        if (!mesh || !material || !shader) continue;
+
+        shader->Bind();
+        mesh->VAO.Bind();
+        mesh->IBO.Bind();
+        mesh->VBO.Bind();
+
+        if (material->diffuseMap)
+        {
+            const Texture* diffTex = rm::Get().texturePool.Get(material->diffuseMap);
+            diffTex->Bind(0);
+            shader->SetUniform1i("material.diffuse", 0);
+        }
+        if (material->specularMap)
+        {
+            const Texture* specTex = rm::Get().texturePool.Get(material->specularMap);
+            specTex->Bind(1);
+            shader->SetUniform1i("material.specular", 1);
+        }
+
+        shader->SetUniformMat4f("uView", cam.GetViewMatrix());
+        shader->SetUniformMat4f("uProj", cam.GetProjectionMatrix());
+        shader->SetUniformMat4f("uModel", gameObj.modelMatrix);
+        shader->SetUniformVec3("uViewPos", cam.GetPosition());
+
+        shader->SetUniformVec3("material.diffuseColor", material->diffuse);
+        shader->SetUniform1f("material.shininess", material->shininess);
+
+        for (size_t i = 0; i < pointLights.size(); ++i)
+        {
+            pointLights[i].SetLightUniforms(*rm_, *shader, i, Light::LightType::POINT);
+        }
+        shader->SetUniform1i("uPointLightCount", static_cast<int>(pointLights.size()));
+
+        Draw(*mesh);
+    }
 }
 
 void Renderer::WireDraw(Object &obj, glm::mat4& MVP) const

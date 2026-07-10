@@ -27,8 +27,8 @@ namespace Scene
         void HandleInput(float deltaTime);
 
     private:
-        std::unique_ptr<Model> model_;
-        std::unique_ptr<Cube> light_;
+        std::unique_ptr<GameObject> object_;
+        std::vector<Cube> lights_;
         std::unique_ptr<Camera> camera_;
 
         float m_camSpeed;
@@ -36,6 +36,5 @@ namespace Scene
         float m_mouseSensitivity;
 
         glm::vec3 lightColor_{0.5f, 0.5f, 0.5f};
-        glm::mat4 modelMatrix_{};
     };
 } // Scene

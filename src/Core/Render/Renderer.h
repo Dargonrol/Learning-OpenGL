@@ -5,6 +5,9 @@
 #include "Core/AssetPool.h"
 #include "glm/fwd.hpp"
 
+class Cube;
+class GameObject;
+class Model;
 class Camera;
 struct Mesh;
 class ResourceManager;
@@ -33,6 +36,7 @@ public:
     void Draw(Object& obj) const;
     void Draw(Object& obj, Handle materialHandle) const;
     static void Draw(const Mesh& mesh);
+    void Draw(GameObject& gameObj, Camera& cam, const std::vector<Cube>& pointLights) const;
     void WireDraw(Object& obj, glm::mat4& MVP) const;
     void WireDraw(const Mesh& mesh, glm::mat4& MVP) const;
     void Clear() const;

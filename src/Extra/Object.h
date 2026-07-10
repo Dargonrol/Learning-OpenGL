@@ -26,7 +26,7 @@ public:
         return rm.materialPool.Get(materialHandle);
     }
 
-    void SetLightUniforms(ResourceManager& rm, Shader& shader, const size_t lightNum, Light::LightType type)
+    void SetLightUniforms(ResourceManager& rm, Shader& shader, const size_t lightNum, Light::LightType type) const
     {
         shader.Bind();
         std::string prefix = "lights[" + std::to_string(lightNum) + "].";

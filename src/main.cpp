@@ -16,7 +16,11 @@
 
 int main()
 {
+#ifdef RELEASE
+#else
     debug_info();
+#endif
+
     using namespace std::literals;
 
     ResourceManager* resource_manager = &ResourceManager::Get();

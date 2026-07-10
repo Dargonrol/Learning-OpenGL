@@ -5,6 +5,7 @@
 #include "Core/Render/Shader.h"
 #include "Core/Render/Texture.h"
 #include "Core/Render/Mesh.h"
+#include "Core/Render/Model.h"
 
 
 class ResourceManager
@@ -27,6 +28,7 @@ public:
     AssetPool<Shader>   shaderPool{};
     AssetPool<Texture>  texturePool{};
     AssetPool<Mesh>     meshPool{};
+    AssetPool<Model>    modelPool{};
 
 
 private:

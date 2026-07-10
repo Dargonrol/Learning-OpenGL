@@ -9,6 +9,7 @@
 #include "imgui.h"
 #include "Scene/SceneManager.h"
 #include "Core/Render/Model.h"
+#include "Extra/GameObject.h"
 
 namespace Scene
 {
@@ -25,30 +26,43 @@ namespace Scene
         m_camSensitivity = 4.0f;
         m_mouseSensitivity = 0.002f;
 
-        light_ = std::make_unique<Cube>();
-        light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
+        lights_.emplace_back();
+        lights_[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error);
 
-        camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
-        camera_->SetTarget({0.0, 0.0, 0.0});
+        camera_ = std::make_unique<Camera>(CameraMode::FPS);
+
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
+        camera_->SetTarget({0.0f, 0.0f, 0.0f});
+
+        glm::vec3& pos = camera_->GetPosition();
+        const glm::vec3& target = camera_->GetTargetPos();
+
         camera_->SetMode(CameraMode::FPS);
+
+        glm::vec3 initialDir = glm::normalize(target - pos);
+        float yaw = std::atan2(initialDir.z, initialDir.x);
+        float pitch = glm::asin(initialDir.y);
+
+        camera_->SetYaw(yaw);
+        camera_->SetPitch(pitch);
         camera_->SetAspectRatio(static_cast<float>(renderer_->GetWindowWidth()) / static_cast<float>(renderer_->GetWindowHeight()));
         camera_->enableMouseControl = true;
-        light_->modelMatrix = glm::translate(light_->modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
-        light_->modelMatrix = glm::scale(light_->modelMatrix, glm::vec3(0.5f));
-        light_->lightSource = true;
-        light_->light.lightType = Light::LightType::POINT;
-        light_->light.ambient = {1.0f, 1.0f, 1.0f};
-        light_->light.diffuse = {1.0f, 1.0f, 1.0f};
-        light_->light.specular = {0.5f, 0.5f, 0.5f};
-        light_->light.constant = 1.0f;
-        light_->light.linear = 0.3f;
-        light_->light.quadratic = 0.3f;
-        light_->light.position = light_->modelMatrix[3];
+        lights_[0].modelMatrix = glm::translate(lights_[0].modelMatrix, glm::vec3{1.0f, 1.0f, 2.0f});
+        lights_[0].modelMatrix = glm::scale(lights_[0].modelMatrix, glm::vec3(0.5f));
+        lights_[0].lightSource = true;
+        lights_[0].light.lightType = Light::LightType::POINT;
+        lights_[0].light.ambient = {1.0f, 1.0f, 1.0f};
+        lights_[0].light.diffuse = {1.0f, 1.0f, 1.0f};
+        lights_[0].light.specular = {0.5f, 0.5f, 0.5f};
+        lights_[0].light.constant = 1.0f;
+        lights_[0].light.linear = 0.3f;
+        lights_[0].light.quadratic = 0.3f;
+        lights_[0].light.position = lights_[0].modelMatrix[3];
 
-        model_ = std::make_unique<Model>(BASE_PATH / "resources/models/backpack/backpack.obj");
-
-        modelMatrix_ = glm::scale(glm::mat4(1.0f), glm::vec3(0.8f));
+        Model model(BASE_PATH / "resources/models/backpack/backpack.obj");
+        Handle h = rm::Get().modelPool.Register("backpack", std::move(model));
+        object_ = std::make_unique<GameObject>(h);
+        object_->modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.8f));
 
         return error;
     }
@@ -58,10 +72,10 @@ namespace Scene
         HandleInput(deltaTime);
         camera_->Update(deltaTime);
 
-        light_->light.diffuse = lightColor_;
-        light_->light.specular = lightColor_;
+        lights_[0].light.diffuse = lightColor_;
+        lights_[0].light.specular = lightColor_;
 
-        Material* materialLight = light_->GetMaterial(*rm_);
+        Material* materialLight = lights_[0].GetMaterial(*rm_);
         if (materialLight)
         {
             materialLight->diffuse = lightColor_;
@@ -79,57 +93,17 @@ namespace Scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         const auto& renderer = sm_->GetRenderer();
 
-        Shader* shaderLight = light_->GetShader(*rm_);
-        Material* materialLight = light_->GetMaterial(*rm_);
+        Shader* shaderLight = lights_[0].GetShader(*rm_);
+        const Material* materialLight = lights_[0].GetMaterial(*rm_);
 
-        for (const auto& subMesh: model_->GetSubMeshes())
-        {
-            Mesh* mesh          = rm::Get().meshPool.Get(subMesh.meshHandle);
-            Material* material  = rm::Get().materialPool.Get(subMesh.materialHandle);
-            Shader* shader      = rm::Get().shaderPool.Get(material->shaderHandle);
+        renderer.Draw(*object_, *camera_, lights_);
 
-
-            shader->Bind();
-            mesh->VAO.Bind();
-            mesh->IBO.Bind();
-            mesh->VBO.Bind();
-
-            if (material->diffuseMap)
-            {
-                Texture* diffTex = rm::Get().texturePool.Get(material->diffuseMap);
-                diffTex->Bind(0);
-                shader->SetUniform1i("material.diffuse", 0);
-            }
-            if (material->specularMap)
-            {
-                Texture* specTex = rm::Get().texturePool.Get(material->specularMap);
-                specTex->Bind(1);
-                shader->SetUniform1i("material.specular", 1);
-            }
-
-            shader->SetUniformMat4f("uView", camera_->GetViewMatrix());
-            shader->SetUniformMat4f("uProj", camera_->GetProjectionMatrix());
-            shader->SetUniformMat4f("uModel", modelMatrix_);
-            shader->SetUniformVec3("uViewPos", camera_->GetPosition());
-
-            shader->SetUniformVec3("material.diffuseColor", material->diffuse);
-            shader->SetUniform1f("material.shininess", material->shininess);
-
-            light_->SetLightUniforms(*rm_, *shader, 0, Light::LightType::POINT);
-            shader->SetUniform1i("uPointLightCount", 1);
-
-            shader->SetUniformVec3("material.diffuseColor", materialLight->diffuse);
-            glm::mat4 MVP = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * modelMatrix_;
-            //renderer.WireDraw(*mesh, MVP);
-            renderer.Draw(*mesh);
-        }
-
-        light_->BindAll(*rm_);
+        lights_[0].BindAll(*rm_);
         shaderLight->SetUniformMat4f("uView", camera_->GetViewMatrix());
         shaderLight->SetUniformMat4f("uProj", camera_->GetProjectionMatrix());
-        shaderLight->SetUniformMat4f("uModel", light_->modelMatrix);
+        shaderLight->SetUniformMat4f("uModel", lights_[0].modelMatrix);
         shaderLight->SetUniformVec3("uLightColor", materialLight->diffuse);
-        renderer.Draw(*light_);
+        renderer.Draw(lights_[0]);
     }
 
     void Scene_ModelLoading::ImGuiRender()
@@ -146,7 +120,7 @@ namespace Scene
     {
         glEnable(GL_DEPTH_TEST);
         int error = 0;
-        light_->materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
+        lights_[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
         double x, y;
         glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
         camera_->SyncMouse(x, y);

@@ -27,6 +27,22 @@ public:
     [[nodiscard]] const std::vector<SubMesh>& GetSubMeshes() const { return subMeshes_; }
 
 
+    Model(Model&& other) noexcept : subMeshes_(std::move(other.subMeshes_)) { }
+    Model& operator=(Model&& other) noexcept
+    {
+        if (this != &other)
+        {
+            subMeshes_ = std::move(other.subMeshes_);
+
+            other.subMeshes_.clear();
+        }
+        return *this;
+    }
+
+    Model(const Model& other) = delete;
+    Model& operator=(const Model& other) = delete;
+
+
 private:
     void processNode(aiNode *node, const aiScene *scene, const std::filesystem::path& path);
     static SubMesh processMesh(aiMesh *mesh, const aiScene * scene, const std::filesystem::path& path, unsigned int index);
