@@ -1,6 +1,10 @@
 #pragma once
 #include <vector>
 
+#include "Core/Util.h"
+#include "Renderer.h"
+#include "OpenGL.h"
+
 class IndexBuffer
 {
 public:
@@ -15,7 +19,27 @@ public:
 
     [[nodiscard]] inline unsigned int GetCount() const { return m_Count; }
 
+    IndexBuffer(IndexBuffer&& other) noexcept : m_RendererID(other.m_RendererID) { other.m_RendererID = 0; other.m_Count = 0; }
+    IndexBuffer& operator=(IndexBuffer&& other) noexcept
+    {
+        if (this != &other)
+        {
+            if (m_RendererID)
+                GLCall(glDeleteBuffers(1, &m_RendererID))
+
+            m_RendererID = other.m_RendererID;
+            m_Count = other.m_Count;
+
+            other.m_RendererID = 0;
+            other.m_Count = 0;
+        }
+        return *this;
+    }
+
+    IndexBuffer(const IndexBuffer& other) = delete;
+    IndexBuffer& operator=(const IndexBuffer& other) = delete;
+
 private:
     unsigned int m_RendererID{};
-    unsigned int m_Count;
+    unsigned int m_Count{};
 };
