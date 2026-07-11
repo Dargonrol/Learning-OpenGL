@@ -1,0 +1,76 @@
+#include "Scene_Menu.h"
+
+#include <iostream>
+
+#include "imgui.h"
+#include "core/Application.h"
+#include "core/SceneManager.h"
+#include "renderer/Renderer.h"
+#include "GLFW/glfw3.h"
+
+namespace Scene
+{
+    using namespace std::literals;
+    int Scene_Menu::s_prevEscapeState;
+
+    Scene_Menu::Scene_Menu() = default;
+    Scene_Menu::~Scene_Menu() = default;
+
+    void Scene_Menu::OnEnter()
+    {
+        s_prevEscapeState = glfwGetKey(&sm_->GetRenderer().GetWindow(), GLFW_KEY_ESCAPE);
+        sm_->GetRenderer().app.SetTitle("Menu"sv);
+    }
+
+    void Scene_Menu::Render()
+    {
+    }
+
+    void Scene_Menu::Update(float deltaTime)
+    {
+        GLFWwindow* window = &sm_->GetRenderer().GetWindow();
+
+        int keyState = glfwGetKey(window, GLFW_KEY_ESCAPE);
+
+        if (s_prevEscapeState == GLFW_RELEASE && keyState == GLFW_PRESS) {
+            sm_->GetRenderer().app.QueueCloseWindow();
+        }
+
+        // Update previous state
+        s_prevEscapeState = keyState;
+    }
+
+    void Scene_Menu::ImGuiRender()
+    {
+        ImGui::Begin("Menu");
+        for (auto& scene: sm_->GetSceneNames())
+        {
+            if (scene != "Menu" && ImGui::Button(scene.c_str()))
+            {
+                sm_->SetScene(scene);
+                ImGui::End();
+                return;
+            }
+        }
+
+        float buttonHeight = ImGui::GetFrameHeight();
+        float avail = ImGui::GetContentRegionAvail().y;
+
+        if (avail > buttonHeight)
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + avail - buttonHeight - 5);
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Reset Scenes"))
+        {
+            std::cout << "Resetting all scenes\n";
+            for (auto& scene: sm_->GetScenesVector())
+            {
+                if (scene->name == this->name)
+                    continue;
+                scene->initialized = false;
+            }
+        }
+        ImGui::End();
+    }
+}
