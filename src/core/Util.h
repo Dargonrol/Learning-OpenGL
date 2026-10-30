@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 
+#include "Log.h"
+
 #if defined(__clang__) || defined(__GNUC__)
     #define DEBUG_BREAK() __builtin_trap()
 #elif defined(_MSC_VER)
@@ -47,14 +49,13 @@ inline bool GLLogCall(const char* function, const char* file, int line)
 inline void debug_info()
 {
 #ifdef DEBUG_BUILD
-    std::cout << "Debug build\n";
-    if (sizeof(void*) == 8) {
-        std::cout << "Runtime: 64-bit process\n";
-    } else if (sizeof(void*) == 4) {
-        std::cout << "Runtime: 32-bit process\n";
+    Log::Debug("running debug build");
+    if constexpr (sizeof(void*) == 8) {
+        Log::Debug("Runtime: 64-bit process");
+    } else if constexpr (sizeof(void*) == 4) {
+        Log::Debug("Runtime: 32-bit process");
     } else {
-        std::cout << "Unknown pointer size\n";
+        Log::Error("Unknown Pointer size");
     }
-    std::cout << std::flush;
 #endif
 }

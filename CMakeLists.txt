@@ -67,6 +67,9 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE
         imgui
         imgui_backends
         assimp::assimp
+        nlohmann_json::nlohmann_json
+        fmt
+        spdlog
 )
 
 include(compiler_warnings)

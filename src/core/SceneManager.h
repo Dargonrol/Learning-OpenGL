@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "scene/Scene.h"
+#include "Log.h"
 
 class Renderer;
 class GLFWwindow;
@@ -23,6 +24,7 @@ namespace Scene
         template<typename T> requires (std::is_base_of_v<Scene, T>)
         void RegisterScene(const std::string_view name)
         {
+            Log::Trace("SceneManager: Registering scene: {}", name);
             std::string SceneName = std::string(name);
             auto iterName = m_NameToHash_Map.find(SceneName);
             if(iterName != m_NameToHash_Map.end()) {

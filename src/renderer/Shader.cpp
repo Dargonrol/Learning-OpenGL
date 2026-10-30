@@ -14,7 +14,7 @@ Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs
 
     if (vs.empty() && tcs.empty() && tes.empty() && gs.empty() && fs.empty() && cs.empty())
     {
-        std::cerr << "[ERROR] Shader::Shader: Shader constructor called with no valid file paths provided!" << std::endl;
+        Log::Error("Shader::Shader: Shader constructor called with no valid file paths provided!");
         error = -1;
         valid_ = false;
         return;

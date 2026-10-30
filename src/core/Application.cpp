@@ -29,7 +29,7 @@ namespace Core
 {
     static void error_callback(int error, const char* description)
     {
-        fprintf(stderr, "Error: %s\n", description);
+        Log::Error("glfw: {}", description);
     }
 
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -38,16 +38,22 @@ namespace Core
 
     Application::Application(const int width, const int height, const std::string_view title) : width_(width), height_(height)
     {
+        Log::Init();
 #ifndef RELEASE
         debug_info();
 #endif
         using namespace std::literals;
 
+        Log::Trace("Application: Initializing Window");
         InitWindow(width, height, title);
+        Log::Trace("Application: Initializing ImGui");
         InitImGui();
+        Log::Trace("Application: Creating ResourceManager");
         resourceManager_ = std::make_unique<ResourceManager>();
+        Log::Trace("Application: Creating and Initializing Renderer");
         renderer_ = std::make_unique<Renderer>(*resourceManager_, window_, *this);
         renderer_->Init();
+        Log::Trace("Application: Creating sceneManager");
         sceneManager_ = std::make_unique<Scene::SceneManager>(*renderer_, *resourceManager_);
 
         sceneManager_->RegisterScene<Scene::Scene_Menu>("Menu"sv);
@@ -61,15 +67,21 @@ namespace Core
         sceneManager_->RegisterScene<Scene::Scene_DiffuseMaps>("08 Diffuse Maps"sv);
         sceneManager_->RegisterScene<Scene::Scene_ModelLoading>("09 Model Loading"sv);
         sceneManager_->SetScene<Scene::Scene_Menu>();
+
+        Log::Debug("#######################################");
+        Log::Debug("        Finished initializing!         ");
+        Log::Debug("#######################################");
     }
 
     Application::~Application()
     {
+        Log::Trace("Application: Shutting down...");
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
         ImGui::DestroyContext();
         glfwDestroyWindow(window_);
         glfwTerminate();
+        Log::Shutdown();
         exit(EXIT_SUCCESS);
     }
 
@@ -89,24 +101,28 @@ namespace Core
 
     void Application::CaptureMouse() const
     {
+        Log::Trace("Application: set mouse capturing = true");
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
     }
 
     void Application::ReleaseMouse() const
     {
+        Log::Trace("Application: set mouse capturing = false");
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     }
 
     void Application::SetTitle(const std::string_view sv) const
     {
+        Log::Trace("Application: setting title: {}", sv);
         if (window_)
             glfwSetWindowTitle(window_, sv.data());
     }
 
     void Application::QueueCloseWindow()
     {
+        Log::Trace("Application: queue window termination");
         windowShouldClose_ = true;
     }
 
@@ -132,24 +148,28 @@ namespace Core
         if (!glfwInit())
             exit(EXIT_FAILURE);
 
+        Log::Trace("Application: setting window hints");
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+        Log::Trace("Application: creating window");
         GLFWwindow* window = glfwCreateWindow(width, height, title.data(), nullptr, nullptr);
         if (!window)
         {
+            Log::Critical("Application: Window creation failed!");
             glfwTerminate();
             exit(EXIT_FAILURE);
         }
 
         glfwSetKeyCallback(window, key_callback);
 
+        Log::Trace("Application: load GL via glad");
         glfwMakeContextCurrent(window);
         gladLoadGL();
         glfwSwapInterval(1);
 
-        std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+        Log::Debug("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         GLCall(glEnable(GL_BLEND));
@@ -159,10 +179,6 @@ namespace Core
         glfwSetFramebufferSizeCallback(window, FrameBufferCallback);
 
         window_ = window;
-
-        std::cout << "#######################################" << std::endl;
-        std::cout << "        Finished initializing!         " << std::endl;
-        std::cout << "#######################################" << std::endl;
     }
 
     void Application::InitImGui() const

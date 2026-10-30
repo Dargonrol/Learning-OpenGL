@@ -16,6 +16,7 @@ class Project(ConanFile):
         self.requires("glm/1.0.1")
         self.requires("assimp/6.0.5")
         self.requires("nlohmann_json/3.11.3")
+        self.requires("spdlog/1.17.0")
 
     def configure(self):
         self.options["assimp"].shared = False
