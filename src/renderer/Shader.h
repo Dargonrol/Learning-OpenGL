@@ -1,12 +1,17 @@
 #pragma once
 #include <filesystem>
 #include <unordered_map>
+#include <variant>
+
 #include "glm/fwd.hpp"
+#include <vector>
 
 class Shader
 {
 
 public:
+    static constexpr const char* MATERIAL_BLOCK_NAME = "MaterialBlock";
+
     enum class Type
     {
         VERTEX,
@@ -19,12 +24,42 @@ public:
 
     struct ShaderContext
     {
-        const std::filesystem::path &vs;
-        const std::filesystem::path &tcs;
-        const std::filesystem::path &tes;
-        const std::filesystem::path &gs;
-        const std::filesystem::path &fs;
-        const std::filesystem::path &cs;
+        std::filesystem::path vs;
+        std::filesystem::path tcs;
+        std::filesystem::path tes;
+        std::filesystem::path gs;
+        std::filesystem::path fs;
+        std::filesystem::path cs;
+    };
+
+    enum class DataTypeEnum { UNKNOWN = 0, INT, FLOAT, VEC2, VEC3, VEC4, MAT4 };
+
+    using DataType = std::variant<
+        int,
+        float,
+        glm::vec2,
+        glm::vec3,
+        glm::vec4,
+        glm::mat4
+    >;
+
+    struct UniformProperty
+    {
+        DataTypeEnum type;
+        size_t size;
+        union
+        {
+            int offset;
+            int location;
+        };
+        std::string name;
+    };
+
+    struct ReflectionData
+    {
+        std::vector<UniformProperty> properties;
+        std::vector<UniformProperty> looseUniformsProperties;
+        size_t bufferSize = 0;
     };
 
     Shader(
@@ -75,6 +110,7 @@ public:
     void Unbind();
 
     [[nodiscard]] unsigned int GetRendererID() const { return m_RendererID; }
+    [[nodiscard]] const ReflectionData& GetShaderReflectionData() const { return shaderReflectionData_; }
 
     void SetUniform1f(const std::string& name, float v0);
     void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
@@ -117,6 +153,7 @@ private:
         );
 
     int GetUniformLocation(const std::string& name);
+    void SetShaderReflectionData();
 
     [[nodiscard]] static ShaderSourceCode parseShaders(const ShaderFilePaths& filepaths, int& error);
     [[nodiscard]] static unsigned int CompileShader(const std::string& source, unsigned int type, int& error);
@@ -127,6 +164,7 @@ private:
     std::unordered_map<std::string, int> m_UniformLocationCache;
     bool m_GotUnbound = false;
     bool valid_ = false;
-};
+    ReflectionData shaderReflectionData_;
 
-static unsigned int lastBoundShader = 0;
+    inline static unsigned int lastBoundShader = 0;
+};

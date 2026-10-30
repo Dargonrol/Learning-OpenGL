@@ -5,8 +5,6 @@
 #include "core/ResourceManager.h"
 #include "Model.h"
 
-using rm = ResourceManager;
-
 class GameObject
 {
 public:

@@ -1,0 +1,16 @@
+{
+  "material_name": "default",
+
+  "shader_name": "shadable",
+  "shader_paths": {
+    "vertex_shader": "resources/shaders/shadable.vert",
+    "fragment_shader": "resources/shaders/shadable.frag"
+  },
+
+  "uniforms": {
+    "ambient": [1.0, 0.5, 0.31],
+    "diffuse": [1.0, 0.5, 0.31],
+    "specular": [0.5, 0.5, 0.5],
+    "shininess": 32.0
+  }
+}

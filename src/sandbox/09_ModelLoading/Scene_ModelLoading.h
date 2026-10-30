@@ -15,7 +15,7 @@ namespace Scene
     {
     public:
         Scene_ModelLoading();
-        virtual ~Scene_ModelLoading() override;
+        ~Scene_ModelLoading() override;
         int Init() override;
         void Update(float deltaTime) override;
         void Render() override;

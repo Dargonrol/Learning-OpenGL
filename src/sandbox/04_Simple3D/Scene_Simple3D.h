@@ -54,11 +54,11 @@ namespace Scene
         std::unique_ptr<Texture> m_tex1;
         std::unique_ptr<Texture> m_tex2;
 
-        float m_radius;
-        float m_time;
-        float m_angle;
-        float m_speed;
-        float m_camX;
-        float m_camZ;
+        float m_radius{};
+        float m_time{};
+        float m_angle{};
+        float m_speed{};
+        float m_camX{};
+        float m_camZ{};
     };
 }

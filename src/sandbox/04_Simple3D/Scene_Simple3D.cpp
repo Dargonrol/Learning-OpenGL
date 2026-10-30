@@ -157,15 +157,17 @@ namespace Scene
 
     void Scene_Simple3D::Render()
     {
-        const auto& renderer = sm_->GetRenderer();
         m_shader->Bind();
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
         m_shader->SetUniformMat4f("u_proj", m_proj);
 
-        for(unsigned int i = 0; i < 10; i++)
+        for(const auto & i : m_model)
         {
-            m_shader->SetUniformMat4f("u_model", m_model[i]);
-            renderer.Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            m_shader->SetUniformMat4f("u_model", i);
+            //renderer.Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            m_shader->Bind();
+            m_va->Bind();
+            GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
         }
     }
 
@@ -198,7 +200,7 @@ namespace Scene
 
     void Scene_Simple3D::OnResize(int width, int height)
     {
-        m_proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+        m_proj = glm::perspective(glm::radians(45.0f), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
         m_shader->SetUniformMat4f("u_proj", m_proj);
     }
 }

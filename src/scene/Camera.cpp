@@ -49,64 +49,75 @@ void Camera::Update(float deltaTime)
     switch (m_mode)
     {
         case CameraMode::FPS:
-            m_pitch = glm::clamp(m_pitch, -1.55f, 1.55f);
-            m_direction.x = glm::cos(m_pitch) * glm::cos(m_yaw);
-            m_direction.y = glm::sin(m_pitch);
-            m_direction.z = glm::cos(m_pitch) * glm::sin(m_yaw);
-            m_direction = glm::normalize(m_direction);
-            m_right = glm::normalize(glm::cross(m_direction, m_worldUp));
-            m_up = glm::normalize(glm::cross(m_right, m_direction));
-
-            if (m_roll != 0.0f)
             {
-                glm::mat4 rollRot = glm::rotate(glm::mat4(1.0f), m_roll, m_direction);
-                m_right = glm::normalize(glm::vec3(rollRot * glm::vec4(m_right, 0.0f)));
-                m_up = glm::normalize(glm::vec3(rollRot * glm::vec4(m_up, 0.0f)));
-            }
-            m_view = glm::lookAt(m_pos, m_pos + m_direction, m_up);
+                m_pitch = glm::clamp(m_pitch, -1.55f, 1.55f);
+                m_direction.x = glm::cos(m_pitch) * glm::cos(m_yaw);
+                m_direction.y = glm::sin(m_pitch);
+                m_direction.z = glm::cos(m_pitch) * glm::sin(m_yaw);
+                m_direction = glm::normalize(m_direction);
+                m_right = glm::normalize(glm::cross(m_direction, m_worldUp));
+                m_up = glm::normalize(glm::cross(m_right, m_direction));
 
-            m_proj = glm::perspective(
-                m_perspectiveData.fov,
-                m_perspectiveData.aspect,
-                m_perspectiveData.near,
-                m_perspectiveData.far
-                );
-            break;
+                if (m_roll != 0.0f)
+                {
+                    glm::mat4 rollRot = glm::rotate(glm::mat4(1.0f), m_roll, m_direction);
+                    m_right = glm::normalize(glm::vec3(rollRot * glm::vec4(m_right, 0.0f)));
+                    m_up = glm::normalize(glm::vec3(rollRot * glm::vec4(m_up, 0.0f)));
+                }
+                m_view = glm::lookAt(m_pos, m_pos + m_direction, m_up);
+
+                m_proj = glm::perspective(
+                    m_perspectiveData.fov,
+                    m_perspectiveData.aspect,
+                    m_perspectiveData.near,
+                    m_perspectiveData.far
+                    );
+                break;
+            }
 
         case CameraMode::ORBIT:
-            m_direction = glm::normalize(m_target - m_pos);
-            m_right = glm::normalize(glm::cross(m_direction, m_worldUp));
-            m_up = glm::normalize(glm::cross(m_right, m_direction));
-            m_view = glm::lookAt(m_pos, m_target, m_up);
+            {
+                m_direction = glm::normalize(m_target - m_pos);
+                m_right = glm::normalize(glm::cross(m_direction, m_worldUp));
+                m_up = glm::normalize(glm::cross(m_right, m_direction));
+                m_view = glm::lookAt(m_pos, m_target, m_up);
 
-            m_proj = glm::perspective(
-                m_perspectiveData.fov,
-                m_perspectiveData.aspect,
-                m_perspectiveData.near,
-                m_perspectiveData.far
-                );
-            break;
+                m_proj = glm::perspective(
+                    m_perspectiveData.fov,
+                    m_perspectiveData.aspect,
+                    m_perspectiveData.near,
+                    m_perspectiveData.far
+                    );
+                break;
+            }
 
         case CameraMode::ORTHO:
-            m_view = glm::translate(glm::mat4(1.0f), -m_pos);
+            {
+                m_view = glm::translate(glm::mat4(1.0f), -m_pos);
 
-            if (m_orthoData.zoom <= 0.1f)
-                m_orthoData.zoom = 0.1f;
+                if (m_orthoData.zoom <= 0.1f)
+                    m_orthoData.zoom = 0.1f;
 
-            float cx = (m_orthoData.bounds.left + m_orthoData.bounds.right) / 2.0f;
-            float cy = (m_orthoData.bounds.bottom + m_orthoData.bounds.top) / 2.0f;
+                const float cx = (m_orthoData.bounds.left + m_orthoData.bounds.right) / 2.0f;
+                const float cy = (m_orthoData.bounds.bottom + m_orthoData.bounds.top) / 2.0f;
 
-            float halfWidth  = (m_orthoData.bounds.right - m_orthoData.bounds.left) / 2.0f * m_orthoData.zoom;
-            float halfHeight = (m_orthoData.bounds.top   - m_orthoData.bounds.bottom) / 2.0f * m_orthoData.zoom;
+                const float halfWidth  = (m_orthoData.bounds.right - m_orthoData.bounds.left) / 2.0f * m_orthoData.zoom;
+                const float halfHeight = (m_orthoData.bounds.top   - m_orthoData.bounds.bottom) / 2.0f * m_orthoData.zoom;
 
-            m_proj = glm::ortho(
-                cx - halfWidth,
-                cx + halfWidth,
-                cy - halfHeight,
-                cy + halfHeight,
-                m_orthoData.near, m_orthoData.far
-                );
-            break;
+                m_proj = glm::ortho(
+                    cx - halfWidth,
+                    cx + halfWidth,
+                    cy - halfHeight,
+                    cy + halfHeight,
+                    m_orthoData.near, m_orthoData.far
+                    );
+                break;
+            }
+
+        case CameraMode::THIRD:
+            {
+                break;
+            }
     }
 }
 
@@ -116,23 +127,28 @@ void Camera::SetMode(const CameraMode mode)
     switch (mode)
     {
         case CameraMode::FPS:
-            m_yaw = std::atan2(m_direction.z, m_direction.x);
-            m_pitch = glm::asin(m_direction.y);
-            m_roll = std::atan2(glm::dot(m_right, m_worldUp), glm::dot(m_up, m_worldUp));
-            m_proj = glm::perspective(
-                m_perspectiveData.fov,
-                m_perspectiveData.aspect,
-                m_perspectiveData.near,
-                m_perspectiveData.far
-                );
-            break;
+            {
+                m_yaw = std::atan2(m_direction.z, m_direction.x);
+                m_pitch = glm::asin(m_direction.y);
+                m_roll = std::atan2(glm::dot(m_right, m_worldUp), glm::dot(m_up, m_worldUp));
+                m_proj = glm::perspective(
+                    m_perspectiveData.fov,
+                    m_perspectiveData.aspect,
+                    m_perspectiveData.near,
+                    m_perspectiveData.far
+                    );
+                break;
+            }
 
         case CameraMode::ORTHO:
-            m_direction= {0.0f, 0.0f, -1.0f};
-            m_up= {0.0f, 1.0f,  0.0f};
-            m_right= {1.0f, 0.0f,  0.0f};
-            m_pos = {0.0f, 0.0f, 0.0f};
-            break;
+            {
+                m_direction= {0.0f, 0.0f, -1.0f};
+                m_up= {0.0f, 1.0f,  0.0f};
+                m_right= {1.0f, 0.0f,  0.0f};
+                m_pos = {0.0f, 0.0f, 0.0f};
+                break;
+            }
+    default: break;
     }
 }
 

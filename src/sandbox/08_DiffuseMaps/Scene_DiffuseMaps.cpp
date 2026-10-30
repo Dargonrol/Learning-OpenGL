@@ -18,8 +18,8 @@ namespace Scene
         light_ = std::make_unique<LightObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
         cube_ = std::make_unique<GameObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
 
-        light_->SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
-        cube_->SetMaterialOverride(Material::parseMaterial("crate", BASE_PATH / "resources/materials/crate.mat", *rm_, error));
+        light_->SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error));
+        cube_->SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/crate.mat.json", *rm_, error));
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
@@ -32,10 +32,10 @@ namespace Scene
         light_->lightData.lightType = LightData::LightType::POINT;
         light_->lightData.ambient = {1.0f, 1.0f, 1.0f};
         light_->lightData.diffuse = {1.0f, 1.0f, 1.0f};
-        light_->lightData.specular = {0.5f, 0.5f, 0.5f};
+        light_->lightData.specular = {1.0f, 1.0f, 1.0f};
         light_->lightData.constant = 1.0f;
-        light_->lightData.linear = 0.5f;
-        light_->lightData.quadratic = 0.5f;
+        light_->lightData.linear = 0.09f;
+        light_->lightData.quadratic = 0.032f;
         light_->lightData.position = light_->modelMatrix[3];
 
         return error;
@@ -52,7 +52,7 @@ namespace Scene
         Material* materialLight = rm_->materialPool.Get(overrideHandle);
         if (materialLight)
         {
-            materialLight->diffuse = lightColor_;
+            materialLight->SetValue("material.diffuse", lightColor_);
         }
 
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
@@ -67,9 +67,10 @@ namespace Scene
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto& renderer = sm_->GetRenderer();
-        renderer.Draw(*cube_, *camera_, {*light_});
-        renderer.DrawLight(*light_, *camera_);
+        auto& renderer = sm_->GetRenderer();
+        Renderer::BuildCommands(*cube_, RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
+        Renderer::BuildCommands(*light_, RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
+        renderer.Execute(camera_->GetViewMatrix(), camera_->GetPosition(), camera_->GetProjectionMatrix(), {*light_});
     }
 
     void Scene_DiffuseMaps::ImGuiRender()
@@ -86,8 +87,8 @@ namespace Scene
     {
         glEnable(GL_DEPTH_TEST);
         int error = 0;
-        light_->SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
-        cube_->SetMaterialOverride(Material::parseMaterial("crate", BASE_PATH / "resources/materials/crate.mat", *rm_, error));
+        light_->SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error));
+        cube_->SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/crate.mat.json", *rm_, error));
     }
 
     void Scene_DiffuseMaps::OnLeave()

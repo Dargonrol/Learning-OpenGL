@@ -29,8 +29,6 @@ namespace Scene
 
     int Scene_Texture2D::Init()
     {
-        const auto& renderer = sm_->GetRenderer();
-
         float vertices[] = {
             -50.0f, -50.0f, 0.0f, 0.0f,
              50.0f, -50.0f, 1.0f, 0.0f,
@@ -95,21 +93,26 @@ namespace Scene
     void Scene_Texture2D::Render()
     {
         if (!sm_) return;
-        const auto& renderer = sm_->GetRenderer();
 
         shader->Bind();
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
             glm::mat4 mvp = proj * view * model;
             shader->SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(*va, *ib, *shader); // will eventually be va, ib, material
+            //renderer.Draw(*va, *ib, *shader); // will eventually be va, ib, material
+            shader->Bind();
+            va->Bind();
+            GLCall(glDrawElements(GL_TRIANGLES, ib->GetCount(), GL_UNSIGNED_INT, nullptr));
         }
 
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
             glm::mat4 mvp = proj * view * model;
             shader->SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(*va, *ib, *shader); // will eventually be va, ib, material
+            //renderer.Draw(*va, *ib, *shader); // will eventually be va, ib, material
+            shader->Bind();
+            va->Bind();
+            GLCall(glDrawElements(GL_TRIANGLES, ib->GetCount(), GL_UNSIGNED_INT, nullptr));
         }
     }
 

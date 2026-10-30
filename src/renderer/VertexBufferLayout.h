@@ -26,7 +26,6 @@ struct VertexBufferElement
             case ShaderDataType::uByte:  return sizeof(std::uint8_t);
         }
         ASSERT(false);
-        return 0;
     }
 };
 

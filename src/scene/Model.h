@@ -44,7 +44,7 @@ public:
 
 
 private:
-    void processNode(aiNode *node, const aiScene *scene, const std::filesystem::path& path, ResourceManager* rm);
+    void processNode(const aiNode *node, const aiScene *scene, const std::filesystem::path& path, ResourceManager* rm);
     static SubMesh processMesh(aiMesh *mesh, const aiScene * scene, const std::filesystem::path& path, unsigned int index, ResourceManager* rm);
     static Handle processMaterial(aiMaterial* mat, const std::filesystem::path& path, unsigned int index, ResourceManager* rm);
     static std::filesystem::path DetermineTexturePath(const std::filesystem::path& modelPath, const std::string& textureFilename);

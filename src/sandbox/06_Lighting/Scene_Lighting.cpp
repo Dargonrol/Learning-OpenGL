@@ -7,6 +7,7 @@
 #include "core/SceneManager.h"
 #include "renderer/VertexBuffer.h"
 #include "scene/Camera.h"
+#include "scene/LightObject.h"
 
 namespace Scene
 {
@@ -148,8 +149,6 @@ namespace Scene
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto& renderer = sm_->GetRenderer();
-
         // Test Object
         Shader* shaderObj = rm_->shaderPool.Get(h_cubeShader);
         if (shaderObj == nullptr)
@@ -166,11 +165,21 @@ namespace Scene
         shaderObj->SetUniform1i("u_pow", pow_);
         shaderObj->SetUniform1f("u_specularStrength", strength_);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        renderer.Draw(*vaObj_, *shaderObj, 36);
+
+        //renderer.Draw(*vaObj_, *shaderObj, 36);
+        shaderObj->Bind();
+        vaObj_->Bind();
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+
         if (debug_)
             shaderObj->SetUniform1i("u_Debug", 1);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        renderer.Draw(*vaObj_, *shaderObj, 36);
+
+        //renderer.Draw(*vaObj_, *shaderObj, 36);
+        shaderObj->Bind();
+        vaObj_->Bind();
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+
         shaderObj->SetUniform1i("u_Debug", 0);
 
         // Light source
@@ -184,7 +193,11 @@ namespace Scene
         shaderLight_->SetUniformMat4f("u_model", modelLight_);
         shaderLight_->SetUniformVec3("u_LightColor", lightColor_);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        renderer.Draw(*vaObj_, *shaderLight_, 36);
+        //renderer.Draw(*vaObj_, *shaderLight_, 36);
+        shaderLight_->Bind();
+        vaLight_->Bind();
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+
     }
 
     void Scene_Lighting::ImGuiRender()

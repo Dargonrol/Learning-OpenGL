@@ -1,0 +1,21 @@
+{
+  "material_name": "crate",
+
+  "shader_name": "texShadable",
+  "shader_paths": {
+    "vertex_shader": "resources/shaders/texShadable.vert",
+    "fragment_shader": "resources/shaders/texShadable.frag"
+  },
+
+  "uniforms": {
+    "material.ambientColor": [0.01, 0.01, 0.01],
+    "material.diffuseColor": [1.0, 1.0, 1.0],
+    "material.specularColor": [1.0, 1.0, 1.0],
+    "material.shininess": 32.0
+  },
+
+  "textures": {
+    "material.diffuse": "resources/textures/crate.png",
+    "material.specular": "resources/textures/crate_specular.png"
+  }
+}

@@ -215,7 +215,7 @@ Handle AssetPool<T>::Register(const std::string_view sv, T asset)
 template<typename T>
 Handle AssetPool<T>::ReplaceData(const std::string_view sv, T asset)
 {
-    auto iter = map_string_handle_.find(sv);
+    const auto iter = map_string_handle_.find(sv);
     if (iter == map_string_handle_.end())
     {
         // doesn't exist
@@ -223,14 +223,18 @@ Handle AssetPool<T>::ReplaceData(const std::string_view sv, T asset)
     }
     // already exists
     Index index = iter->second.id;
-    Handle oldHandle = pool_[index].h;
-    //++pool_[index].h.gen;
+    const Handle oldHandle = pool_[index].h;
+    Handle& currentHandle = pool_[index].h;
+
+    ++currentHandle.gen;
     pool_[index].data = std::move(asset);
-    map_string_handle_[static_cast<std::string>(sv)] = pool_[index].h;
+
+    iter->second = currentHandle;
     auto node = map_handle_string_.extract(map_handle_string_.find(oldHandle));
-    node.key() = pool_[index].h;
+    node.key() = currentHandle;
     map_handle_string_.insert(std::move(node));
-    return pool_[index].h;
+
+    return currentHandle;
 }
 
 template<typename T>

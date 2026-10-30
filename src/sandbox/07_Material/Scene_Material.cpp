@@ -19,9 +19,9 @@ namespace Scene
         Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
         Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
 
-        lightModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
-        cubeModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error, true);
-        debugMaterial = Material::parseMaterial("debug", BASE_PATH / "resources/materials/debug.mat", *rm_, error);
+        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, error, true);
+        debugMaterial = Material::ParseMaterial(BASE_PATH / "resources/materials/debug.mat.json", *rm_, error);
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
@@ -40,8 +40,8 @@ namespace Scene
         camera_->Update(deltaTime);
 
         Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
-        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->diffuse = lightColor_;
-        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->specular = lightColor_;
+        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->SetValue("material.diffuse", lightColor_);
+        rm_->materialPool.Get(lightModel->GetSubMeshes()[0].materialHandle)->SetValue("material.specular", lightColor_);
 
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
         camera_->HandleGenericCameraControls(window, deltaTime);
@@ -55,15 +55,11 @@ namespace Scene
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto& renderer = sm_->GetRenderer();
+        auto& renderer = sm_->GetRenderer();
 
-        renderer.Draw(*cube_, *camera_, {*light_});
-        renderer.DrawLight(*light_, *camera_);
-
-        glm::mat4 MVP_Cube = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * cube_->modelMatrix;
-        glm::mat4 MVP_Light = camera_->GetProjectionMatrix() * camera_->GetViewMatrix() * light_->modelMatrix;
-        //renderer.WireDraw(*cube_, MVP_Cube);
-        //renderer.WireDraw(*light_, MVP_Light);
+        renderer.BuildCommands(*cube_, RasterizationMode::SOLID, *rm_);
+        renderer.BuildCommands(*light_, RasterizationMode::SOLID, *rm_);
+        renderer.Execute(camera_->GetViewMatrix(), camera_->GetPosition(), camera_->GetProjectionMatrix(), {*light_});
     }
 
     void Scene_Material::ImGuiRender()
@@ -82,8 +78,8 @@ namespace Scene
         int error = 0;
         Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
         Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
-        lightModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error, true);
-        cubeModel->GetSubMeshes()[0].materialHandle = Material::parseMaterial("default", BASE_PATH / "resources/materials/default.mat", *rm_, error, true);
+        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, error, true);
     }
 
     void Scene_Material::OnLeave()

@@ -1,0 +1,9 @@
+{
+  "material_name": "light",
+
+  "shader_name": "light",
+  "shader_paths": {
+    "vertex_shader": "resources/shaders/light.vert",
+    "fragment_shader": "resources/shaders/light.frag"
+  }
+}

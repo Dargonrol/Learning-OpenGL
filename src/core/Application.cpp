@@ -120,6 +120,11 @@ namespace Core
         return height_;
     }
 
+    ResourceManager* Application::GetResourceManager() const
+    {
+        return &*resourceManager_;
+    }
+
     void Application::InitWindow(const int width, const int height, const std::string_view title)
     {
         glfwSetErrorCallback(error_callback);
@@ -154,6 +159,10 @@ namespace Core
         glfwSetFramebufferSizeCallback(window, FrameBufferCallback);
 
         window_ = window;
+
+        std::cout << "#######################################" << std::endl;
+        std::cout << "        Finished initializing!         " << std::endl;
+        std::cout << "#######################################" << std::endl;
     }
 
     void Application::InitImGui() const

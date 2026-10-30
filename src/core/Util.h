@@ -19,6 +19,22 @@
     #define ASSERT(x)
     #define GLCall(x) x;
 #else
+#include "core/OpenGL.h"
+
+inline void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+inline bool GLLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error] (0x" << std::hex << error << std::dec << ") in " << function << " at " << file << ":" << line << "\n";
+        return false;
+    }
+    return true;
+}
     #define ASSERT(x) if (!(x)) DEBUG_BREAK();
     #define GLCall(x) {GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))}
 #endif

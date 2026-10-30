@@ -104,9 +104,6 @@ namespace Scene
         m_tex2->Bind(1);
         m_shader->SetUniform1i("u_Texture2", 1);
 
-        int loc1 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture1");
-        int loc2 = glGetUniformLocation(m_shader->GetRendererID(), "u_Texture2");
-
         for(int i = 0; i < 10; ++i)
         {
             m_model[i] = glm::mat4(1.0f);
@@ -167,7 +164,10 @@ namespace Scene
         for (const auto & i : m_model)
         {
             m_shader->SetUniformMat4f("u_model", i);
-            sm_->GetRenderer().Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            //sm_->GetRenderer().Draw(*m_va, *m_shader, 36); // will eventually be va, ib, material
+            m_shader->Bind();
+            m_va->Bind();
+            GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
         }
     }
 

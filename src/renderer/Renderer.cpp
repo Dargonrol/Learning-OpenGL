@@ -10,27 +10,12 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
+#include "core/Application.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "scene/Mesh.h"
 #include "scene/Model.h"
 #include "scene/GameObject.h"
-#include "scene/Camera.h"
 #include "scene/LightObject.h"
-
-void GLClearError()
-{
-    while (glGetError() != GL_NO_ERROR);
-}
-
-bool GLLogCall(const char* function, const char* file, int line)
-{
-    while (GLenum error = glGetError())
-    {
-        std::cout << "[OpenGL Error] (0x" << std::hex << error << std::dec << ") in " << function << " at " << file << ":" << line << "\n";
-        return false;
-    }
-    return true;
-}
 
 Renderer::Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::Application& APP) : app(APP), m_window(window), rm_(&resource_manager){}
 
@@ -38,180 +23,144 @@ void Renderer::Init()
 {
     stbi_set_flip_vertically_on_load(true);
 
-    // set up basic shader and material
-    const char* vertex =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "uniform mat4 uMVP;\n"
-        "void main() { gl_Position = uMVP * vec4(aPos, 1.0); }\n";
-
-    const char* frag =
-        "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "void main(){FragColor = vec4(1.0, 0.0, 0.0, 1.0);}\n";
-    int error = 0;
-    auto shader = Shader(vertex, frag, error);
-    if (error)
+    if (false)
     {
-        std::cerr << "Failed Debug Shader creation!" << std::endl;
-        return;
-    }
-    Material material{};
-    material.shaderHandle = rm_->shaderPool.Register("debug", std::move(shader));
-    debugShaderHandle = material.shaderHandle;
-    material.ambient = {1.0f, 0.0f, 0.0f};
-    material.diffuse = {0.0f, 0.0f, 0.0f};
-    material.shininess = 0.0f;
-    material.specular = {0.0f, 0.0f, 0.0f};
-    debugMaterialHandle = rm_->materialPool.Register("debug", material);
-    std::cout << "Registering debug Material and Shader \n";
-}
+        // set up basic shader and material
+        const char* vertex =
+            "#version 330 core\n"
+            "layout (location = 0) in vec3 aPos;\n"
+            "uniform mat4 uMVP;\n"
+            "void main() { gl_Position = uMVP * vec4(aPos, 1.0); }\n";
 
-void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, Shader &shader) const
-{
-    shader.Bind();
-    va.Bind();
-    ib.Bind();
-    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
-}
-
-void Renderer::Draw(const VertexArray &va, Shader &shader, unsigned int count) const
-{
-    shader.Bind();
-    va.Bind();
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, count));
-}
-
-void Renderer::Draw(const Mesh& mesh) const
-{
-    mesh.VAO.Bind();
-    mesh.IBO.Bind();
-    GLCall(glDrawElements(GL_TRIANGLES, mesh.IBO.GetCount(), GL_UNSIGNED_INT, nullptr));
-}
-
-void Renderer::Draw(const GameObject& gameObj, Camera& cam, const std::vector<LightObject>& lights) const
-{
-    Handle modelHandle = gameObj.GetModelHandle();
-    Model* model = rm_->modelPool.Get(modelHandle);
-    if (!model) return;
-
-    int i = 0;
-    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
-    {
-        const Mesh* mesh          = rm_->meshPool.Get(meshHandle);
-        const Material* material  = rm_->materialPool.Get(materialHandle);
-
-        Handle overrideHandle = gameObj.GetMaterialHandleOverride(i);
-        if (overrideHandle)
-            material = rm_->materialPool.Get(overrideHandle);
-
-        Shader* shader      = rm_->shaderPool.Get(material->shaderHandle);
-
-        if (!mesh || !material || !shader) { ++i; continue; }
-
-        shader->Bind();
-        mesh->VAO.Bind();
-        mesh->IBO.Bind();
-        mesh->VBO.Bind();
-
-        if (material->diffuseMap)
+        const char* frag =
+            "#version 330 core\n"
+            "out vec4 FragColor;\n"
+            "void main(){FragColor = vec4(1.0, 0.0, 0.0, 1.0);}\n";
+        int error = 0;
+        auto shader = Shader(vertex, frag, error);
+        if (error)
         {
-            const Texture* diffTex = rm_->texturePool.Get(material->diffuseMap);
-            diffTex->Bind(0);
-            shader->SetUniform1i("material.diffuse", 0);
+            std::cerr << "Failed Debug Shader creation!" << std::endl;
+            return;
         }
-        if (material->specularMap)
+        Material material{};
+        material.Init(rm_->shaderPool.Register("debug", std::move(shader)), *rm_);
+        material.SetValue("u_AmbientColor", glm::vec3{1.0f, 0.0f, 0.0f});
+        material.SetValue("u_DiffuseColor", glm::vec3{0.0f, 0.0f, 0.0f});
+        material.SetValue("u_SpecularColor", glm::vec3{0.0f, 0.0f, 0.0f});
+        material.SetValue("u_Shininess", 0.0f);
+        debugMaterialHandle = rm_->materialPool.Register("debug", material);
+        std::cout << "Registering debug Material and Shader \n";
+    }
+}
+
+void Renderer::Submit(const RenderCommand& cmd)
+{
+    commandQueue_.push_back(cmd);
+}
+
+void Renderer::SortQueue()
+{
+    std::sort(commandQueue_.begin(), commandQueue_.end(), [](const RenderCommand& a, const RenderCommand& b)
+    {
+        return a.sortKey < b.sortKey;
+    });
+}
+
+// TODO: add different render passes.
+void Renderer::Execute(const glm::mat4& view, const glm::vec3& viewPos, const glm::mat4& proj, std::vector<LightObject> lights)
+{
+    SortQueue();
+    Handle activeShaderHandle = {0, 0};
+    Handle activeMaterialHandle = {0, 0};
+    unsigned int vertexArrayID = 0;
+
+    for (const auto& cmd: commandQueue_)
+    {
+        if (activeShaderHandle != cmd.shaderHandle)
         {
-            const Texture* specTex = rm_->texturePool.Get(material->specularMap);
-            specTex->Bind(1);
-            shader->SetUniform1i("material.specular", 1);
+            activeShaderHandle = cmd.shaderHandle;
+
+            Shader* shader = app.GetResourceManager()->shaderPool.Get(activeShaderHandle);
+            shader->Bind();
+
+            shader->SetUniformMat4f("uView", view);
+            shader->SetUniformMat4f("uProj", proj);
+            shader->SetUniformVec3("uViewPos", viewPos);
+
+            if (!lights.empty())
+            {
+                shader->SetUniformVec3("uLightColor", lights[0].lightData.diffuse);
+            }
+
+            for (size_t i = 0; i < lights.size(); ++i)
+            {
+                std::string prefix = "lights[" + std::to_string(i) + "].";
+                shader->SetUniformVec3(prefix + "ambient", lights[i].lightData.ambient);
+                shader->SetUniformVec3(prefix + "diffuse", lights[i].lightData.diffuse);
+                shader->SetUniformVec3(prefix + "specular", lights[i].lightData.specular);
+                shader->SetUniform1f(prefix + "constant", lights[i].lightData.constant);
+                shader->SetUniform1f(prefix + "linear", lights[i].lightData.linear);
+                shader->SetUniform1f(prefix + "quadratic", lights[i].lightData.quadratic);
+                shader->SetUniformVec3(prefix + "position", lights[i].GetPosition());
+                shader->SetUniform1i(prefix + "type", static_cast<int>(lights[i].lightData.lightType));
+            }
+            shader->SetUniform1i("uPointLightCount", static_cast<int>(lights.size()));
         }
 
-        shader->SetUniformMat4f("uView", cam.GetViewMatrix());
-        shader->SetUniformMat4f("uProj", cam.GetProjectionMatrix());
-        shader->SetUniformMat4f("uModel", gameObj.modelMatrix);
-        shader->SetUniformVec3("uViewPos", cam.GetPosition());
-
-        shader->SetUniformVec3("material.diffuseColor", material->diffuse);
-        shader->SetUniform1f("material.shininess", material->shininess);
-
-        for (size_t i = 0; i < lights.size(); ++i)
+        if (vertexArrayID != cmd.vertexArrayID)
         {
-            std::string prefix = "lights[" + std::to_string(i) + "].";
-            shader->SetUniformVec3(prefix + "ambient", lights[i].lightData.ambient);
-            shader->SetUniformVec3(prefix + "diffuse", lights[i].lightData.diffuse);
-            shader->SetUniformVec3(prefix + "specular", lights[i].lightData.specular);
-            shader->SetUniform1f(prefix + "constant", lights[i].lightData.constant);
-            shader->SetUniform1f(prefix + "linear", lights[i].lightData.linear);
-            shader->SetUniform1f(prefix + "quadratic", lights[i].lightData.quadratic);
-            shader->SetUniformVec3(prefix + "position", lights[i].GetPosition());
-            shader->SetUniform1i(prefix + "type", static_cast<int>(lights[i].lightData.lightType));
+            vertexArrayID = cmd.vertexArrayID;
+            VertexArray::BindVertexArray(vertexArrayID);
         }
-        shader->SetUniform1i("uPointLightCount", static_cast<int>(lights.size()));
 
-        Draw(*mesh);
-        ++i;
-    }
-}
+        Shader* currentShader = app.GetResourceManager()->shaderPool.Get(activeShaderHandle);
 
-void Renderer::DrawLight(LightObject& obj, Camera& cam) const
-{
-    Handle modelHandle = obj.GetModelHandle();
-    Model* model = rm_->modelPool.Get(modelHandle);
-    if (!model) return;
+        currentShader->SetUniformMat4f("uModel", cmd.modelMatrix);
 
-    int i = 0;
-    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
-    {
-        const Mesh* mesh          = rm_->meshPool.Get(meshHandle);
-        const Material* material  = rm_->materialPool.Get(materialHandle);
+        if (activeMaterialHandle != cmd.materialHandle && cmd.materialHandle)
+        {
+            activeMaterialHandle = cmd.materialHandle;
 
-        Handle overrideHandle{};
-        if (overrideHandle = obj.GetMaterialHandleOverride(i))
-            material = rm_->materialPool.Get(overrideHandle);
+            Material* material = app.GetResourceManager()->materialPool.Get(activeMaterialHandle);
+            if (material)
+                material->Bind(*rm_);
+        }
 
-        Shader* shader      = rm_->shaderPool.Get(material->shaderHandle);
+        if (currentRasterMode_ != cmd.rasterMode)
+        {
+            switch (cmd.rasterMode)
+            {
+            case RasterizationMode::SOLID:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                glPointSize(1.0f);
+                currentRasterMode_ = RasterizationMode::SOLID;
+                break;
+            case RasterizationMode::WIREFRAME:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                glPointSize(1.0f);
+                currentRasterMode_ = RasterizationMode::WIREFRAME;
+                break;
+            case RasterizationMode::POINT:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                glPointSize(4.0f);
+                currentRasterMode_ = RasterizationMode::POINT;
+                break;
+            }
+        }
 
-        if (!mesh || !material || !shader) { ++i; continue; }
-
-        shader->Bind();
-        mesh->VAO.Bind();
-        mesh->IBO.Bind();
-        mesh->VBO.Bind();
-
-        shader->SetUniformMat4f("uView", cam.GetViewMatrix());
-        shader->SetUniformMat4f("uProj", cam.GetProjectionMatrix());
-        shader->SetUniformMat4f("uModel", obj.modelMatrix);
-        shader->SetUniformVec3("uViewPos", cam.GetPosition());
-        shader->SetUniformVec3("uLightColor", obj.lightData.diffuse);
-
-
-        Draw(*mesh);
-        ++i;
-    }
-}
-
-void Renderer::WireDraw(const GameObject& gameObj, const glm::mat4& MVP) const
-{
-    if (rm_->shaderPool.Exists(debugShaderHandle))
-    {
-        rm_->shaderPool.Get(debugShaderHandle)->Bind();
-        rm_->shaderPool.Get(debugShaderHandle)->SetUniformMat4f("uMVP", MVP);
+        const void* indexOffset = reinterpret_cast<void*>(cmd.firstIndex * sizeof(unsigned int));
+        GLCall(glDrawElementsInstancedBaseVertex(
+            GL_TRIANGLES,
+            cmd.indexCount,
+            GL_UNSIGNED_INT,
+            indexOffset,
+            cmd.instanceCount,
+            cmd.baseVertex
+            ));
     }
 
-    Model* model = rm_->modelPool.Get(gameObj.GetModelHandle());
-    if (!model)
-        return;
-
-    for (const auto& [meshHandle, materialHandle]: model->GetSubMeshes())
-    {
-        const Mesh* mesh = rm_->meshPool.Get(meshHandle);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        Draw(*mesh);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    if (rm_->shaderPool.Exists(debugShaderHandle))
-        rm_->shaderPool.Get(debugShaderHandle)->Unbind();
+    commandQueue_.clear();
 }
 
 void Renderer::Clear() const
@@ -235,4 +184,61 @@ void Renderer::ImGui_EndFrame() const
     glfwSwapBuffers(m_window);
 }
 
+uint64_t Renderer::CalculateSortKey(const Handle shaderHandle, const Handle materialHandle, RasterizationMode mode)
+{
+    uint64_t shaderID = static_cast<uint64_t>(shaderHandle.id);
+    uint64_t materialID = static_cast<uint64_t>(materialHandle.id);
+    uint64_t wireMode = static_cast<uint64_t>(mode);
+
+    // Bit 62-63 (2 Bit) mode
+    // Bit 32-61 (30 Bit) shaderID
+    // BIT 0-31 (32 Bit) materialID
+    return (wireMode << 62) | (shaderID << 32) | materialID;
+}
+
 Renderer::~Renderer() = default;
+
+void Renderer::BuildCommands(const GameObject& obj, const RasterizationMode mode, ResourceManager& rm, std::vector<RenderCommand>& commandQueue)
+{
+    const Handle modelHandle = obj.GetModelHandle();
+    Model* model = rm.modelPool.Get(modelHandle);
+    if (!model) return;
+
+    int i = 0;
+    for (auto& [meshHandle, materialHandle]: model->GetSubMeshes())
+    {
+        const Mesh* mesh = rm.meshPool.Get(meshHandle);
+
+        Handle overrideHandle = obj.GetMaterialHandleOverride(i);
+        Handle newMaterialHandle{0, 0};
+        if (overrideHandle)
+            newMaterialHandle = overrideHandle;
+        else
+            newMaterialHandle = materialHandle;
+
+        const Material* material  = rm.materialPool.Get(newMaterialHandle);
+
+        if (!mesh || !material) { ++i; continue; }
+
+        RenderCommand cmd;
+        cmd.materialHandle = newMaterialHandle;
+        cmd.shaderHandle = material->GetShaderHandle();
+        cmd.vertexArrayID = mesh->VAO.GetRendererID();
+        cmd.instanceCount = 1;
+        cmd.rasterMode = mode;
+        cmd.indexCount = mesh->IBO.GetCount();
+        cmd.baseVertex = 0;
+        cmd.firstIndex = 0;
+        cmd.modelMatrix = obj.modelMatrix;
+        cmd.sortKey = CalculateSortKey(cmd.shaderHandle, cmd.materialHandle, mode);
+
+        commandQueue.push_back(cmd);
+
+        ++i;
+    }
+}
+
+void Renderer::BuildCommands(const GameObject& obj, RasterizationMode mode, ResourceManager& rm)
+{
+    BuildCommands(obj, mode, rm, commandQueue_);
+}

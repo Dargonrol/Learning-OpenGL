@@ -11,6 +11,15 @@
 Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs, const std::filesystem::path &tes, const std::filesystem::path &gs, const std::filesystem::path &fs, const std::filesystem::path &cs, int &error)
 {
     error = 0;
+
+    if (vs.empty() && tcs.empty() && tes.empty() && gs.empty() && fs.empty() && cs.empty())
+    {
+        std::cerr << "[ERROR] Shader::Shader: Shader constructor called with no valid file paths provided!" << std::endl;
+        error = -1;
+        valid_ = false;
+        return;
+    }
+
     const ShaderFilePaths paths = {
         vs,
         tcs,
@@ -28,7 +37,12 @@ Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs
     }
     m_RendererID = CreateShaders(source, error);
     if (!error)
+    {
         valid_ = true;
+        SetShaderReflectionData();
+    }
+    else
+        return;
 }
 
 Shader::Shader(const ShaderContext &shaderContext, int &error) : Shader(shaderContext.vs, shaderContext.tcs, shaderContext.tes, shaderContext.gs, shaderContext.fs, shaderContext.cs, error) {}
@@ -54,7 +68,10 @@ Shader::Shader(const std::string &vs, const std::string &fs, int &error)
     };
     m_RendererID = CreateShaders(shaderSource, error);
     if (!error)
+    {
         valid_ = true;
+        SetShaderReflectionData();
+    }
 }
 
 Shader::Shader(const char *vs, const char *fs, int &error) : Shader(std::string(vs), std::string(fs), error) {}
@@ -109,7 +126,89 @@ int Shader::GetUniformLocation(const std::string &name)
     return location;
 }
 
-GLuint Shader::CompileShader(const std::string& source, unsigned int type, int& error)
+void Shader::SetShaderReflectionData()
+{
+    Bind();
+
+    const unsigned int blockIndex = glGetUniformBlockIndex(m_RendererID, MATERIAL_BLOCK_NAME);
+    if (blockIndex != GL_INVALID_INDEX)
+    {
+        int blockSize = 0;
+        GLCall(glGetActiveUniformBlockiv(m_RendererID, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize));
+        shaderReflectionData_.bufferSize = static_cast<size_t>(blockSize);
+        // shaderReflectionData_.blockIndex = blockIndex;
+    }
+    else
+      shaderReflectionData_.bufferSize = 0;
+
+    int numUniforms = 0;
+    GLCall(glGetProgramiv(m_RendererID, GL_ACTIVE_UNIFORMS, &numUniforms));
+
+    if (numUniforms <= 0)
+        return;
+
+    std::vector<GLuint> uniformIndices(numUniforms);
+    for (int i = 0; i < numUniforms; ++i)
+    {
+        uniformIndices[i] = static_cast<GLuint>(i);
+    }
+
+    std::vector<GLint> offsets(numUniforms);
+
+    GLCall(glGetActiveUniformsiv(m_RendererID, numUniforms, uniformIndices.data(), GL_UNIFORM_OFFSET, offsets.data()));
+
+    for (int i = 0; i < numUniforms; ++i)
+    {
+        char nameBuffer[256];
+        GLsizei actualLength = 0;
+        GLint uniformSize = 0;
+        GLenum uniformType = 0;
+        GLCall(glGetActiveUniform(m_RendererID, uniformIndices[i], static_cast<GLsizei>(sizeof(nameBuffer)), &actualLength, &uniformSize, &uniformType, nameBuffer));
+
+        UniformProperty prop;
+        prop.name = std::string(nameBuffer);
+        prop.size = static_cast<size_t>(uniformSize);
+        switch (uniformType)
+        {
+        case GL_INT:
+            prop.type = DataTypeEnum::INT;
+            break;
+        case GL_SAMPLER_2D:
+            prop.type = DataTypeEnum::INT;
+            break;
+        case GL_FLOAT:
+            prop.type = DataTypeEnum::FLOAT;
+            break;
+        case GL_FLOAT_VEC2:
+            prop.type = DataTypeEnum::VEC2;
+            break;
+        case GL_FLOAT_VEC3:
+            prop.type = DataTypeEnum::VEC3;
+            break;
+        case GL_FLOAT_VEC4:
+            prop.type = DataTypeEnum::VEC4;
+            break;
+        case GL_FLOAT_MAT4:
+            prop.type = DataTypeEnum::MAT4;
+            break;
+        default:
+            prop.type = DataTypeEnum::UNKNOWN;
+            break;
+        }
+
+        if (const int offset = offsets[i]; offset >= 0)
+        {
+            prop.offset = offset;
+            shaderReflectionData_.properties.push_back(prop);
+        } else
+        {
+            prop.location = GetUniformLocation(prop.name);
+            shaderReflectionData_.looseUniformsProperties.push_back(prop);
+        }
+    }
+}
+
+GLuint Shader::CompileShader(const std::string& source, const unsigned int type, int& error)
 {
     std::string typeString;
     switch (type)
@@ -264,12 +363,20 @@ std::string parseFile(const std::filesystem::path& path, const std::string& shad
 Shader::ShaderSourceCode Shader::parseShaders(const ShaderFilePaths& filepaths, int& error)
 {
     std::string shaders[6];
-    if (!filepaths.vertexShader.empty()) shaders[0] = parseFile(filepaths.vertexShader, "vertex", error); if (error) return {};
-    if (!filepaths.tesselationControlShader.empty()) shaders[1] = parseFile(filepaths.tesselationControlShader, "tessellation control", error); if (error) return {};
-    if (!filepaths.tesselationEvaluateShader.empty()) shaders[2] = parseFile(filepaths.tesselationEvaluateShader, "tessellation evaluation", error); if (error) return {};
-    if (!filepaths.geometryShader.empty()) shaders[3] = parseFile(filepaths.geometryShader, "geometry", error); if (error) return {};
-    if (!filepaths.fragmentShader.empty()) shaders[4] = parseFile(filepaths.fragmentShader, "fragment", error); if (error) return {};
-    if (!filepaths.computeShader.empty()) shaders[5] = parseFile(filepaths.computeShader, "compute", error); if (error) return {};
+    if (!filepaths.vertexShader.empty())
+        shaders[0] = parseFile(filepaths.vertexShader, "vertex", error);
+    if (!filepaths.tesselationControlShader.empty())
+        shaders[1] = parseFile(filepaths.tesselationControlShader, "tessellation control", error);
+    if (!filepaths.tesselationEvaluateShader.empty())
+        shaders[2] = parseFile(filepaths.tesselationEvaluateShader, "tessellation evaluation", error);
+    if (!filepaths.geometryShader.empty())
+        shaders[3] = parseFile(filepaths.geometryShader, "geometry", error);
+    if (!filepaths.fragmentShader.empty())
+        shaders[4] = parseFile(filepaths.fragmentShader, "fragment", error);
+    if (!filepaths.computeShader.empty())
+        shaders[5] = parseFile(filepaths.computeShader, "compute", error);
+
+    if (error) return {};
 
     return {
         shaders[0],
@@ -291,10 +398,11 @@ Shader & Shader::operator=(Shader &&other) noexcept
         m_RendererID = other.m_RendererID;
         m_UniformLocationCache = std::move(other.m_UniformLocationCache);
         m_GotUnbound = other.m_GotUnbound;
+        shaderReflectionData_ = std::move(other.shaderReflectionData_);
 
         other.m_RendererID = 0;
     }
     return *this;
 }
 
-Shader::Shader(Shader &&other) noexcept : m_RendererID(other.m_RendererID), m_UniformLocationCache(std::move(other.m_UniformLocationCache)), m_GotUnbound(other.m_GotUnbound) { other.m_RendererID = 0; }
+Shader::Shader(Shader &&other) noexcept : m_RendererID(other.m_RendererID), m_UniformLocationCache(std::move(other.m_UniformLocationCache)), m_GotUnbound(other.m_GotUnbound), shaderReflectionData_((std::move(other.shaderReflectionData_))) { other.m_RendererID = 0; }

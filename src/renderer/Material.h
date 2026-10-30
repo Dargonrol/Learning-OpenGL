@@ -1,72 +1,59 @@
 #pragma once
 #include "core/AssetPool.h"
-#include "glm/vec3.hpp"
 #include <filesystem>
+
+#include "Shader.h"
 
 // fwd declares
 class Shader;
 class ResourceManager;
 // fwd declares
 
-struct Material
+struct StringHash
 {
-    Handle shaderHandle = {0, 0};
-    Handle diffuseMap = {0, 0};
-    Handle specularMap = {0, 0};
-    glm::vec3 ambient = {1.0f, 1.0f, 1.0f};     // ambient lighting color
-    glm::vec3 diffuse = {1.0f, 1.0f, 1.0f};     // color of surface under diffuse lighting
-    glm::vec3 specular = {0.0f, 0.0f, 0.0f};    // color of specular highlight
-    float shininess = 0.5f;
+    using is_transparent = void;
 
-    void BindShader(ResourceManager& rm) const;
-
-    static Handle parseMaterial(std::string_view name, const std::filesystem::path& path, ResourceManager& rm, int& error, bool replace = false);
-
-    friend std::ostream& operator<<(std::ostream &os, const Material& mat)
+    size_t operator()(const std::string_view sv) const noexcept
     {
-        os << "Material:\n Shader " << mat.shaderHandle << "\n" <<
-            "diffuse Map " << mat.diffuseMap << "\n" <<
-            "specular Map " << mat.specularMap << "\n" <<
-            "Ambient: {" << mat.ambient.x << ", " << mat.ambient.y << ", " << mat.ambient.z << "}\n" <<
-            "diffuse: {" << mat.diffuse.x << ", " << mat.diffuse.y << ", " << mat.diffuse.z << "}\n" <<
-            "specular: {" << mat.specular.x << ", " << mat.specular.y << ", " << mat.specular.z << "}\n" <<
-            "shininess: " << mat.shininess;
-        return os;
+        return std::hash<std::string_view>{}(sv);
     }
-
-    enum class Tokens
+    size_t operator()(const std::string& str) const noexcept
     {
-        SHADER_NAME,
+        return std::hash<std::string>{}(str);
+    }
+    size_t operator()(const char* str) const noexcept
+    {
+        return std::hash<std::string_view>{}(str);
+    }
+};
 
-        VERT_SHADER_PATH,
-        FRAG_SHADER_PATH,
-        TC_SHADER_PATH,
-        TE_SHADER_PATH,
-        GEO_SHADER_PATH,
-
-        DIFF_MAP_PATH,
-        SPEC_MAP_PATH,
-
-        AMBIENT_VALUE,
-        DIFFUSE_VALUE,
-        SPECULAR_VALUE,
-        SHININESS_VALUE
+class Material
+{
+public:
+    struct TextureBinding
+    {
+        std::string samplerName;
+        Handle textureHandle;
     };
 
-    static inline const std::unordered_map<Tokens, std::string> tokenEnumStrMap = {
-        {Tokens::SHADER_NAME, "shader_name"},
-        {Tokens::VERT_SHADER_PATH, "vert_shader"},
-        {Tokens::FRAG_SHADER_PATH, "frag_shader"},
-        {Tokens::TC_SHADER_PATH, "tc_shader"},
-        {Tokens::TE_SHADER_PATH, "te_shader"},
-        {Tokens::GEO_SHADER_PATH, "geo_shader"},
+    Material() = default;
+    ~Material() = default;
 
-        {Tokens::DIFF_MAP_PATH, "diffuse_map"},
-        {Tokens::SPEC_MAP_PATH, "specular_map"},
+    void Init(Handle shaderHandle, ResourceManager& rm);
 
-        {Tokens::AMBIENT_VALUE, "ambient"},
-        {Tokens::DIFFUSE_VALUE, "diffuse"},
-        {Tokens::SPECULAR_VALUE, "specular"},
-        {Tokens::SHININESS_VALUE, "shininess"}
-    };
+    void Bind(ResourceManager& rm);
+
+    void SetValue(std::string_view name, const Shader::DataType& value);
+    void SetTexture(std::string_view samplerName, Handle handle);
+    [[nodiscard]] Shader::DataType GetValue(std::string_view name, Shader::DataTypeEnum* type = nullptr);
+    [[nodiscard]] Handle GetShaderHandle() const;
+
+    static Handle ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm, int& error, bool replace = false);
+
+private:
+    std::vector<uint8_t> uniformBufferData_;
+    std::vector<TextureBinding> textureSlotsBuffer_;
+    std::unordered_map<std::string, Shader::DataType, StringHash, std::equal_to<>> looseUniformBuffer_;
+    Shader::ReflectionData shaderLayout_;
+    Handle shaderHandle_;
 };

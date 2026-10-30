@@ -31,6 +31,8 @@ namespace Core
         [[nodiscard]] int GetWindowWidth() const;
         [[nodiscard]] int GetWindowHeight() const;
 
+        [[nodiscard]] ResourceManager* GetResourceManager() const;
+
     private:
         void InitWindow(int width, int height, std::string_view title);
         void InitImGui() const;

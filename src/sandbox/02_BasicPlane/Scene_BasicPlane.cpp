@@ -85,7 +85,6 @@ namespace Scene
     void Scene_BasicPlane::Render()
     {
         if (!sm_) return;
-        const auto& renderer = sm_->GetRenderer();
 
         //m_view = m_camera->GetViewMatrix();
 
@@ -94,7 +93,11 @@ namespace Scene
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
         m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
 
-        renderer.Draw(*m_va, *m_ib, *m_shader); // will eventually be va, ib, material
+        //renderer.Draw(*m_va, *m_ib, *m_shader); // will eventually be va, ib, material
+        m_shader->Bind();
+        m_va->Bind();
+        m_ib->Bind();
+        GLCall(glDrawElements(GL_TRIANGLES, m_ib->GetCount(), GL_UNSIGNED_INT, nullptr));
     }
 
     void Scene_BasicPlane::ImGuiRender()

@@ -30,7 +30,7 @@ namespace Scene
 
         LightObject obj(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
         lights_.emplace_back(obj);
-        lights_[0].SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
+        lights_[0].SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error));
 
         camera_ = std::make_unique<Camera>(CameraMode::FPS);
 
@@ -77,12 +77,6 @@ namespace Scene
         lights_[0].lightData.diffuse = lightColor_;
         lights_[0].lightData.specular = lightColor_;
 
-        Material* materialLight = rm_->materialPool.Get(rm_->modelPool.Get(lights_[0].GetModelHandle())->GetSubMeshes()[0].materialHandle);
-        if (materialLight)
-        {
-            materialLight->diffuse = lightColor_;
-        }
-
         GLFWwindow* window = &sm_->GetRenderer().GetWindow();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -93,10 +87,12 @@ namespace Scene
     void Scene_ModelLoading::Render()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        const auto& renderer = sm_->GetRenderer();
+        auto& renderer = sm_->GetRenderer();
 
-        renderer.Draw(*object_, *camera_, lights_);
-        renderer.DrawLight(lights_[0], *camera_);
+        Renderer::BuildCommands(*object_, RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
+        Renderer::BuildCommands(lights_[0], RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
+
+        renderer.Execute(camera_->GetViewMatrix(), camera_->GetPosition(), camera_->GetProjectionMatrix(), lights_);
     }
 
     void Scene_ModelLoading::ImGuiRender()
@@ -113,7 +109,7 @@ namespace Scene
     {
         glEnable(GL_DEPTH_TEST);
         int error = 0;
-        lights_[0].SetMaterialOverride(Material::parseMaterial("light", BASE_PATH / "resources/materials/light.mat", *rm_, error));
+        lights_[0].SetMaterialOverride(Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error));
         double x, y;
         glfwGetCursorPos(&renderer_->GetWindow(), &x, &y);
         camera_->SyncMouse(x, y);

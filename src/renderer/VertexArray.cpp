@@ -13,7 +13,6 @@ static GLenum ShaderDataTypeToOpenGL(const ShaderDataType type)
         case ShaderDataType::uByte: return GL_UNSIGNED_BYTE;
     }
     ASSERT(false);
-    return 0;
 }
 
 VertexArray::VertexArray()
@@ -34,6 +33,16 @@ void VertexArray::Bind() const
 void VertexArray::Unbind() const
 {
     GLCall(glBindVertexArray(0));
+}
+
+unsigned int VertexArray::GetRendererID() const
+{
+    return m_RendererID;
+}
+
+void VertexArray::BindVertexArray(const unsigned int ID)
+{
+    GLCall(glBindVertexArray(ID));
 }
 
 void VertexArray::AddBuffer(const VertexBuffer &vb, const VertexBufferLayout &layout) const
