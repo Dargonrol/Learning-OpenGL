@@ -1,1 +1,23 @@
 vendor/ linguist-vendored
+
+setup.sh linguist-detectable=false
+setup.bat linguist-detectable=false
+conan/conanfile.py linguist-detectable=false
+
+*.frag linguist-language=GLSL
+*.vert linguist-language=GLSL
+
+* text=auto
+
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.fbx binary
+*.obj binary
+*.png binary
+*.jpg binary
+*.tga binary
+*.hdr binary
+*.ttf binary
+*.otf binary
