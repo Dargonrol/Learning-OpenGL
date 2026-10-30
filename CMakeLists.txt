@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.12...${CMAKE_VERSION})
+project(OpenGLAPP VERSION 0.7 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(vcpkg)
-
-project(OpenGLAPP VERSION 0.6 LANGUAGES C CXX)
 
 if(CMAKE_BUILD_TYPE)
     message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -34,7 +32,6 @@ endif()
 
 include(options)
 include(dependencies)
-include(compiler_warnings)
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
         "src/*.cpp"
@@ -46,13 +43,15 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # this allows #include "Core/Renderer.h" instead of #include "../../Core/Renderer.h"
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(${PROJECT_NAME} PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb"
+)
 
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES
         OUTPUT_NAME "${PROJECT_NAME}"
 )
-
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE
         SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
@@ -61,18 +60,14 @@ target_compile_definitions( ${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Release>:RELEASE_BUILD>
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include"
-)
-
 target_link_libraries( ${PROJECT_NAME} PRIVATE
         glfw
         glad
         glm::glm
-        imgui::imgui
+        imgui
+        imgui_backends
         assimp::assimp
 )
 
+include(compiler_warnings)
 enable_warnings("${PROJECT_NAME}")
-

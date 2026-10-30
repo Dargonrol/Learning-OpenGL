@@ -1,0 +1,10 @@
+[settings]
+os=Windows
+arch=x86
+compiler=gcc
+compiler.version=13
+compiler.cppstd=17
+compiler.libcxx=libstdc++11
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja

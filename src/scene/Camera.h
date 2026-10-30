@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "glm/gtc/type_ptr.hpp"
 
 class GLFWwindow;
