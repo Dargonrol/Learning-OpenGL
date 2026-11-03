@@ -10,6 +10,14 @@
 
 Shader::Shader(const std::filesystem::path &vs, const std::filesystem::path &tcs, const std::filesystem::path &tes, const std::filesystem::path &gs, const std::filesystem::path &fs, const std::filesystem::path &cs, int &error)
 {
+#ifdef DEBUG_BUILD
+    if (vs.empty())
+        DEBUG_shaderName = cs.filename();
+    else
+        DEBUG_shaderName = vs.filename();
+    Log::Trace("Creating Shader {}", DEBUG_shaderName);
+#endif
+
     error = 0;
 
     if (vs.empty() && tcs.empty() && tes.empty() && gs.empty() && fs.empty() && cs.empty())
@@ -57,8 +65,9 @@ Shader::Shader(const std::filesystem::path& cs, int &error) : Shader({}, {}, {},
 
 Shader::Shader(const std::string &vs, const std::string &fs, int &error)
 {
+    Log::Trace("Creating shader");
     error = 0;
-    ShaderSourceCode shaderSource = {
+    const ShaderSourceCode shaderSource = {
         vs,
         "",
         "",
@@ -119,15 +128,14 @@ int Shader::GetUniformLocation(const std::string &name)
     int location;
     GLCall(location = glGetUniformLocation(m_RendererID, name.c_str()));
     if (location == -1)
-    {
-        std::cout << "[WARNING] Uniform '" << name << "' does not exist!\n";
-    }
+        Log::Warn("Uniform '{}' does not exist!", name);
     m_UniformLocationCache[name] = location;
     return location;
 }
 
 void Shader::SetShaderReflectionData()
 {
+    Log::Debug("Setting Shader reflection data");
     Bind();
 
     const unsigned int blockIndex = glGetUniformBlockIndex(m_RendererID, MATERIAL_BLOCK_NAME);
@@ -135,14 +143,19 @@ void Shader::SetShaderReflectionData()
     {
         int blockSize = 0;
         GLCall(glGetActiveUniformBlockiv(m_RendererID, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize));
+        Log::Trace("Block index: {}, Block size / buffer size: {}", blockIndex, blockSize);
         shaderReflectionData_.bufferSize = static_cast<size_t>(blockSize);
         // shaderReflectionData_.blockIndex = blockIndex;
     }
     else
-      shaderReflectionData_.bufferSize = 0;
+    {
+        shaderReflectionData_.bufferSize = 0;
+        Log::Trace("Buffer size: 0");
+    }
 
     int numUniforms = 0;
     GLCall(glGetProgramiv(m_RendererID, GL_ACTIVE_UNIFORMS, &numUniforms));
+    Log::Trace("Number of Uniforms: {}", numUniforms);
 
     if (numUniforms <= 0)
         return;
@@ -171,27 +184,35 @@ void Shader::SetShaderReflectionData()
         switch (uniformType)
         {
         case GL_INT:
+            Log::Trace("Found {} Uniform | Type: GL_INT/INT | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::INT;
             break;
         case GL_SAMPLER_2D:
+            Log::Trace("Found {} Uniform | Type: GL_SAMPLER_2D/INT | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::INT;
             break;
         case GL_FLOAT:
+            Log::Trace("Found {} Uniform | Type: GL_FLOAT/FLOAT | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::FLOAT;
             break;
         case GL_FLOAT_VEC2:
+            Log::Trace("Found {} Uniform | Type: GL_FLOAT_VEC2/FLOAT | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::VEC2;
             break;
         case GL_FLOAT_VEC3:
+            Log::Trace("Found {} Uniform | Type: GL_FLOAT_VEC3/VEC3 | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::VEC3;
             break;
         case GL_FLOAT_VEC4:
+            Log::Trace("Found {} Uniform | Type: GL_FLOAT_VEC4/VEC4 | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::VEC4;
             break;
         case GL_FLOAT_MAT4:
+            Log::Trace("Found {} Uniform | Type: GL_FLOAT_MAT4/MAT4 | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::MAT4;
             break;
         default:
+            Log::Trace("Found {} Uniform | Type: ?/UNKNOWN | Name: {} | Size: {}", offsets[i] >= 0 ? "UBO" : "loose", nameBuffer, uniformSize);
             prop.type = DataTypeEnum::UNKNOWN;
             break;
         }
