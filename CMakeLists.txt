@@ -15,21 +15,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# activate compiler cache
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
-endif()
-
-# activate LTO
-include(CheckIPOSupported)
-check_ipo_supported(RESULT result OUTPUT error)
-if(result)
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-else()
-    message(STATUS "IPO / LTO not supported: ${error}")
-endif()
-
 include(options)
 include(dependencies)
 
@@ -41,6 +26,21 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+# precompiled headers
+target_precompile_headers(${PROJECT_NAME} PRIVATE
+        <iostream>
+        <vector>
+        <string>
+        <memory>
+        <optional>
+        <filesystem>
+        <glad/glad.h>
+        <GLFW/glfw3.h>
+        <glm/glm.hpp>
+        <spdlog/spdlog.h>
+        <imgui.h>
+)
 
 # this allows #include "Core/Renderer.h" instead of #include "../../Core/Renderer.h"
 target_include_directories(${PROJECT_NAME} PRIVATE
