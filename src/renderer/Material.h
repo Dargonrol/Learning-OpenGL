@@ -48,7 +48,7 @@ public:
     [[nodiscard]] Shader::DataType GetValue(std::string_view name, Shader::DataTypeEnum* type = nullptr);
     [[nodiscard]] Handle GetShaderHandle() const;
 
-    static Handle ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm, int& error, bool replace = false);
+    static Handle ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm, bool replace = false);
 
 private:
     std::vector<uint8_t> uniformBufferData_;

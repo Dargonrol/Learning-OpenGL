@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
+#include "ShaderLoader.h"
 #include "core/Application.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "scene/Mesh.h"
@@ -37,21 +38,21 @@ void Renderer::Init()
             "#version 330 core\n"
             "out vec4 FragColor;\n"
             "void main(){FragColor = vec4(1.0, 0.0, 0.0, 1.0);}\n";
-        int error = 0;
-        auto shader = Shader(vertex, frag, error);
-        if (error)
+        auto shaderOpt = ShaderLoader::FromSources({.vs = vertex, .fs = frag}, "debug shader");
+        if (!shaderOpt)
         {
-            std::cerr << "Failed Debug Shader creation!" << std::endl;
-            return;
+            Log::Error("Debug Shader creation failed!");
+        } else
+        {
+            Material material{};
+            material.Init(rm_->shaderPool.Register("debug", std::move(shaderOpt.value())), *rm_);
+            material.SetValue("u_AmbientColor", glm::vec3{1.0f, 0.0f, 0.0f});
+            material.SetValue("u_DiffuseColor", glm::vec3{0.0f, 0.0f, 0.0f});
+            material.SetValue("u_SpecularColor", glm::vec3{0.0f, 0.0f, 0.0f});
+            material.SetValue("u_Shininess", 0.0f);
+            debugMaterialHandle = rm_->materialPool.Register("debug", material);
+            std::cout << "Registering debug Material and Shader \n";
         }
-        Material material{};
-        material.Init(rm_->shaderPool.Register("debug", std::move(shader)), *rm_);
-        material.SetValue("u_AmbientColor", glm::vec3{1.0f, 0.0f, 0.0f});
-        material.SetValue("u_DiffuseColor", glm::vec3{0.0f, 0.0f, 0.0f});
-        material.SetValue("u_SpecularColor", glm::vec3{0.0f, 0.0f, 0.0f});
-        material.SetValue("u_Shininess", 0.0f);
-        debugMaterialHandle = rm_->materialPool.Register("debug", material);
-        std::cout << "Registering debug Material and Shader \n";
     }
 }
 

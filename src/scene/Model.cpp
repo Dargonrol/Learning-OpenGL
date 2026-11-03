@@ -10,6 +10,7 @@
 #include "renderer/Texture.h"
 #include "renderer/Vertex.h"
 #include "core/ResourceManager.h"
+#include "renderer/ShaderLoader.h"
 
 struct Vertex;
 
@@ -126,26 +127,19 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
 
     if (!shaderHandle)
     {
-        std::cout << "Shader has not been compiled yet." << std::endl;
-        Shader::ShaderContext sc = {
-            BASE_PATH / "resources/shaders/texShadable.vert",
-            {},
-            {},
-            {},
-            BASE_PATH / "resources/shaders/texShadable.frag",
-            {}
-        };
+        Log::Trace("Model-loading | texShadable has not been compiled yet");
 
-        int error = 0;
-        auto shader = Shader(sc, error);
-
-        if (error)
+        auto shaderOpt = ShaderLoader::FromFiles({
+           .vs = BASE_PATH / "resources/shaders/texShadable.vert",
+           .fs = BASE_PATH / "resources/shaders/texShadable.frag"
+        });
+        if (!shaderOpt)
         {
-            std::cerr << "Error parsing material with shader: " << "texShadable" << std::endl;
+            Log::Error("Model-loading | Error parsing material with shader: texShadable");
             return {0, 0};
         }
 
-        shaderHandle = rm->shaderPool.Register("texShadable", std::move(shader));
+        shaderHandle = rm->shaderPool.Register("texShadable", std::move(*shaderOpt));
     }
 
     material.Init(shaderHandle, *rm);

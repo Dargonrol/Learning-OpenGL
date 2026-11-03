@@ -72,7 +72,10 @@ namespace Scene
                     m_CurrentScene->OnLeave();
                 m_CurrentScene = it->get();
                 if (m_CurrentScene)
+                {
+                    Log::Info("Entering Scene: {}", it->get()->name);
                     m_CurrentScene->OnEnter();
+                }
                 return;
             }
         }

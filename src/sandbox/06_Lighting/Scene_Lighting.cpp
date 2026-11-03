@@ -5,6 +5,7 @@
 #include "core/Application.h"
 #include "core/ResourceManager.h"
 #include "core/SceneManager.h"
+#include "renderer/ShaderLoader.h"
 #include "renderer/VertexBuffer.h"
 #include "scene/Camera.h"
 #include "scene/LightObject.h"
@@ -20,26 +21,25 @@ namespace Scene
         int error = 0;
 
         {
-            auto lightShader = Shader(
-                BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
-                BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader",
-                error
-            );
+            auto shaderOpt = ShaderLoader::FromFiles({
+               .vs = BASE_PATH / "resources/shaders/Lighting/Light_VERT.shader",
+               .fs = BASE_PATH / "resources/shaders/Lighting/Light_FRAG.shader"
+           });
+            if (!shaderOpt)
+                return -1;
 
-            if (error)
-                return error;
+            h_lightShader = rm_->shaderPool.Register("Scene_Lighting_Cube", std::move(*shaderOpt));
+        }
 
-            h_lightShader = rm_->shaderPool.Register("Scene_Lighting_Cube", std::move(lightShader));
+        {
+            auto shaderOpt = ShaderLoader::FromFiles({
+               .vs = BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
+               .fs = BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader"
+           });
+            if (!shaderOpt)
+                return -1;
 
-            auto objShader = Shader(
-                BASE_PATH / "resources/shaders/Lighting/Cube_VERT.shader",
-                BASE_PATH / "resources/shaders/Lighting/Cube_FRAG.shader",
-                error
-            );
-
-            if (error)
-                return error;
-            h_cubeShader = rm_->shaderPool.Register("Scene_Lighting_Light", std::move(objShader));
+            h_cubeShader = rm_->shaderPool.Register("Scene_Lighting_Light", std::move(*shaderOpt));
         }
 
         rm_->shaderPool.Get(h_lightShader)->Bind();

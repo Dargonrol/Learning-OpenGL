@@ -15,6 +15,7 @@
 #include "renderer/VertexBuffer.h"
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
+#include "renderer/ShaderLoader.h"
 #include "renderer/Texture.h"
 
 
@@ -56,15 +57,15 @@ namespace Scene
         proj = glm::ortho(0.0f, (float)sm_->GetRenderer().app.GetWindowWidth(), 0.0f, (float)sm_->GetRenderer().app.GetWindowHeight(), -1.0f, 1.0f);
         view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-        int error = 0;
-        shader = std::make_unique<Shader>(
-            BASE_PATH / "resources/shaders/Basic/basic_VERT.shader",
-            BASE_PATH / "resources/shaders/Basic/basic_FRAG.shader",
-            error
-            );
+        auto shaderOpt = ShaderLoader::FromFiles({
+            .vs = BASE_PATH / "resources/shaders/Basic/basic_VERT.shader",
+            .fs = BASE_PATH / "resources/shaders/Basic/basic_FRAG.shader"
+        });
+        if (shaderOpt)
+            shader = std::make_unique<Shader>(std::move(*shaderOpt));
+        else
+            return -1;
 
-        if (error)
-            return error;
         shader->Bind();
         shader->SetUniform4f("u_Color", 1.0f, 0.5f, 0.5f, 1.0f);
 
@@ -72,7 +73,7 @@ namespace Scene
         texture->Bind(0);
         shader->SetUniform1i("u_Texture", 0);
 
-        return error;
+        return 0;
     }
 
     void Scene_Texture2D::Update(float deltaTime)

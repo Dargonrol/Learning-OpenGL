@@ -13,15 +13,14 @@ namespace Scene
 {
     int Scene_Material::Init()
     {
-        int error = 0;
         light_ = std::make_unique<LightObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
         cube_ = std::make_unique<GameObject>(BASE_PATH / "resources/models/primitives/Cube/Cube.obj", rm_);
         Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
         Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
 
-        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error, true);
-        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, error, true);
-        debugMaterial = Material::ParseMaterial(BASE_PATH / "resources/materials/debug.mat.json", *rm_, error);
+        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, true);
+        debugMaterial = Material::ParseMaterial(BASE_PATH / "resources/materials/debug.mat.json", *rm_);
 
         camera_ = std::make_unique<Camera>(CameraMode::ORBIT);
         camera_->SetPosition({5.0f, 5.0f, 5.0f});
@@ -32,7 +31,7 @@ namespace Scene
         light_->modelMatrix = glm::translate(light_->modelMatrix, glm::vec3{0.0f, 1.0f, 2.0f});
         light_->modelMatrix = glm::scale(light_->modelMatrix, glm::vec3(0.5f));
 
-        return error;
+        return 0;
     }
 
     void Scene_Material::Update(float deltaTime)
@@ -75,11 +74,10 @@ namespace Scene
     void Scene_Material::OnEnter()
     {
         glEnable(GL_DEPTH_TEST);
-        int error = 0;
         Model* lightModel = rm_->modelPool.Get(light_->GetModelHandle());
         Model* cubeModel = rm_->modelPool.Get(cube_->GetModelHandle());
-        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, error, true);
-        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, error, true);
+        lightModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/light.mat.json", *rm_, true);
+        cubeModel->GetSubMeshes()[0].materialHandle = Material::ParseMaterial(BASE_PATH / "resources/materials/default.mat.json", *rm_, true);
     }
 
     void Scene_Material::OnLeave()

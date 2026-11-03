@@ -5,6 +5,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "ShaderLoader.h"
 #include "core/ResourceManager.h"
 #include "core/Util.h"
 
@@ -215,15 +216,13 @@ Handle Material::GetShaderHandle() const
 
 using json = nlohmann::json;
 
-Handle Material::ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm,
-    int& error, bool replace)
+Handle Material::ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm, bool replace)
 {
     Log::Debug("Parsing Material: {}", materialPath.filename().c_str());
     std::ifstream file(materialPath);
     if (!file.is_open())
     {
         Log::Error("Material::ParseMaterial: Could not open file {}", materialPath.c_str());
-        error = -1;
         return {0, 0};
     }
 
@@ -235,14 +234,12 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     catch (const json::parse_error& e)
     {
         Log::Error("Material::ParseMaterial: JSON error in {}:{}", materialPath.c_str(), e.what());
-        error = -1;
         return {0 ,0};
     }
 
     std::string materialName;
     if (!data.contains("material_name") || !data["material_name"].is_string())
     {
-        error = -1;
         Log::Error("Material::ParseMaterial: \"material_name\" cannot be empty! in ", materialPath.c_str());
         return {0 ,0};
     }
@@ -255,7 +252,6 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     else
     {
         Log::Error("Material::ParseMaterial: shader_name cannot be empty! in ", materialPath.c_str());
-        error = -1;
         return {0, 0};
     }
 
@@ -263,14 +259,13 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     {
         if (!data.contains("shader_paths"))
         {
-            error = -1;
             Log::Error("Material::ParseMaterial: Shader: {} did not exist and no shader_paths were provided.", shaderName);
             return {0, 0};
         }
 
         const auto& paths = data["shader_paths"];
 
-        Shader::ShaderContext sc;
+        ShaderFilePaths sc;
         if (paths.contains("vertex_shader") && paths["vertex_shader"].is_string())
             sc.vs = SanitizePath(paths["vertex_shader"].get<std::string>());
         if (paths.contains("compute_shader") && paths["compute_shader"].is_string())
@@ -284,14 +279,14 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
         if (paths.contains("tess_eval_shader") && paths["tess_eval_shader"].is_string())
             sc.tes = SanitizePath(paths["tess_eval_shader"].get<std::string>());
 
-        Shader shader{sc, error};
-        if (error != 0)
+        auto shaderOpt = ShaderLoader::FromFiles(sc);
+        if (!shaderOpt)
         {
             Log::Error("Material::ParseMaterial: failed shader creation with shader: {}", shaderName);
-            return {0, 0};
+            return {0 ,0};
         }
 
-        shaderHandle = rm.shaderPool.Register(shaderName, std::move(shader));
+        shaderHandle = rm.shaderPool.Register(shaderName, std::move(*shaderOpt));
     } else
         shaderHandle = rm.shaderPool.GetHandle(shaderName);
 

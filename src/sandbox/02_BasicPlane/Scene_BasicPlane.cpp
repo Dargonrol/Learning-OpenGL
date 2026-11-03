@@ -4,6 +4,7 @@
 #include "core/SceneManager.h"
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
+#include "renderer/ShaderLoader.h"
 #include "renderer/VertexArray.h"
 #include "renderer/VertexBuffer.h"
 #include "renderer/VertexBufferLayout.h"
@@ -18,8 +19,6 @@ namespace Scene
 
     int Scene_BasicPlane::Init()
     {
-        int error = 0;
-
         float vertices[] = {
             -50.0f, -50.0f,
              50.0f, -50.0f,
@@ -32,14 +31,15 @@ namespace Scene
             2, 3, 0
         };
 
-        m_shader = std::make_unique<Shader>(
-            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_VERT.shader",
-            BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_FRAG.shader",
-            error
-            );
+        auto shaderOpt = ShaderLoader::FromFiles({
+            .vs = BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_VERT.shader",
+            .fs = BASE_PATH / "resources/shaders/BasicPlane/BasicPlane_FRAG.shader"
+        });
+        if (shaderOpt)
+            m_shader = std::make_unique<Shader>(std::move(*shaderOpt));
+        else
+            return -1;
 
-        if (error)
-            return error;
         m_shader->Bind();
 
         m_ib = std::make_unique<IndexBuffer>(indices, 3 * 2);
@@ -66,7 +66,7 @@ namespace Scene
         m_shader->SetUniformMat4f("u_proj", m_camera->GetProjectionMatrix());
         m_shader->SetUniformMat4f("u_view", m_camera->GetViewMatrix());
 
-        return error;
+        return 0;
     }
 
     void Scene_BasicPlane::Update(float deltaTime)

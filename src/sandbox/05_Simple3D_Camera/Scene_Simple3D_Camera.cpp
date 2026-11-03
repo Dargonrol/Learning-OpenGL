@@ -15,6 +15,7 @@
 #include "scene/Camera.h"
 #include "renderer/Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "renderer/ShaderLoader.h"
 
 namespace Scene
 {
@@ -23,16 +24,15 @@ namespace Scene
 
     int Scene_Simple3D_Camera::Init()
     {
-        int error = 0;
 
-        m_shader = std::make_unique<Shader>(
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader",
-            error
-            );
-
-        if (error)
-            return error;
+        auto shaderOpt = ShaderLoader::FromFiles({
+            .vs = BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
+            .fs = BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader"
+        });
+        if (shaderOpt)
+            m_shader = std::make_unique<Shader>(std::move(*shaderOpt));
+        else
+            return -1;
 
         float vertices[] = {
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -130,7 +130,7 @@ namespace Scene
 
         ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
 
-        return error;
+        return 0;
     }
 
     void Scene_Simple3D_Camera::ResetCamera()

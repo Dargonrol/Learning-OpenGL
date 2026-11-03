@@ -13,10 +13,10 @@
 #include "renderer/VertexArray.h"
 #include "renderer/VertexBuffer.h"
 #include "core/SceneManager.h"
-#include "renderer/Material.h"
 #include "renderer/Renderer.h"
 #include "scene/Camera.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "renderer/ShaderLoader.h"
 
 namespace Scene
 {
@@ -25,16 +25,15 @@ namespace Scene
 
     int Scene_Simple3D::Init()
     {
-        int error = 0;
+        auto shaderOpt = ShaderLoader::FromFiles({
+            .vs = BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
+            .fs = BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader"
+        });
+        if (shaderOpt)
+            m_shader = std::make_unique<Shader>(std::move(*shaderOpt));
+        else
+            return -1;
 
-        m_shader = std::make_unique<Shader>(
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_VERT.shader",
-            BASE_PATH / "resources/shaders/Simple3D/Simple3D_FRAG.shader",
-            error
-            );
-
-        if (error)
-            return error;
         m_shader->Bind();
 
         float vertices[] = {
@@ -125,7 +124,7 @@ namespace Scene
 
         m_camera->SetMode(CameraMode::ORBIT);
 
-        return error;
+        return 0;
     }
 
     void Scene_Simple3D::Update(float deltaTime)

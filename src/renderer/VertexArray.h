@@ -1,7 +1,6 @@
 #pragma once
 #include "core/Util.h"
 #include "core/OpenGL.h"
-#include "renderer/Renderer.h"
 
 class VertexBufferLayout;
 class VertexBuffer;
