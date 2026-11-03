@@ -25,8 +25,6 @@ namespace Scene
             return;
         }
 
-        Log::Trace("SceneManager: Unregistering Scene {}", name);
-
         const size_t hash = iterName -> second;
 
         m_NameToHash_Map.erase(iterName);
@@ -67,7 +65,6 @@ namespace Scene
                     }
                     it->get()->initialized = true;
                 }
-                Log::Trace("SceneManager: Setting new Scene {}", it->get()->name);
                 if (m_CurrentScene)
                     m_CurrentScene->OnLeave();
                 m_CurrentScene = it->get();

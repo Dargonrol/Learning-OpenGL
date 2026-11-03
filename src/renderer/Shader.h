@@ -167,9 +167,4 @@ private:
     ReflectionData shaderReflectionData_;
 
     inline static unsigned int lastBoundShader = 0;
-
-#ifdef DEBUG_BUILD
-public:
-    std::string DEBUG_shaderName = std::to_string(reinterpret_cast<size_t>(this));
-#endif
 };

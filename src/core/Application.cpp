@@ -101,12 +101,14 @@ namespace Core
 
     void Application::CaptureMouse() const
     {
+        Log::Trace("Application: set mouse capturing = true");
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
     }
 
     void Application::ReleaseMouse() const
     {
+        Log::Trace("Application: set mouse capturing = false");
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     }
@@ -207,7 +209,6 @@ namespace Core
     {
         glViewport(0, 0, width, height);
         auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-        Log::Trace("Resize Callback: {}x{}",width,height);
         if (app)
             app->sceneManager_->OnResize(width, height);
     }

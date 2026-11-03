@@ -56,9 +56,4 @@ private:
     std::unordered_map<std::string, Shader::DataType, StringHash, std::equal_to<>> looseUniformBuffer_;
     Shader::ReflectionData shaderLayout_;
     Handle shaderHandle_;
-
-#ifdef DEBUG_BUILD
-public:
-    std::string DEBUG_materialName = std::to_string(reinterpret_cast<size_t>(this));
-#endif
 };

@@ -17,7 +17,7 @@
 #endif
 #define BASE_PATH std::filesystem::path(SOURCE_DIR)
 
-#ifdef RELEASE_BUILD
+#ifdef RELEASE
     #define ASSERT(x)
     #define GLCall(x) x;
 #else
@@ -32,7 +32,7 @@ inline bool GLLogCall(const char* function, const char* file, int line)
 {
     while (GLenum error = glGetError())
     {
-        Log::Warn("[OpenGL Error] ({:#04X}) in {} at {}:{}", error, function, file, line);
+        std::cout << "[OpenGL Error] (0x" << std::hex << error << std::dec << ") in " << function << " at " << file << ":" << line << "\n";
         return false;
     }
     return true;
