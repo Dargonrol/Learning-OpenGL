@@ -117,6 +117,11 @@ Handle Model::processMaterial(aiMaterial* mat, const std::filesystem::path& path
         return materialHandle;
 
     Material material;
+
+#ifdef DEBUG_BUILD
+    material.DEBUG_materialName = materialKey;
+#endif
+
     Handle shaderHandle = rm->shaderPool.GetHandle("texShadable");
 
     if (!shaderHandle)

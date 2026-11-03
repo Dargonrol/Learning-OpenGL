@@ -21,9 +21,10 @@ Renderer::Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::
 
 void Renderer::Init()
 {
+    Log::Trace("Initializing Renderer");
     stbi_set_flip_vertically_on_load(true);
 
-    if (false)
+    if constexpr (false)
     {
         // set up basic shader and material
         const char* vertex =
@@ -186,9 +187,9 @@ void Renderer::ImGui_EndFrame() const
 
 uint64_t Renderer::CalculateSortKey(const Handle shaderHandle, const Handle materialHandle, RasterizationMode mode)
 {
-    uint64_t shaderID = static_cast<uint64_t>(shaderHandle.id);
-    uint64_t materialID = static_cast<uint64_t>(materialHandle.id);
-    uint64_t wireMode = static_cast<uint64_t>(mode);
+    const uint64_t shaderID = static_cast<uint64_t>(shaderHandle.id);
+    const uint64_t materialID = static_cast<uint64_t>(materialHandle.id);
+    const uint64_t wireMode = static_cast<uint64_t>(mode);
 
     // Bit 62-63 (2 Bit) mode
     // Bit 32-61 (30 Bit) shaderID

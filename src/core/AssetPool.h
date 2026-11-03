@@ -6,12 +6,14 @@
 #include <queue>
 #include <unordered_map>
 
+#include "Log.h"
+
 using Index = u_int32_t;
 
 struct TransparentHash {
     using is_transparent = void;
 
-    size_t operator()(std::string_view sv) const noexcept {
+    size_t operator()(const std::string_view sv) const noexcept {
         return std::hash<std::string_view>{}(sv);
     }
 
@@ -23,7 +25,7 @@ struct TransparentHash {
 struct TransparentEqual {
     using is_transparent = void;
 
-    bool operator()(std::string_view lhs, std::string_view rhs) const noexcept {
+    bool operator()(const std::string_view lhs, const std::string_view rhs) const noexcept {
         return lhs == rhs;
     }
 };
@@ -57,7 +59,7 @@ namespace std {
 }
 
 /**
- * In-house asset/resource management datastructure.
+ * In-house asset/resource management data-structure.
  * not guaranteed contiguous memory.
  * @tparam T Type
  */
@@ -67,7 +69,7 @@ class AssetPool
 public:
     struct Slot
     {
-        Slot(Handle handle, bool isFree, T&& asset)
+        Slot(const Handle handle, const bool isFree, T&& asset)
         : h(handle), free(isFree), data(std::move(asset)) {}
 
         Slot() : h({0, 0}), free(true), data() {}
@@ -175,6 +177,7 @@ std::string_view AssetPool<T>::GetName(const Handle h) const noexcept
 template<typename T>
 Handle AssetPool<T>::Register(const std::string_view sv, T asset)
 {
+    Log::Trace("AssetPool: Registering new Asset: {}", sv);
     auto iter = map_string_handle_.find(sv);
     if (iter == map_string_handle_.end())
     {
@@ -208,6 +211,7 @@ Handle AssetPool<T>::Register(const std::string_view sv, T asset)
         return pool_[index].h;
     }
     // name already exists do nothing
+    Log::Trace("AssetPool: Asset {} does already exist. (not overriding)", sv);
     Index index = iter->second.id;
     return pool_[index].h;
 }
@@ -222,6 +226,7 @@ Handle AssetPool<T>::ReplaceData(const std::string_view sv, T asset)
         return Register(sv, std::move(asset));
     }
     // already exists
+    Log::Trace("AssetPool: Asset {} does already exist. (overriding)", sv);
     Index index = iter->second.id;
     const Handle oldHandle = pool_[index].h;
     Handle& currentHandle = pool_[index].h;
@@ -243,7 +248,10 @@ bool AssetPool<T>::Remove(const Handle h)
     // doesn't actually remove the element but marks it as free
     auto iter1 = map_handle_string_.find(h);
     if (iter1 == map_handle_string_.end())
+    {
+        Log::Trace("AssetPool: Could not remove Handle. Handle {} does not exist.", h);
         return false;
+    }
 
     Index index = h.id;
 
@@ -262,6 +270,7 @@ bool AssetPool<T>::Remove(const Handle h)
     map_handle_string_.erase(h);
 
     freeSpaces_.push(index);
+    Log::Trace("AssetPool: Removed {}", h);
 
     return true;
 }

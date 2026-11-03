@@ -10,10 +10,13 @@
 
 void Material::Init(const Handle shaderHandle, ResourceManager& rm)
 {
+#ifdef DEBUG_BUILD
+    Log::Trace("Initializing Material: {}", DEBUG_materialName);
+#endif
     const Shader* shader = rm.shaderPool.Get(shaderHandle);
     if (!shader)
     {
-        std::cerr << "[ERROR] Material::Init(): Shader handle not valid!" << std::endl;
+        Log::Error("Material::Init(): Shader handle not valid!");
         return;
     }
 
@@ -215,10 +218,11 @@ using json = nlohmann::json;
 Handle Material::ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm,
     int& error, bool replace)
 {
+    Log::Debug("Parsing Material: {}", materialPath.filename().c_str());
     std::ifstream file(materialPath);
     if (!file.is_open())
     {
-         std::cerr << "[ERROR] Material::ParseMaterial: Could not open file " << materialPath << std::endl;
+        Log::Error("Material::ParseMaterial: Could not open file {}", materialPath.c_str());
         error = -1;
         return {0, 0};
     }
@@ -230,7 +234,7 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     }
     catch (const json::parse_error& e)
     {
-        std::cerr << "[ERROR] Material::ParseMaterial: JSON error in " << materialPath << ": " << e.what() << std::endl;
+        Log::Error("Material::ParseMaterial: JSON error in {}:{}", materialPath.c_str(), e.what());
         error = -1;
         return {0 ,0};
     }
@@ -239,7 +243,7 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     if (!data.contains("material_name") || !data["material_name"].is_string())
     {
         error = -1;
-        std::cerr << "[ERROR] Material::ParseMaterial: \"material_name\" cannot be empty! in " << materialPath << std::endl;
+        Log::Error("Material::ParseMaterial: \"material_name\" cannot be empty! in ", materialPath.c_str());
         return {0 ,0};
     }
     materialName = data["material_name"];
@@ -250,7 +254,7 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
         shaderName = data["shader_name"].get<std::string>();
     else
     {
-        std::cerr << "[ERROR] Material::ParseMaterial: shader_name cannot be empty! in " << materialPath << std::endl;
+        Log::Error("Material::ParseMaterial: shader_name cannot be empty! in ", materialPath.c_str());
         error = -1;
         return {0, 0};
     }
@@ -260,7 +264,7 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
         if (!data.contains("shader_paths"))
         {
             error = -1;
-            std::cerr << "[ERROR] Material::ParseMaterial: Shader: " << shaderName << " did not exist and no shader_paths were provided." << std::endl;
+            Log::Error("Material::ParseMaterial: Shader: {} did not exist and no shader_paths were provided.", shaderName);
             return {0, 0};
         }
 
@@ -280,13 +284,10 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
         if (paths.contains("tess_eval_shader") && paths["tess_eval_shader"].is_string())
             sc.tes = SanitizePath(paths["tess_eval_shader"].get<std::string>());
 
-        std::cout << sc.vs.c_str() << std::endl << std::flush;
-        std::cout << sc.fs.c_str() << std::endl << std::flush;
-
         Shader shader{sc, error};
         if (error != 0)
         {
-            std::cerr << "[ERROR] Material::ParseMaterial: failed shader creation with shader: " << shaderName << std::endl;
+            Log::Error("Material::ParseMaterial: failed shader creation with shader: {}", shaderName);
             return {0, 0};
         }
 
@@ -294,7 +295,13 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     } else
         shaderHandle = rm.shaderPool.GetHandle(shaderName);
 
+
     Material material;
+
+#ifdef DEBUG_BUILD
+    material.DEBUG_materialName = materialName;
+#endif
+
     material.Init(shaderHandle, rm);
 
     if (data.contains("uniforms") && data["uniforms"].is_object())

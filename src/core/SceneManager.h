@@ -26,7 +26,7 @@ namespace Scene
         {
             Log::Trace("SceneManager: Registering scene: {}", name);
             std::string SceneName = std::string(name);
-            auto iterName = m_NameToHash_Map.find(SceneName);
+            const auto iterName = m_NameToHash_Map.find(SceneName);
             if(iterName != m_NameToHash_Map.end()) {
                 return;
             }
@@ -41,13 +41,14 @@ namespace Scene
         template<typename T> requires (std::is_base_of_v<Scene, T>)
         void UnRegisterScene()
         {
-            size_t hash = typeid(T).hash_code();
+            const size_t hash = typeid(T).hash_code();
             bool found = false;
             for (auto it = m_Scenes_Vector.begin(); it != m_Scenes_Vector.end(); ++it)
             {
                 if (typeid(**it).hash_code() == hash)
                 {
                     found = true;
+                    Log::Trace("SceneManager: Unregistering Scene {}", it->get()->name);
                     m_Scenes_Vector.erase(it);
                     break;
                 }
@@ -85,6 +86,7 @@ namespace Scene
                         }
                         scene->initialized = true;
                     }
+                    Log::Trace("SceneManager: Setting new Scene {}", scene->name);
                     if (m_CurrentScene)
                         m_CurrentScene->OnLeave();
                     m_CurrentScene = scene.get();
