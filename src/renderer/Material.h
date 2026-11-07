@@ -48,6 +48,9 @@ public:
     [[nodiscard]] Shader::DataType GetValue(std::string_view name, Shader::DataTypeEnum* type = nullptr);
     [[nodiscard]] Handle GetShaderHandle() const;
 
+    void SetLightingEnabled(const bool value) { receivesLighting = value; }
+    bool GetLightingEnabled() const { return receivesLighting; }
+
     static Handle ParseMaterial(const std::filesystem::path& materialPath, ResourceManager& rm, bool replace = false);
 
 private:
@@ -56,6 +59,8 @@ private:
     std::unordered_map<std::string, Shader::DataType, StringHash, std::equal_to<>> looseUniformBuffer_;
     Shader::ReflectionData shaderLayout_;
     Handle shaderHandle_;
+
+    bool receivesLighting = true;
 
 #ifdef DEBUG_BUILD
 public:

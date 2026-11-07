@@ -240,7 +240,7 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
     std::string materialName;
     if (!data.contains("material_name") || !data["material_name"].is_string())
     {
-        Log::Error("Material::ParseMaterial: \"material_name\" cannot be empty! in ", materialPath.c_str());
+        Log::Error("Material::ParseMaterial: \"material_name\" cannot be empty! in {}", materialPath.c_str());
         return {0 ,0};
     }
     materialName = data["material_name"];
@@ -292,6 +292,15 @@ Handle Material::ParseMaterial(const std::filesystem::path& materialPath, Resour
 
 
     Material material;
+    if (data.contains("receivesLighting"))
+    {
+        if (!data["receivesLighting"].is_boolean())
+            Log::Warn("Material::ParseMaterial: \"receivesLighting\" must be a boolean in {}", materialPath.c_str());
+        else
+        {
+            material.SetLightingEnabled(data["receivesLighting"]);
+        }
+    }
 
 #ifdef DEBUG_BUILD
     material.DEBUG_materialName = materialName;

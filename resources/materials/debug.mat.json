@@ -1,5 +1,6 @@
 {
   "material_name": "default",
+  "receivesLighting": false,
 
   "shader_name": "default",
   "shader_paths": {

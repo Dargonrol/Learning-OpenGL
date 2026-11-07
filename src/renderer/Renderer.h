@@ -30,6 +30,13 @@ enum class RasterizationMode : uint8_t
     POINT = 2
 };
 
+enum class RenderPassType : uint8_t
+{
+    SHADOW= 0,
+    OPAQUE = 1,
+    TRANSPARENT = 2
+};
+
 struct RenderCommand
 {
     uint64_t sortKey = 0;
@@ -39,11 +46,14 @@ struct RenderCommand
     Handle materialHandle{0, 0};
 
     glm::mat4 modelMatrix{1.0f};
+    float distanceFromCamera = 0.0f;
 
     uint32_t indexCount = 0;
     uint32_t firstIndex = 0;
     int32_t baseVertex = 0;
     uint32_t instanceCount = 1;
+
+    std::string name = "gr";
 
     RasterizationMode rasterMode = RasterizationMode::SOLID;
 };
@@ -51,39 +61,58 @@ struct RenderCommand
 class Renderer
 {
 public:
-    explicit Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::Application& APP);
-    ~Renderer();
+    explicit Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::Application& APP) : app(APP), m_window(window), rm_(&resource_manager) {}
+    ~Renderer() = default;
 
     void Init();
 
-    void Submit(const RenderCommand& cmd);
-    void Execute(const glm::mat4& view, const glm::vec3& viewPos, const glm::mat4& proj, std::vector<LightObject> lights);
+    void Submit(const RenderCommand& cmd, RenderPassType passType);
+    void Submit(const GameObject& obj, RenderPassType passType, const glm::vec3& camPos, RasterizationMode rasterMode = RasterizationMode::SOLID);
+    void Execute(const glm::mat4& view, const glm::vec3& viewPos, const glm::mat4& proj, const std::vector<LightObject>& lights);
 
-    void Clear() const;
+    void Clear();
 
     [[nodiscard]] GLFWwindow& GetWindow() const { return *m_window; }
-    [[nodiscard]] std::vector<RenderCommand>& GetRenderQueue() { return commandQueue_; }
 
     void ImGui_BeginFrame() const;
     void ImGui_EndFrame() const;
 
-    static uint64_t CalculateSortKey(Handle shaderHandle, Handle materialHandle, RasterizationMode mode = RasterizationMode::SOLID);
-    static void BuildCommands(const GameObject& obj, RasterizationMode mode, ResourceManager& rm, std::vector<RenderCommand>& commandQueue);
-    void BuildCommands(const GameObject& obj, RasterizationMode mode, ResourceManager& rm);
 
 public:
     Core::Application& app;
 
 private:
-    void SortQueue();
+    void ExecutePass_Shadow(const std::vector<LightObject>& lights);
+    void ExecutePass_Opaque(const std::vector<LightObject>& lights);
+    void ExecutePass_Transparent(const std::vector<LightObject>& lights);
+
+    void SortQueue_Opaque();
+    void SortQueue_Transparent();
+
+    static uint64_t CalculateSortKey_Opaque(Handle shaderHandle, Handle materialHandle, float distanceToCamera, RasterizationMode mode = RasterizationMode::SOLID);
+    static uint64_t CalculateSortKey_Transparent(Handle shaderHandle, Handle materialHandle, float distanceToCamera, RasterizationMode mode = RasterizationMode::SOLID);
+
+    [[nodiscard]] static uint64_t GetSortKey(const RenderCommand& cmd, RenderPassType passType, float distanceToCamera);
+    [[nodiscard]] static uint32_t GetQuantizedDepth_20Bit(float distanceToCamera);
+
+    void BindLights(const Shader& shader, const std::vector<LightObject>& lights) const;
 
 private:
     GLFWwindow* m_window = nullptr;
     ResourceManager* rm_ = nullptr;
 
-    std::vector<RenderCommand> commandQueue_;
+    std::vector<RenderCommand> commandQueue_Opaque_;
+    std::vector<RenderCommand> commandQueue_Transparent_;
+    std::vector<RenderCommand> commandQueue_Shadow_;
     RasterizationMode currentRasterMode_ = RasterizationMode::SOLID;
 
     Handle debugMaterialHandle = {0,0};
     Handle debugShaderHandle = {0,0};
+
+    struct RenderContext
+    {
+        glm::mat4 viewMatrix;
+        glm::mat4 projectionMatrix;
+        glm::vec3 viewPos;
+    } renderContext_{};
 };

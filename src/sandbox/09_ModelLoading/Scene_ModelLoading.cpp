@@ -89,8 +89,8 @@ namespace Scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto& renderer = sm_->GetRenderer();
 
-        Renderer::BuildCommands(*object_, RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
-        Renderer::BuildCommands(lights_[0], RasterizationMode::SOLID, *rm_, renderer.GetRenderQueue());
+        renderer.Submit(*object_, RenderPassType::OPAQUE, camera_->GetPosition(), RasterizationMode::SOLID);
+        renderer.Submit(lights_[0], RenderPassType::OPAQUE, camera_->GetPosition(), RasterizationMode::SOLID);
 
         renderer.Execute(camera_->GetViewMatrix(), camera_->GetPosition(), camera_->GetProjectionMatrix(), lights_);
     }

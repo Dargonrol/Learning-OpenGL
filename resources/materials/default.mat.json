@@ -1,5 +1,6 @@
 {
   "material_name": "default",
+  "receivesLighting": true,
 
   "shader_name": "shadable",
   "shader_paths": {

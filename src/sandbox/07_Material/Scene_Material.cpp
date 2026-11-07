@@ -56,8 +56,8 @@ namespace Scene
 
         auto& renderer = sm_->GetRenderer();
 
-        renderer.BuildCommands(*cube_, RasterizationMode::SOLID, *rm_);
-        renderer.BuildCommands(*light_, RasterizationMode::SOLID, *rm_);
+        renderer.Submit(*cube_, RenderPassType::OPAQUE, camera_->GetPosition(), RasterizationMode::SOLID);
+        renderer.Submit(*light_, RenderPassType::OPAQUE, camera_->GetPosition(), RasterizationMode::SOLID);
         renderer.Execute(camera_->GetViewMatrix(), camera_->GetPosition(), camera_->GetProjectionMatrix(), {*light_});
     }
 

@@ -45,19 +45,19 @@ void Shader::Unbind()
     m_GotUnbound = true;
 }
 
-void Shader::SetUniform1i(const std::string &name, const int v0) { GLCall(glUniform1i(GetUniformLocation(name), v0)); }
+void Shader::SetUniform1i(const std::string &name, const int v0) const { GLCall(glUniform1i(GetUniformLocation(name), v0)); }
 
-void Shader::SetUniformVec3(const std::string &name, const glm::vec3 &value) { GLCall(glUniform3f(GetUniformLocation(name), value.x, value.y, value.z)); }
+void Shader::SetUniformVec3(const std::string &name, const glm::vec3 &value) const { GLCall(glUniform3f(GetUniformLocation(name), value.x, value.y, value.z)); }
 
-void Shader::SetUniformVec4(const std::string &name, const glm::vec4 &value) { GLCall(glUniform4f(GetUniformLocation(name), value[0], value[1], value[2], value[3])); }
+void Shader::SetUniformVec4(const std::string &name, const glm::vec4 &value) const{ GLCall(glUniform4f(GetUniformLocation(name), value[0], value[1], value[2], value[3])); }
 
-void Shader::SetUniformMat4f(const std::string &name, const glm::mat4& matrix) { GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0])); }
+void Shader::SetUniformMat4f(const std::string &name, const glm::mat4& matrix) const { GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0])); }
 
-void Shader::SetUniform1f(const std::string &name, const float v0) { GLCall(glUniform1f(GetUniformLocation(name), v0)); }
+void Shader::SetUniform1f(const std::string &name, const float v0) const { GLCall(glUniform1f(GetUniformLocation(name), v0)); }
 
-void Shader::SetUniform4f(const std::string &name, const float v0, const float v1, const float v2, const float v3) { GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3)); }
+void Shader::SetUniform4f(const std::string &name, const float v0, const float v1, const float v2, const float v3) const { GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3)); }
 
-int Shader::GetUniformLocation(const std::string &name)
+int Shader::GetUniformLocation(const std::string &name) const
 {
     if (m_UniformLocationCache.contains(name))
         return m_UniformLocationCache[name];

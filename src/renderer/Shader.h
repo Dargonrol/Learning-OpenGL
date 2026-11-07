@@ -56,23 +56,23 @@ public:
     [[nodiscard]] unsigned int GetRendererID() const { return m_RendererID; }
     [[nodiscard]] const ReflectionData& GetShaderReflectionData() const { return shaderReflectionData_; }
 
-    void SetUniform1f(const std::string& name, float v0);
-    void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-    void SetUniform1i(const std::string& name, int v0);
-    void SetUniformVec3(const std::string& name, const glm::vec3& value);
-    void SetUniformVec4(const std::string& name, const glm::vec4& value);
-    void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+    void SetUniform1f(const std::string& name, float v0) const;
+    void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) const;
+    void SetUniform1i(const std::string& name, int v0) const;
+    void SetUniformVec3(const std::string& name, const glm::vec3& value) const;
+    void SetUniformVec4(const std::string& name, const glm::vec4& value) const;
+    void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) const;
 
     Shader(Shader&& other) noexcept;
     Shader& operator=(Shader&& other) noexcept;
 
 private:
-    int GetUniformLocation(const std::string& name);
+    int GetUniformLocation(const std::string& name) const;
     void SetShaderReflectionData();
 
 private:
     unsigned int m_RendererID;
-    std::unordered_map<std::string, int> m_UniformLocationCache;
+    mutable std::unordered_map<std::string, int> m_UniformLocationCache;
     bool m_GotUnbound = false;
     ReflectionData shaderReflectionData_;
 

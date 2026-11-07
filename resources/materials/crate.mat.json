@@ -1,5 +1,6 @@
 {
   "material_name": "crate",
+  "receivesLighting": true,
 
   "shader_name": "texShadable",
   "shader_paths": {
