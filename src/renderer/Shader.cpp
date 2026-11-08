@@ -93,6 +93,12 @@ void Shader::SetShaderReflectionData()
         Log::Trace("Buffer size: 0");
     }
 
+    const unsigned int cameraBlockIndex = glGetUniformBlockIndex(m_RendererID, CAMERA_BLOCK_NAME);
+    if (cameraBlockIndex != GL_INVALID_INDEX)
+    {
+        GLCall(glUniformBlockBinding(m_RendererID, cameraBlockIndex, 0));
+    }
+
     int numUniforms = 0;
     GLCall(glGetProgramiv(m_RendererID, GL_ACTIVE_UNIFORMS, &numUniforms));
     Log::Trace("Number of Uniforms: {}", numUniforms);

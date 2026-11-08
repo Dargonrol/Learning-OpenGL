@@ -23,6 +23,14 @@ void Renderer::Init()
     Log::Trace("Initializing Renderer");
     stbi_set_flip_vertically_on_load(true);
 
+    GLCall(glGenBuffers(1, &UBO_Camera_));
+    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, UBO_Camera_));
+
+    GLCall(glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) + sizeof(glm::mat4) +sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW));
+    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+
+    GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO_Camera_));
+
     if constexpr (false)
     {
         // set up basic shader and material
@@ -119,6 +127,13 @@ void Renderer::Execute(const glm::mat4& view, const glm::vec3& viewPos, const gl
     renderContext_.viewPos = viewPos;
     renderContext_.projectionMatrix = proj;
 
+    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, UBO_Camera_));
+    GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view)));
+    GLCall(glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj)));
+    glm::vec4 viewPosPadded{viewPos, 1.0f};
+    GLCall(glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, sizeof(glm::vec4), glm::value_ptr(viewPosPadded)));
+    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+
     ExecutePass_Shadow(lights);
 
     SortQueue_Opaque();
@@ -191,10 +206,6 @@ void Renderer::ExecutePass_Opaque(const std::vector<LightObject>& lights)
             if (shader)
             {
                 shader->Bind();
-
-                shader->SetUniformMat4f("uView", renderContext_.viewMatrix);
-                shader->SetUniformMat4f("uProj", renderContext_.projectionMatrix);
-                shader->SetUniformVec3("uViewPos", renderContext_.viewPos);
 
                 if (material && material->GetLightingEnabled())
                     BindLights(*shader, lights);
@@ -292,10 +303,6 @@ void Renderer::ExecutePass_Transparent(const std::vector<LightObject>& lights)
             if (shader)
             {
                 shader->Bind();
-
-                shader->SetUniformMat4f("uView", renderContext_.viewMatrix);
-                shader->SetUniformMat4f("uProj", renderContext_.projectionMatrix);
-                shader->SetUniformVec3("uViewPos", renderContext_.viewPos);
 
                 if (material && material->GetLightingEnabled())
                     BindLights(*shader, lights);
@@ -446,5 +453,5 @@ void Renderer::ImGui_EndFrame() const
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(m_window);
+    glfwSwapBuffers(window_);
 }

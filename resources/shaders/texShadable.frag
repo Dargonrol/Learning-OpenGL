@@ -1,4 +1,12 @@
 #version 330 core
+
+layout (std140) uniform CameraData
+{
+    mat4 uView;
+    mat4 uProj;
+    vec4 uViewPos;
+};
+
 layout(location = 0) out vec4 FragColor;
 
 #define MAX_LIGHTS 3
@@ -7,7 +15,6 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
-uniform vec3 uViewPos;
 uniform int uPointLightCount;
 
 struct Material
@@ -46,7 +53,7 @@ vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 void main()
 {
     vec3 norm = normalize(Normal);
-    vec3 viewDir = normalize(uViewPos - FragPos);
+    vec3 viewDir = normalize(uViewPos.xyz - FragPos);
 
     vec3 result = vec3(0.0);
     for (int i = 0; i < uPointLightCount; i++)

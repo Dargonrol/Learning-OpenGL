@@ -61,7 +61,7 @@ struct RenderCommand
 class Renderer
 {
 public:
-    explicit Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::Application& APP) : app(APP), m_window(window), rm_(&resource_manager) {}
+    explicit Renderer(ResourceManager& resource_manager, GLFWwindow* window, Core::Application& APP) : app(APP), window_(window), rm_(&resource_manager) {}
     ~Renderer() = default;
 
     void Init();
@@ -72,7 +72,7 @@ public:
 
     void Clear();
 
-    [[nodiscard]] GLFWwindow& GetWindow() const { return *m_window; }
+    [[nodiscard]] GLFWwindow& GetWindow() const { return *window_; }
 
     void ImGui_BeginFrame() const;
     void ImGui_EndFrame() const;
@@ -98,13 +98,15 @@ private:
     void BindLights(const Shader& shader, const std::vector<LightObject>& lights) const;
 
 private:
-    GLFWwindow* m_window = nullptr;
+    GLFWwindow* window_ = nullptr;
     ResourceManager* rm_ = nullptr;
 
     std::vector<RenderCommand> commandQueue_Opaque_;
     std::vector<RenderCommand> commandQueue_Transparent_;
     std::vector<RenderCommand> commandQueue_Shadow_;
     RasterizationMode currentRasterMode_ = RasterizationMode::SOLID;
+
+    unsigned int UBO_Camera_ = 0;
 
     Handle debugMaterialHandle = {0,0};
     Handle debugShaderHandle = {0,0};

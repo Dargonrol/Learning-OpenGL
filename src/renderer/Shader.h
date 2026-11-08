@@ -11,6 +11,7 @@ class Shader
 
 public:
     static constexpr const char* MATERIAL_BLOCK_NAME = "MaterialBlock";
+    static constexpr const char* CAMERA_BLOCK_NAME = "CameraData";
 
     enum class DataTypeEnum { UNKNOWN = 0, INT, FLOAT, VEC2, VEC3, VEC4, MAT4 };
 
