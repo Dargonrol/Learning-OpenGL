@@ -1,6 +1,5 @@
 #include "Model.h"
 
-#include <iostream>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -16,13 +15,13 @@ struct Vertex;
 
 Model::Model(const std::filesystem::path& path, ResourceManager* rm)
 {
-    std::cout << "Loading Model: " << path << std::endl;
+    Log::Debug("Loading Model \"{}\"", path.string());
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        Log::Error("Model::Model(): Could not import model. {}", importer.GetErrorString());
         return;
     }
 
@@ -230,7 +229,7 @@ std::filesystem::path Model::DetermineTexturePath(const std::filesystem::path& m
 
     if (!std::filesystem::exists(fullTexturePath))
     {
-        std::cerr << "[Error] Texture not found: " << fullTexturePath << "\n";
+        Log::Error("Model::DetermineTexturePath: Could not find Texture: {}", fullTexturePath.string());
     }
 
     return fullTexturePath;

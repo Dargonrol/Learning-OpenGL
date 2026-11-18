@@ -53,8 +53,6 @@ struct RenderCommand
     int32_t baseVertex = 0;
     uint32_t instanceCount = 1;
 
-    std::string name = "gr";
-
     RasterizationMode rasterMode = RasterizationMode::SOLID;
 };
 
@@ -104,7 +102,6 @@ private:
     std::vector<RenderCommand> commandQueue_Opaque_;
     std::vector<RenderCommand> commandQueue_Transparent_;
     std::vector<RenderCommand> commandQueue_Shadow_;
-    RasterizationMode currentRasterMode_ = RasterizationMode::SOLID;
 
     unsigned int UBO_Camera_ = 0;
 
@@ -117,4 +114,6 @@ private:
         glm::mat4 projectionMatrix;
         glm::vec3 viewPos;
     } renderContext_{};
+
+    RasterizationMode currentRasterMode_ = RasterizationMode::SOLID;
 };
