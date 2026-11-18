@@ -40,13 +40,13 @@ struct Handle
     [[nodiscard]] bool operator!=(const Handle &other) const { return !(*this == other); }
     [[nodiscard]] bool operator<(const Handle& other) const { return this->id < other.id || (this->id == other.id && this->gen < other.gen); }
 
-#ifdef DEBUG_BUILD
     friend std::ostream& operator<<(std::ostream &os, const Handle& h)
     {
         os << "Handle{id:" << h.id << ",gen:" << h.gen << "}";
         return os;
     }
 
+#ifdef DEBUG_BUILD
     std::string to_string() const
     {
         std::ostringstream oss;

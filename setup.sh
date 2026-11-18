@@ -4,6 +4,39 @@ set -e
 rm -f CMakeUserPresets.json CMakePresets.json
 rm -rf build
 
+REQUIRED_TOOLS=("conan" "cmake" "ninja" "gcc" "pkg-config")
+MISSING_TOOLS=()
+
+for tool in "${REQUIRED_TOOLS[@]}"; do
+    if ! command -v "$tool" &> /dev/null; then
+        MISSING_TOOLS+=("$tool")
+    fi
+done
+
+if command -v pkg-config &> /dev/null; then
+    if ! pkg-config --exists xres; then
+        MISSING_PACKAGES+=("libxres")
+    fi
+fi
+
+if [ ${#MISSING_TOOLS[@]} -ne 0 ]; then
+    echo "Error: The following required tool(s) are missing: ${MISSING_TOOLS[*]}" >&2
+    echo "Please install them." >&2
+    echo "On Arch: sudo pacman -S conan cmake ninja base-devel pkgconf libxres" >&2
+    exit 1
+fi
+
+OPTIONAL_TOOLS=("mold" "ccache")
+for tool in "${OPTIONAL_TOOLS[@]}"; do
+    if command -v "$tool" &> /dev/null; then
+        echo "--> Optional tool found: $tool"
+    else
+        echo "--> Note: $tool not found (continuing without it)."
+    fi
+done
+
+sleep 2
+
 if ! conan profile path default &>/dev/null; then
   conan profile detect --force
 fi
